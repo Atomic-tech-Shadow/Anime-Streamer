@@ -324,6 +324,8 @@ export default function HomeScreen() {
                   title={getAnimeTitle(item)}
                   image={getAnimeImage(item)}
                   episode={item.episode ?? item.number}
+                  language={item.language}
+                  season={item.season}
                   size="small"
                   onPress={() => handleRecentPress(item)}
                 />

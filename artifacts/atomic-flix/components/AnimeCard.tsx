@@ -10,11 +10,27 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 
+const FLAG_BASE = "https://raw.githubusercontent.com/Anime-Sama/IMG/img/autres";
+const LANG_FLAG_URL: Record<string, string> = {
+  VOSTFR: `${FLAG_BASE}/flag_jp.png`,
+  VO:     `${FLAG_BASE}/flag_jp.png`,
+  VF:     `${FLAG_BASE}/flag_fr.png`,
+  VF1:    `${FLAG_BASE}/flag_fr.png`,
+  VF2:    `${FLAG_BASE}/flag_fr.png`,
+  VA:     `${FLAG_BASE}/flag_en.png`,
+  VAR:    `${FLAG_BASE}/flag_ar.png`,
+  VKR:    `${FLAG_BASE}/flag_kr.png`,
+  VCN:    `${FLAG_BASE}/flag_cn.png`,
+  VQC:    `${FLAG_BASE}/flag_qc.png`,
+};
+
 interface AnimeCardProps {
   title: string;
   image?: string;
   type?: string;
   episode?: string | number;
+  language?: string;
+  season?: string | number;
   onPress?: () => void;
   size?: "small" | "medium" | "large";
   badge?: string;
@@ -27,10 +43,11 @@ const DIMENSIONS = {
 };
 
 export default function AnimeCard({
-  title, image, type, episode, onPress, size = "medium", badge,
+  title, image, type, episode, language, season, onPress, size = "medium", badge,
 }: AnimeCardProps) {
   const colors = useColors();
   const dim    = DIMENSIONS[size];
+  const flagUrl = language ? LANG_FLAG_URL[language.toUpperCase()] : undefined;
 
   return (
     <TouchableOpacity
@@ -52,13 +69,17 @@ export default function AnimeCard({
           </View>
         )}
 
-        {/* Top-right: episode pill */}
-        {episode !== undefined && (
-          <View style={[styles.episodePill, { backgroundColor: "rgba(8,8,15,0.75)", borderColor: colors.neonBlue + "66" }]}>
-            <View style={[styles.episodeDot, { backgroundColor: colors.neonBlue }]} />
-            <Text style={[styles.episodeText, { color: "#fff" }]}>
-              {episode}
-            </Text>
+        {/* Top-right: episode + language pill */}
+        {(episode !== undefined || language) && (
+          <View style={[styles.episodePill, { backgroundColor: "rgba(8,8,15,0.82)", borderColor: "rgba(255,255,255,0.15)" }]}>
+            {flagUrl && (
+              <Image source={{ uri: flagUrl }} style={styles.pillFlag} resizeMode="cover" />
+            )}
+            {episode !== undefined && (
+              <Text style={[styles.episodeText, { color: "#fff" }]}>
+                {season ? `S${season} ` : ""}EP {episode}
+              </Text>
+            )}
           </View>
         )}
 
@@ -106,10 +127,10 @@ const styles = StyleSheet.create({
   episodePill: {
     position: "absolute", top: 8, right: 8,
     flexDirection: "row", alignItems: "center", gap: 4,
-    paddingHorizontal: 7, paddingVertical: 3,
+    paddingHorizontal: 6, paddingVertical: 3,
     borderRadius: 20, borderWidth: 1, zIndex: 2,
   },
-  episodeDot: { width: 5, height: 5, borderRadius: 3 },
+  pillFlag: { width: 16, height: 11, borderRadius: 2 },
   episodeText: { fontSize: 9, fontWeight: "800" as const, letterSpacing: 0.3 },
 
   gradient: {
