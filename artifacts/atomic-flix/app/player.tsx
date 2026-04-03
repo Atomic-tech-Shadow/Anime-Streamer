@@ -18,10 +18,19 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 import { useEpisodes, useSeasons } from "@/hooks/useAnime";
 
-const LANG_META: Record<string, { label: string; flag?: string; sub?: string }> = {
-  VOSTFR: { label: "VOSTFR", sub: "Sous-titré FR" },
-  VF:     { label: "VF",     flag: "🇫🇷", sub: "Français" },
-  VF2:    { label: "VF 2",   flag: "🇫🇷", sub: "Alt. Français" },
+const FLAG_BASE = "https://raw.githubusercontent.com/Anime-Sama/IMG/img/autres";
+
+const LANG_META: Record<string, { label: string; flagUrl?: string; sub?: string }> = {
+  VOSTFR: { label: "VOSTFR", flagUrl: `${FLAG_BASE}/flag_jp.png`, sub: "Sous-titré FR" },
+  VO:     { label: "VO",     flagUrl: `${FLAG_BASE}/flag_jp.png`, sub: "Japonais" },
+  VF:     { label: "VF",     flagUrl: `${FLAG_BASE}/flag_fr.png`, sub: "Français" },
+  VF1:    { label: "VF 1",   flagUrl: `${FLAG_BASE}/flag_fr.png`, sub: "Alt. Français" },
+  VF2:    { label: "VF 2",   flagUrl: `${FLAG_BASE}/flag_fr.png`, sub: "Alt. Français" },
+  VA:     { label: "VA",     flagUrl: `${FLAG_BASE}/flag_en.png`, sub: "Anglais" },
+  VAR:    { label: "VAR",    flagUrl: `${FLAG_BASE}/flag_ar.png`, sub: "Arabe" },
+  VKR:    { label: "VKR",    flagUrl: `${FLAG_BASE}/flag_kr.png`, sub: "Coréen" },
+  VCN:    { label: "VCN",    flagUrl: `${FLAG_BASE}/flag_cn.png`, sub: "Chinois" },
+  VQC:    { label: "VQC",    flagUrl: `${FLAG_BASE}/flag_qc.png`, sub: "Québécois" },
 };
 
 function getEpisodeList(data: any): any[] {
@@ -224,7 +233,9 @@ export default function PlayerScreen() {
                         elevation: 8,
                       }]}
                     >
-                      {meta.flag && <Text style={styles.langFlag}>{meta.flag}</Text>}
+                      {meta.flagUrl && (
+                        <Image source={{ uri: meta.flagUrl }} style={styles.langFlagImg} resizeMode="cover" />
+                      )}
                       <View>
                         <Text style={styles.langLabelActive}>{meta.label}</Text>
                         {meta.sub && <Text style={styles.langSubActive}>{meta.sub}</Text>}
@@ -236,7 +247,9 @@ export default function PlayerScreen() {
                       borderColor: colors.border,
                       borderWidth: 1,
                     }]}>
-                      {meta.flag && <Text style={styles.langFlag}>{meta.flag}</Text>}
+                      {meta.flagUrl && (
+                        <Image source={{ uri: meta.flagUrl }} style={[styles.langFlagImg, { opacity: 0.7 }]} resizeMode="cover" />
+                      )}
                       <View>
                         <Text style={[styles.langLabel, { color: colors.mutedForeground }]}>{meta.label}</Text>
                         {meta.sub && <Text style={[styles.langSub, { color: colors.mutedForeground + "99" }]}>{meta.sub}</Text>}
@@ -418,7 +431,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   langBtnActive: { borderRadius: 12 },
-  langFlag: { fontSize: 20, lineHeight: 24 },
+  langFlagImg: { width: 30, height: 20, borderRadius: 3 },
   langLabelActive: { color: "#fff", fontSize: 13, fontWeight: "800" as const, letterSpacing: 0.3 },
   langSubActive:   { color: "rgba(255,255,255,0.65)", fontSize: 9, fontWeight: "500" as const, marginTop: 1 },
   langLabel: { fontSize: 13, fontWeight: "700" as const, letterSpacing: 0.3 },
