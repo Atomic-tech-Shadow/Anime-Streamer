@@ -36,7 +36,6 @@ export default function AnimeCard({
 }: AnimeCardProps) {
   const colors = useColors();
   const dim = DIMENSIONS[size];
-  const gradientHeight = type ? 56 : 44;
 
   return (
     <TouchableOpacity
@@ -83,7 +82,7 @@ export default function AnimeCard({
 
         <LinearGradient
           colors={["transparent", "rgba(8,8,15,0.92)"]}
-          style={[styles.gradient, { height: gradientHeight }]}
+          style={styles.gradient}
         >
           <Text style={styles.titleOverlay} numberOfLines={2}>
             {title}
@@ -142,7 +141,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    justifyContent: "flex-end",
+    paddingTop: 20,
     paddingHorizontal: 7,
     paddingBottom: 7,
   },
