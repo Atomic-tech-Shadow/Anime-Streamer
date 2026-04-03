@@ -14,6 +14,7 @@ import { useColors } from "@/hooks/useColors";
 import { useSearch } from "@/hooks/useAnime";
 import AnimeCard from "@/components/AnimeCard";
 import SearchBar from "@/components/SearchBar";
+import LoadingScreen from "@/components/LoadingScreen";
 
 function getAnimeList(data: any): any[] {
   if (!data) return [];
@@ -84,11 +85,7 @@ export default function SearchScreen() {
           </Text>
         </View>
       ) : isLoading ? (
-        <View style={styles.emptyState}>
-          <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>
-            Recherche en cours...
-          </Text>
-        </View>
+        <LoadingScreen label="Recherche" fullscreen={false} style={{ flex: 1 }} />
       ) : results.length === 0 ? (
         <View style={styles.emptyState}>
           <Feather name="frown" size={48} color={colors.mutedForeground} />

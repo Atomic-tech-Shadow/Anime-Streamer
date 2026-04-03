@@ -15,6 +15,7 @@ import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 import { useSeasons } from "@/hooks/useAnime";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_GAP       = 12;
@@ -84,11 +85,7 @@ export default function AnimeDetailScreen() {
   };
 
   if (isLoading && !paramTitle) {
-    return (
-      <View style={[styles.root, styles.centered, { backgroundColor: colors.background }]}>
-        <Feather name="loader" size={28} color={colors.neonPurple} />
-      </View>
-    );
+    return <LoadingScreen label="Chargement" />;
   }
 
   return (
@@ -240,7 +237,6 @@ export default function AnimeDetailScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  centered: { alignItems: "center", justifyContent: "center" },
   scroll: { flexGrow: 1 },
 
   hero: { height: 340, justifyContent: "flex-end", position: "relative" },

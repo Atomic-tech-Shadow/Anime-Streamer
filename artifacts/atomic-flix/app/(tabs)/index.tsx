@@ -21,6 +21,7 @@ import SectionHeader from "@/components/SectionHeader";
 import SkeletonCard from "@/components/SkeletonCard";
 import HeroBanner from "@/components/HeroBanner";
 import NeonGlow from "@/components/NeonGlow";
+import LoadingScreen from "@/components/LoadingScreen";
 
 function getPopularList(data: any): any[] {
   if (!data) return [];
@@ -158,6 +159,13 @@ export default function HomeScreen() {
   };
 
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
+
+  const isInitialLoad = loadingPopular && loadingRecent && loadingReco
+    && popularList.length === 0 && recentList.length === 0;
+
+  if (isInitialLoad) {
+    return <LoadingScreen label="Atomic Flix" />;
+  }
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
