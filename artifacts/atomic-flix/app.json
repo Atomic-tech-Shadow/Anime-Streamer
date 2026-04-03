@@ -2,6 +2,7 @@
   "expo": {
     "name": "ATOMIC FLIX",
     "slug": "atomic-flix",
+    "owner": "cidmarco",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -17,7 +18,8 @@
       "supportsTablet": false
     },
     "android": {
-      "backgroundColor": "#08080F"
+      "backgroundColor": "#08080F",
+      "package": "com.cidmarco.atomicflix"
     },
     "web": {
       "favicon": "./assets/images/icon.png",
@@ -36,6 +38,11 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "4a82031b-ff3f-479b-9e88-d0d38ff656d8"
+      }
     }
   }
 }
