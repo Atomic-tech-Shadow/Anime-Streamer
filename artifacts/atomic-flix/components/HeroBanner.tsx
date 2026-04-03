@@ -7,8 +7,10 @@ import {
   TouchableOpacity,
   Dimensions,
   Animated,
+  Platform,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -21,98 +23,64 @@ interface HeroBannerProps {
   onPlay?: () => void;
 }
 
-export default function HeroBanner({
-  title,
-  image,
-  type,
-  onPress,
-  onPlay,
-}: HeroBannerProps) {
+export default function HeroBanner({ title, image, type, onPress, onPlay }: HeroBannerProps) {
   const colors = useColors();
-  const scale = useRef(new Animated.Value(1)).current;
+  const scale  = useRef(new Animated.Value(1)).current;
 
-  const handlePressIn = () => {
-    Animated.spring(scale, { toValue: 0.97, useNativeDriver: false }).start();
-  };
-
-  const handlePressOut = () => {
-    Animated.spring(scale, { toValue: 1, useNativeDriver: false }).start();
-  };
+  const handlePressIn  = () => Animated.spring(scale, { toValue: 0.975, useNativeDriver: true, tension: 120, friction: 8 }).start();
+  const handlePressOut = () => Animated.spring(scale, { toValue: 1,     useNativeDriver: true, tension: 120, friction: 8 }).start();
 
   return (
-    <TouchableOpacity
-      activeOpacity={1}
-      onPress={onPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-    >
-      <Animated.View
-        style={[styles.container, { transform: [{ scale }] }]}
-      >
+    <TouchableOpacity activeOpacity={1} onPress={onPress} onPressIn={handlePressIn} onPressOut={handlePressOut}>
+      <Animated.View style={[styles.container, { transform: [{ scale }] }]}>
+
+        {/* Background image */}
         {image ? (
-          <Image
-            source={{ uri: image }}
-            style={StyleSheet.absoluteFill}
-            resizeMode="cover"
-          />
+          <Image source={{ uri: image }} style={StyleSheet.absoluteFill} resizeMode="cover" />
         ) : (
-          <View
-            style={[StyleSheet.absoluteFill, { backgroundColor: colors.secondary }]}
-          />
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.card }]} />
         )}
-        <View
-          style={[
-            StyleSheet.absoluteFill,
-            {
-              background: undefined,
-              backgroundColor: undefined,
-            },
-          ]}
-        >
-          <View
-            style={[
-              styles.gradientOverlay,
-              { backgroundColor: "rgba(8,8,15,0.3)" },
-            ]}
-          />
-          <View
-            style={[
-              styles.gradientBottom,
-              { backgroundColor: colors.background },
-            ]}
-          />
-        </View>
+
+        {/* Cinematic gradient overlay */}
+        <LinearGradient
+          colors={["rgba(8,8,15,0.08)", "rgba(8,8,15,0.45)", "rgba(8,8,15,0.96)"]}
+          locations={[0, 0.4, 1]}
+          style={StyleSheet.absoluteFill}
+        />
+
+        {/* Content */}
         <View style={styles.content}>
           {type && (
-            <View
-              style={[styles.typeBadge, { backgroundColor: colors.neonPurple }]}
-            >
-              <Text style={styles.typeBadgeText}>{type.toUpperCase()}</Text>
+            <View style={[styles.typeBadge, { backgroundColor: colors.neonPurple + "30", borderColor: colors.neonPurple + "55" }]}>
+              <View style={[styles.typeDot, { backgroundColor: colors.neonPurple }]} />
+              <Text style={[styles.typeBadgeText, { color: colors.neonPurple }]}>{type.toUpperCase()}</Text>
             </View>
           )}
-          <Text
-            style={[styles.title, { color: colors.foreground }]}
-            numberOfLines={2}
-          >
-            {title}
-          </Text>
+
+          <Text style={styles.title} numberOfLines={2}>{title}</Text>
+
           <View style={styles.actions}>
-            <TouchableOpacity
-              style={[
-                styles.playButton,
-                { backgroundColor: colors.neonPurple },
-              ]}
-              onPress={onPlay ?? onPress}
-              activeOpacity={0.8}
-            >
-              <Feather name="play" size={16} color="#fff" />
-              <Text style={styles.playText}>Regarder</Text>
+            {/* Play button — gradient */}
+            <TouchableOpacity onPress={onPlay ?? onPress} activeOpacity={0.82} style={styles.playWrap}>
+              <LinearGradient
+                colors={[colors.neonPurple, colors.neonBlue]}
+                start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                style={[styles.playButton, {
+                  shadowColor: colors.neonPurple,
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.5,
+                  shadowRadius: 10,
+                  elevation: 8,
+                }]}
+              >
+                <Feather name="play" size={14} color="#fff" />
+                <Text style={styles.playText}>Regarder</Text>
+              </LinearGradient>
             </TouchableOpacity>
+
+            {/* Info button — glass */}
             <TouchableOpacity
-              style={[
-                styles.infoButton,
-                { backgroundColor: "rgba(255,255,255,0.15)", borderColor: "rgba(255,255,255,0.3)" },
-              ]}
+              style={[styles.infoButton, { backgroundColor: "rgba(255,255,255,0.12)", borderColor: "rgba(255,255,255,0.22)" }]}
               onPress={onPress}
               activeOpacity={0.8}
             >
@@ -128,75 +96,45 @@ export default function HeroBanner({
 const styles = StyleSheet.create({
   container: {
     width: SCREEN_WIDTH - 32,
-    height: 220,
-    borderRadius: 16,
+    height: 228,
+    borderRadius: 18,
     overflow: "hidden",
     marginHorizontal: 16,
     marginBottom: 24,
+    ...Platform.select({
+      ios: { shadowColor: "#000", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 16 },
+      android: { elevation: 10 },
+    }),
   },
-  gradientOverlay: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  gradientBottom: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 120,
-    opacity: 0.85,
-  },
-  content: {
-    position: "absolute",
-    bottom: 16,
-    left: 16,
-    right: 16,
-  },
+  content: { position: "absolute", bottom: 18, left: 16, right: 16 },
+
   typeBadge: {
+    flexDirection: "row", alignItems: "center", gap: 6,
     alignSelf: "flex-start",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
-    marginBottom: 8,
+    paddingHorizontal: 10, paddingVertical: 4,
+    borderRadius: 20, borderWidth: 1, marginBottom: 10,
   },
-  typeBadgeText: {
-    color: "#fff",
-    fontSize: 9,
-    fontWeight: "800" as const,
-    letterSpacing: 1,
-  },
+  typeDot: { width: 5, height: 5, borderRadius: 3 },
+  typeBadgeText: { fontSize: 9, fontWeight: "800" as const, letterSpacing: 1.2 },
+
   title: {
-    fontSize: 22,
-    fontWeight: "800" as const,
-    letterSpacing: -0.5,
-    marginBottom: 12,
-    textShadowColor: "rgba(0,0,0,0.8)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    color: "#fff", fontSize: 22, fontWeight: "800" as const,
+    letterSpacing: -0.5, lineHeight: 27, marginBottom: 14,
+    textShadowColor: "rgba(0,0,0,0.9)",
+    textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 6,
   },
-  actions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
+
+  actions: { flexDirection: "row", alignItems: "center", gap: 10 },
+  playWrap: {},
   playButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderRadius: 8,
-    gap: 6,
+    flexDirection: "row", alignItems: "center", gap: 7,
+    paddingHorizontal: 18, paddingVertical: 10,
+    borderRadius: 10,
   },
-  playText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "700" as const,
-  },
+  playText: { color: "#fff", fontSize: 14, fontWeight: "700" as const },
+
   infoButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
+    width: 40, height: 40, borderRadius: 10,
+    alignItems: "center", justifyContent: "center", borderWidth: 1,
   },
 });

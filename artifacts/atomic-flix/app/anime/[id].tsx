@@ -17,10 +17,12 @@ import { useColors } from "@/hooks/useColors";
 import { useAnimeDetails, useSeasons } from "@/hooks/useAnime";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const CARD_GAP = 12;
+const CARD_GAP       = 12;
 const CARD_H_PADDING = 16;
-const SEASON_CARD_WIDTH = (SCREEN_WIDTH - CARD_H_PADDING * 2 - CARD_GAP) / 2;
-const SEASON_CARD_HEIGHT = 130;
+const SEASON_CARD_WIDTH  = (SCREEN_WIDTH - CARD_H_PADDING * 2 - CARD_GAP) / 2;
+const SEASON_CARD_HEIGHT = 140;
+
+const LANG_FLAG: Record<string, string> = { VF: "🇫🇷", VF2: "🇫🇷" };
 
 function getSeasons(data: any): any[] {
   if (!data) return [];
@@ -36,20 +38,18 @@ export default function AnimeDetailScreen() {
   const insets = useSafeAreaInsets();
 
   const { id, title: paramTitle, image: paramImage } = useLocalSearchParams<{
-    id: string;
-    title: string;
-    image: string;
+    id: string; title: string; image: string;
   }>();
 
-  const { data: details } = useAnimeDetails(id ?? "");
+  const { data: details }    = useAnimeDetails(id ?? "");
   const { data: seasonsData } = useSeasons(id ?? "");
 
-  const anime = details ?? {};
-  const title = anime.title ?? paramTitle ?? "Anime";
-  const image = anime.image ?? anime.cover ?? anime.thumbnail ?? paramImage ?? "";
+  const anime  = details ?? {};
+  const title  = anime.title ?? paramTitle ?? "Anime";
+  const image  = anime.image ?? anime.cover ?? anime.thumbnail ?? paramImage ?? "";
   const synopsis = anime.synopsis ?? anime.description ?? "";
   const genres: string[] = anime.genres ?? [];
-  const type = anime.type ?? "";
+  const type   = anime.type ?? "";
   const status = anime.status ?? "";
 
   const seasons = getSeasons(seasonsData);
@@ -63,11 +63,8 @@ export default function AnimeDetailScreen() {
     router.push({
       pathname: "/player",
       params: {
-        url: "",
-        title,
-        image,
-        season: String(num),
-        episodeNum: "1",
+        url: "", title, image,
+        season: String(num), episodeNum: "1",
         animeId: id ?? "",
         language: initialLang,
         availableLanguages: langs.join(","),
@@ -89,46 +86,53 @@ export default function AnimeDetailScreen() {
           {image ? (
             <Image source={{ uri: image }} style={StyleSheet.absoluteFill} resizeMode="cover" />
           ) : (
-            <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.secondary }]} />
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.card }]} />
           )}
           <LinearGradient
-            colors={["rgba(8,8,15,0.1)", "rgba(8,8,15,0.95)"]}
+            colors={["rgba(8,8,15,0)", "rgba(8,8,15,0.55)", "rgba(8,8,15,0.98)"]}
+            locations={[0, 0.42, 1]}
             style={StyleSheet.absoluteFill}
           />
+
+          {/* Back button */}
           <TouchableOpacity
-            style={[styles.backBtn, { top: topPadding + 12, backgroundColor: "rgba(0,0,0,0.5)" }]}
+            style={[styles.backBtn, { top: topPadding + 14, backgroundColor: "rgba(8,8,15,0.55)", borderColor: "rgba(255,255,255,0.12)" }]}
             onPress={() => router.back()}
             activeOpacity={0.8}
           >
-            <Feather name="arrow-left" size={20} color="#fff" />
+            <Feather name="arrow-left" size={18} color="#fff" />
           </TouchableOpacity>
+
           <View style={styles.heroContent}>
+            {/* Genre pills */}
             {genres.length > 0 && (
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.genreList}
-                style={{ marginBottom: 10 }}
+                style={{ marginBottom: 12 }}
               >
                 {genres.map((g, i) => (
-                  <View
-                    key={i}
-                    style={[styles.genreBadge, { backgroundColor: "rgba(255,255,255,0.15)", borderColor: "rgba(255,255,255,0.25)" }]}
-                  >
-                    <Text style={[styles.genreText, { color: "rgba(255,255,255,0.85)" }]}>{g}</Text>
+                  <View key={i} style={[styles.genreBadge, { backgroundColor: "rgba(255,255,255,0.10)", borderColor: "rgba(255,255,255,0.18)" }]}>
+                    <Text style={styles.genreText}>{g}</Text>
                   </View>
                 ))}
               </ScrollView>
             )}
+
             <Text style={styles.heroTitle} numberOfLines={2}>{title}</Text>
+
+            {/* Meta badges */}
             <View style={styles.metaRow}>
               {type ? (
-                <View style={[styles.metaBadge, { backgroundColor: colors.neonPurple + "33" }]}>
+                <View style={[styles.metaBadge, { backgroundColor: colors.neonPurple + "28", borderColor: colors.neonPurple + "44" }]}>
+                  <Feather name="tv" size={10} color={colors.neonPurple} />
                   <Text style={[styles.metaBadgeText, { color: colors.neonPurple }]}>{type}</Text>
                 </View>
               ) : null}
               {status ? (
-                <View style={[styles.metaBadge, { backgroundColor: colors.neonBlue + "33" }]}>
+                <View style={[styles.metaBadge, { backgroundColor: colors.neonBlue + "28", borderColor: colors.neonBlue + "44" }]}>
+                  <Feather name="activity" size={10} color={colors.neonBlue} />
                   <Text style={[styles.metaBadgeText, { color: colors.neonBlue }]}>{status}</Text>
                 </View>
               ) : null}
@@ -140,11 +144,11 @@ export default function AnimeDetailScreen() {
         {synopsis ? (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionIcon}>📺</Text>
-              <Text style={[styles.sectionTitle, { color: colors.neonBlue }]}>Synopsis</Text>
+              <View style={[styles.sectionAccent, { backgroundColor: colors.neonBlue }]} />
+              <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Synopsis</Text>
             </View>
             <View style={[styles.synopsisCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <Text style={[styles.synopsisText, { color: colors.foreground }]}>
+              <Text style={[styles.synopsisText, { color: colors.mutedForeground }]}>
                 {synopsis}
               </Text>
             </View>
@@ -154,35 +158,52 @@ export default function AnimeDetailScreen() {
         {/* ── Saisons et Films ── */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionIcon}>🎬</Text>
-            <Text style={[styles.sectionTitle, { color: colors.neonBlue }]}>Saisons et Films</Text>
+            <View style={[styles.sectionAccent, { backgroundColor: colors.neonPurple }]} />
+            <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Saisons & Films</Text>
           </View>
 
           <View style={styles.seasonGrid}>
-            {(seasons.length === 0 ? [{ number: 1, name: "Saison 1" }] : seasons).map((s: any, i: number) => {
-              const num = s.number ?? i + 1;
-              const name = s.name ?? `Saison ${num}`;
+            {(seasons.length === 0 ? [{ number: 1, name: "Saison 1", languages: ["VOSTFR"] }] : seasons).map((s: any, i: number) => {
+              const num   = s.number ?? i + 1;
+              const name  = s.name ?? `Saison ${num}`;
+              const langs: string[] = s.languages ?? [];
               return (
                 <TouchableOpacity
                   key={String(i)}
                   onPress={() => handleSeasonPress(num)}
                   activeOpacity={0.82}
-                  style={[styles.seasonCard, { borderColor: colors.neonBlue }]}
+                  style={styles.seasonCard}
                 >
                   {image ? (
                     <Image source={{ uri: image }} style={StyleSheet.absoluteFill} resizeMode="cover" />
                   ) : (
-                    <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.secondary }]} />
+                    <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.card }]} />
                   )}
                   <LinearGradient
-                    colors={["transparent", "rgba(8,8,15,0.85)"]}
+                    colors={["rgba(8,8,15,0.1)", "rgba(8,8,15,0.88)"]}
                     style={StyleSheet.absoluteFill}
                   />
+
+                  {/* Language badges top-right */}
+                  {langs.length > 0 && (
+                    <View style={styles.langBadgeRow}>
+                      {langs.slice(0, 3).map((l) => (
+                        <View key={l} style={[styles.langBadge, { backgroundColor: "rgba(8,8,15,0.72)", borderColor: "rgba(255,255,255,0.2)" }]}>
+                          {LANG_FLAG[l] && <Text style={styles.langBadgeFlag}>{LANG_FLAG[l]}</Text>}
+                          <Text style={styles.langBadgeText}>{l}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+
                   <View style={styles.seasonCardContent}>
-                    <Text style={styles.seasonCardTitle}>{name}</Text>
-                    <Text style={[styles.seasonTypeText, { color: colors.neonBlue }]}>
-                      📺 {type ? type.toUpperCase() : "SÉRIE"}
-                    </Text>
+                    <Text style={styles.seasonCardTitle} numberOfLines={1}>{name}</Text>
+                    <View style={styles.seasonCardMeta}>
+                      <Feather name="play-circle" size={10} color="rgba(255,255,255,0.55)" />
+                      <Text style={styles.seasonCardMetaText}>
+                        {type ? type.toUpperCase() : "SÉRIE"}
+                      </Text>
+                    </View>
                   </View>
                 </TouchableOpacity>
               );
@@ -197,63 +218,58 @@ export default function AnimeDetailScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   scroll: { flexGrow: 1 },
-  hero: {
-    height: 320,
-    justifyContent: "flex-end",
-    position: "relative",
-  },
+
+  hero: { height: 340, justifyContent: "flex-end", position: "relative" },
   backBtn: {
-    position: "absolute",
-    left: 14,
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
+    position: "absolute", left: 16,
+    width: 38, height: 38, borderRadius: 19,
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 1,
   },
-  heroContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 20,
-  },
+  heroContent: { paddingHorizontal: 18, paddingBottom: 22 },
   heroTitle: {
-    color: "#fff",
-    fontSize: 26,
-    fontWeight: "800" as const,
-    letterSpacing: -0.5,
-    marginBottom: 10,
-    textShadowColor: "rgba(0,0,0,0.7)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    color: "#fff", fontSize: 28, fontWeight: "800" as const,
+    letterSpacing: -0.5, lineHeight: 34, marginBottom: 12,
+    textShadowColor: "rgba(0,0,0,0.8)",
+    textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 6,
   },
   metaRow: { flexDirection: "row", gap: 8 },
-  metaBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
-  metaBadgeText: { fontSize: 12, fontWeight: "700" as const, letterSpacing: 0.3 },
-  genreList: { gap: 8, paddingRight: 4 },
+  metaBadge: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, borderWidth: 1 },
+  metaBadgeText: { fontSize: 11, fontWeight: "700" as const, letterSpacing: 0.3 },
+  genreList: { gap: 7, paddingRight: 4 },
   genreBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20, borderWidth: 1 },
-  genreText: { fontSize: 11 },
-  section: { paddingHorizontal: 16, paddingTop: 24 },
-  sectionHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 14 },
-  sectionIcon: { fontSize: 18 },
-  sectionTitle: { fontSize: 18, fontWeight: "800" as const, letterSpacing: 0.2 },
-  synopsisCard: { borderRadius: 12, borderWidth: 1, padding: 16 },
-  synopsisText: { fontSize: 14, lineHeight: 23 },
+  genreText: { fontSize: 11, color: "rgba(255,255,255,0.82)", fontWeight: "500" as const },
+
+  section: { paddingHorizontal: 16, paddingTop: 26 },
+  sectionHeader: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 14 },
+  sectionAccent: { width: 3, height: 18, borderRadius: 2 },
+  sectionTitle: { fontSize: 17, fontWeight: "800" as const, letterSpacing: -0.2 },
+
+  synopsisCard: { borderRadius: 14, borderWidth: 1, padding: 16 },
+  synopsisText: { fontSize: 14, lineHeight: 24 },
+
   seasonGrid: { flexDirection: "row", flexWrap: "wrap", gap: CARD_GAP },
   seasonCard: {
-    width: SEASON_CARD_WIDTH,
-    height: SEASON_CARD_HEIGHT,
-    borderRadius: 12,
-    borderWidth: 2,
-    overflow: "hidden",
-    justifyContent: "flex-end",
+    width: SEASON_CARD_WIDTH, height: SEASON_CARD_HEIGHT,
+    borderRadius: 14, overflow: "hidden", justifyContent: "flex-end",
   },
-  seasonCardContent: { padding: 10 },
+  langBadgeRow: {
+    position: "absolute", top: 8, right: 8,
+    flexDirection: "row", gap: 4, flexWrap: "wrap", justifyContent: "flex-end",
+  },
+  langBadge: {
+    flexDirection: "row", alignItems: "center", gap: 3,
+    paddingHorizontal: 6, paddingVertical: 3,
+    borderRadius: 6, borderWidth: 1,
+  },
+  langBadgeFlag: { fontSize: 10 },
+  langBadgeText: { color: "#fff", fontSize: 9, fontWeight: "700" as const, letterSpacing: 0.3 },
+  seasonCardContent: { padding: 11 },
   seasonCardTitle: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "800" as const,
-    textShadowColor: "rgba(0,0,0,0.7)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+    color: "#fff", fontSize: 13, fontWeight: "800" as const,
+    textShadowColor: "rgba(0,0,0,0.8)",
+    textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4,
   },
-  seasonTypeText: { fontSize: 11, fontWeight: "700" as const, letterSpacing: 0.5, marginTop: 3 },
+  seasonCardMeta: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 4 },
+  seasonCardMetaText: { color: "rgba(255,255,255,0.5)", fontSize: 10, fontWeight: "600" as const, letterSpacing: 0.5 },
 });
