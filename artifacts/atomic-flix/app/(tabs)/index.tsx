@@ -132,7 +132,7 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.scroll,
-          { paddingTop: topPadding + 8, paddingBottom: Platform.OS === "web" ? 34 : insets.bottom + 20 },
+          { paddingTop: topPadding + 8, paddingBottom: Platform.OS === "web" ? 100 : insets.bottom + 76 },
         ]}
         refreshControl={
           <RefreshControl
