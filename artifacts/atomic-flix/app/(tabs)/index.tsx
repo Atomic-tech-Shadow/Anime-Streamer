@@ -180,7 +180,6 @@ export default function HomeScreen() {
           <SectionHeader
             title="✨ Pépites"
             accent
-            onSeeAll={() => router.push("/search")}
           />
           {loadingPopular ? (
             <FlatList
