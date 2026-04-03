@@ -236,12 +236,12 @@ export default function AnimeDetailScreen() {
 
                   <View style={styles.seasonCardContent}>
                     <Text style={styles.seasonCardTitle} numberOfLines={1}>{name}</Text>
-                    <View style={styles.seasonCardMeta}>
-                      <Feather name="play-circle" size={10} color="rgba(255,255,255,0.55)" />
-                      <Text style={styles.seasonCardMetaText}>
-                        {type ? type.toUpperCase() : "SÉRIE"}
-                      </Text>
-                    </View>
+                    {type ? (
+                      <View style={styles.seasonCardMeta}>
+                        <Feather name="play-circle" size={10} color="rgba(255,255,255,0.55)" />
+                        <Text style={styles.seasonCardMetaText}>{type.toUpperCase()}</Text>
+                      </View>
+                    ) : null}
                   </View>
                 </TouchableOpacity>
               );
