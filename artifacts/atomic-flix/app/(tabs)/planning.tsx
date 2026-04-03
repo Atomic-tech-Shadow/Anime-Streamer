@@ -87,7 +87,7 @@ export default function PlanningScreen() {
           styles.scroll,
           {
             paddingTop: topPadding + 8,
-            paddingBottom: Platform.OS === "web" ? 34 : insets.bottom + 20,
+            paddingBottom: Platform.OS === "web" ? 110 : insets.bottom + 90,
           },
         ]}
       >
