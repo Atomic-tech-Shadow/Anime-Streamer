@@ -8,12 +8,27 @@ import {
   Image,
   Platform,
 } from "react-native";
+
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
 import { usePlanning } from "@/hooks/useAnime";
 import NeonGlow from "@/components/NeonGlow";
+
+const FLAG_BASE = "https://raw.githubusercontent.com/Anime-Sama/IMG/img/autres";
+const LANG_FLAG_URL: Record<string, string> = {
+  VOSTFR: `${FLAG_BASE}/flag_jp.png`,
+  VO:     `${FLAG_BASE}/flag_jp.png`,
+  VF:     `${FLAG_BASE}/flag_fr.png`,
+  VF1:    `${FLAG_BASE}/flag_fr.png`,
+  VF2:    `${FLAG_BASE}/flag_fr.png`,
+  VA:     `${FLAG_BASE}/flag_en.png`,
+  VAR:    `${FLAG_BASE}/flag_ar.png`,
+  VKR:    `${FLAG_BASE}/flag_kr.png`,
+  VCN:    `${FLAG_BASE}/flag_cn.png`,
+  VQC:    `${FLAG_BASE}/flag_qc.png`,
+};
 
 const DAYS = [
   { key: "monday", label: "Lun" },
@@ -227,16 +242,18 @@ export default function PlanningScreen() {
                             </Text>
                           </View>
                         )}
-                        {langLabel && (
+                        {langLabel && LANG_FLAG_URL[langLabel.toUpperCase()] && (
                           <View
                             style={[
                               styles.epBadge,
-                              { backgroundColor: colors.neonBlue + "22", marginLeft: 6 },
+                              { backgroundColor: "rgba(255,255,255,0.08)", marginLeft: 6, paddingHorizontal: 5 },
                             ]}
                           >
-                            <Text style={[styles.epText, { color: colors.neonBlue }]}>
-                              {langLabel}
-                            </Text>
+                            <Image
+                              source={{ uri: LANG_FLAG_URL[langLabel.toUpperCase()] }}
+                              style={styles.langFlag}
+                              resizeMode="cover"
+                            />
                           </View>
                         )}
                       </View>
@@ -341,6 +358,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   epText: { fontSize: 11, fontWeight: "700" as const },
+  langFlag: { width: 22, height: 15, borderRadius: 2 },
   timeRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   timeText: { fontSize: 12 },
 });
