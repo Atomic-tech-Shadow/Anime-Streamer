@@ -243,18 +243,11 @@ export default function PlanningScreen() {
                           </View>
                         )}
                         {langLabel && LANG_FLAG_URL[langLabel.toUpperCase()] && (
-                          <View
-                            style={[
-                              styles.epBadge,
-                              { backgroundColor: "rgba(255,255,255,0.08)", marginLeft: 6, paddingHorizontal: 5 },
-                            ]}
-                          >
-                            <Image
-                              source={{ uri: LANG_FLAG_URL[langLabel.toUpperCase()] }}
-                              style={styles.langFlag}
-                              resizeMode="cover"
-                            />
-                          </View>
+                          <Image
+                            source={{ uri: LANG_FLAG_URL[langLabel.toUpperCase()] }}
+                            style={styles.langFlag}
+                            resizeMode="cover"
+                          />
                         )}
                       </View>
                     )}
@@ -358,7 +351,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   epText: { fontSize: 11, fontWeight: "700" as const },
-  langFlag: { width: 22, height: 15, borderRadius: 2 },
+  langFlag: { width: 26, height: 18, borderRadius: 3 },
   timeRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   timeText: { fontSize: 12 },
 });
