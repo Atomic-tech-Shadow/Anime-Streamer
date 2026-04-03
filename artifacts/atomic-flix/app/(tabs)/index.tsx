@@ -138,6 +138,25 @@ export default function HomeScreen() {
     }
   };
 
+  // For recent episodes: go directly to the player at the right episode + language
+  const handleRecentPress = (item: any) => {
+    const id = item.animeId ?? getAnimeId(item);
+    if (!id) return;
+    router.push({
+      pathname: "/player",
+      params: {
+        url: "",
+        title: item.animeTitle ?? getAnimeTitle(item),
+        image: item.image ?? getAnimeImage(item) ?? "",
+        season: String(item.season ?? 1),
+        episodeNum: String(item.episode ?? 1),
+        animeId: id,
+        language: item.language ?? "VOSTFR",
+        availableLanguages: item.language ?? "VOSTFR",
+      },
+    });
+  };
+
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
 
   return (
@@ -306,7 +325,7 @@ export default function HomeScreen() {
                   image={getAnimeImage(item)}
                   episode={item.episode ?? item.number}
                   size="small"
-                  onPress={() => handleAnimePress(item)}
+                  onPress={() => handleRecentPress(item)}
                 />
               )}
             />
