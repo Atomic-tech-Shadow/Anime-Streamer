@@ -1,4 +1,7 @@
-const BASE_URL = "https://anime-sama-scraper.vercel.app";
+const DOMAIN = process.env.EXPO_PUBLIC_DOMAIN;
+const BASE_URL = DOMAIN
+  ? `https://${DOMAIN}/api/anime-proxy`
+  : "https://anime-sama-scraper.vercel.app/api";
 
 export interface Anime {
   id: string;
@@ -59,29 +62,29 @@ async function fetchAPI<T>(endpoint: string): Promise<T> {
 
 export const api = {
   search: (query: string) =>
-    fetchAPI<any>(`/api/search?query=${encodeURIComponent(query)}`),
+    fetchAPI<any>(`/search?query=${encodeURIComponent(query)}`),
 
-  recent: () => fetchAPI<any>(`/api/recent`),
+  recent: () => fetchAPI<any>(`/recent`),
 
   planning: (day: string = "today") =>
-    fetchAPI<any>(`/api/planning?day=${day}`),
+    fetchAPI<any>(`/planning?day=${day}`),
 
-  popular: () => fetchAPI<any>(`/api/popular`),
+  popular: () => fetchAPI<any>(`/popular`),
 
-  recommendations: () => fetchAPI<any>(`/api/recommendations`),
+  recommendations: () => fetchAPI<any>(`/recommendations`),
 
   animeDetails: (animeId: string) =>
-    fetchAPI<any>(`/api/anime/${encodeURIComponent(animeId)}`),
+    fetchAPI<any>(`/anime/${encodeURIComponent(animeId)}`),
 
   seasons: (animeId: string) =>
-    fetchAPI<any>(`/api/seasons/${encodeURIComponent(animeId)}`),
+    fetchAPI<any>(`/seasons/${encodeURIComponent(animeId)}`),
 
   episodes: (animeId: string, season: number = 1, language: string = "VOSTFR") =>
-    fetchAPI<any>(`/api/episodes/${encodeURIComponent(animeId)}?season=${season}&language=${language}`),
+    fetchAPI<any>(`/episodes/${encodeURIComponent(animeId)}?season=${season}&language=${language}`),
 
   episodeSources: (url: string) =>
-    fetchAPI<any>(`/api/episode-sources?url=${encodeURIComponent(url)}`),
+    fetchAPI<any>(`/episode-sources?url=${encodeURIComponent(url)}`),
 
   embed: (animeUrl: string) =>
-    fetchAPI<any>(`/api/embed?url=${encodeURIComponent(animeUrl)}`),
+    fetchAPI<any>(`/embed?url=${encodeURIComponent(animeUrl)}`),
 };

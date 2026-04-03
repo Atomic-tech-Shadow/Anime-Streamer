@@ -24,12 +24,23 @@ import NeonGlow from "@/components/NeonGlow";
 function getPopularList(data: any): any[] {
   if (!data) return [];
   if (Array.isArray(data)) return data;
+  if (data.allPopular && Array.isArray(data.allPopular)) return data.allPopular;
   if (data.categories && typeof data.categories === "object") {
     return Object.values(data.categories as Record<string, any[]>).flat();
   }
   if (data.results) return data.results;
   if (data.data) return Array.isArray(data.data) ? data.data : [];
   return [];
+}
+
+function getPepitesList(data: any): any[] {
+  if (!data?.categories?.pepites) return [];
+  return Array.isArray(data.categories.pepites) ? data.categories.pepites : [];
+}
+
+function getClassiquesList(data: any): any[] {
+  if (!data?.categories?.classiques) return [];
+  return Array.isArray(data.categories.classiques) ? data.categories.classiques : [];
 }
 
 function getRecentList(data: any): any[] {
@@ -83,10 +94,12 @@ export default function HomeScreen() {
   } = useRecommendations();
 
   const popularList = getPopularList(popular);
+  const pepitesList = getPepitesList(popular);
+  const classiquesList = getClassiquesList(popular);
   const recentList = getRecentList(recent);
   const recoList = getRecoList(recommendations);
 
-  const featured = popularList[0] ?? recentList[0];
+  const featured = pepitesList[0] ?? popularList[0] ?? recentList[0];
 
   const refreshing = loadingPopular && loadingRecent;
 
@@ -165,7 +178,7 @@ export default function HomeScreen() {
 
         <View style={styles.section}>
           <SectionHeader
-            title="Tendances"
+            title="✨ Pépites"
             accent
             onSeeAll={() => router.push("/search")}
           />
@@ -175,16 +188,16 @@ export default function HomeScreen() {
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.list}
-              keyExtractor={(i) => String(i)}
+              keyExtractor={(i) => `skel-pep-${i}`}
               renderItem={() => <SkeletonCard width={140} height={198} />}
             />
           ) : (
             <FlatList
-              data={popularList.slice(0, 12)}
+              data={(pepitesList.length > 0 ? pepitesList : popularList).slice(0, 15)}
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.list}
-              keyExtractor={(item, i) => getAnimeId(item) || String(i)}
+              keyExtractor={(item, i) => `pep-${i}-${getAnimeId(item)}`}
               renderItem={({ item }) => (
                 <AnimeCard
                   title={getAnimeTitle(item)}
@@ -197,6 +210,27 @@ export default function HomeScreen() {
             />
           )}
         </View>
+
+        {classiquesList.length > 0 && (
+          <View style={styles.section}>
+            <SectionHeader title="Classiques" accent />
+            <FlatList
+              data={classiquesList.slice(0, 15)}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.list}
+              keyExtractor={(item, i) => `cls-${i}-${getAnimeId(item)}`}
+              renderItem={({ item }) => (
+                <AnimeCard
+                  title={getAnimeTitle(item)}
+                  image={getAnimeImage(item)}
+                  type={item.type ?? item.category}
+                  onPress={() => handleAnimePress(item)}
+                />
+              )}
+            />
+          </View>
+        )}
 
         <View style={styles.section}>
           <SectionHeader title="Ajouts récents" accent />
@@ -215,7 +249,7 @@ export default function HomeScreen() {
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.list}
-              keyExtractor={(item, i) => getAnimeId(item) || String(i)}
+              keyExtractor={(item, i) => `rec-${i}-${getAnimeId(item)}`}
               renderItem={({ item }) => (
                 <AnimeCard
                   title={getAnimeTitle(item)}
@@ -237,7 +271,7 @@ export default function HomeScreen() {
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.list}
-              keyExtractor={(item, i) => getAnimeId(item) || String(i)}
+              keyExtractor={(item, i) => `reco-${i}-${getAnimeId(item)}`}
               renderItem={({ item }) => (
                 <AnimeCard
                   title={getAnimeTitle(item)}
