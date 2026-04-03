@@ -11,8 +11,7 @@ import {
   Modal,
   FlatList,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useLocalSearchParams } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { WebView } from "react-native-webview";
 import { LinearGradient } from "expo-linear-gradient";
@@ -96,9 +95,6 @@ function PickerModal({
 
 export default function PlayerScreen() {
   const colors = useColors();
-  const router = useRouter();
-  const insets = useSafeAreaInsets();
-
   const {
     title,
     image,
@@ -189,8 +185,7 @@ export default function PlayerScreen() {
     value: String(i),
   }));
 
-  const topPadding = Platform.OS === "web" ? 0 : insets.top;
-  const isLoading  = loadingEpisodes && episodes.length === 0;
+  const isLoading = loadingEpisodes && episodes.length === 0;
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
@@ -207,20 +202,6 @@ export default function PlayerScreen() {
             colors={["rgba(8,8,15,0.15)", "rgba(8,8,15,0.88)"]}
             style={StyleSheet.absoluteFill}
           />
-          <TouchableOpacity
-            style={[styles.backBtn, { top: topPadding + 12, backgroundColor: "rgba(0,0,0,0.45)" }]}
-            onPress={() => router.back()}
-            activeOpacity={0.8}
-          >
-            <Feather name="arrow-left" size={20} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.externalBtn, { top: topPadding + 12, backgroundColor: "rgba(0,0,0,0.45)" }]}
-            onPress={handleOpenExternal}
-            activeOpacity={0.8}
-          >
-            <Feather name="external-link" size={18} color="#fff" />
-          </TouchableOpacity>
           <View style={styles.heroContent}>
             <Text style={styles.heroTitle} numberOfLines={2}>{title ?? "Lecture"}</Text>
             {season ? <Text style={styles.heroSeason}>SAISON {season}</Text> : null}
@@ -368,8 +349,6 @@ export default function PlayerScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   hero: { height: 220, justifyContent: "flex-end", position: "relative" },
-  backBtn: { position: "absolute", left: 14, width: 38, height: 38, borderRadius: 10, alignItems: "center", justifyContent: "center" },
-  externalBtn: { position: "absolute", right: 14, width: 38, height: 38, borderRadius: 10, alignItems: "center", justifyContent: "center" },
   heroContent: { paddingHorizontal: 16, paddingBottom: 16 },
   heroTitle: { color: "#fff", fontSize: 24, fontWeight: "800" as const, letterSpacing: -0.5, textShadowColor: "rgba(0,0,0,0.6)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 },
   heroSeason: { color: "rgba(255,255,255,0.7)", fontSize: 12, fontWeight: "600" as const, letterSpacing: 1.5, marginTop: 4 },
