@@ -14,6 +14,15 @@
       "resizeMode": "cover",
       "backgroundColor": "#08080F"
     },
+    "updates": {
+      "url": "https://u.expo.dev/4a82031b-ff3f-479b-9e88-d0d38ff656d8",
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "ios": {
       "supportsTablet": false
     },
@@ -37,7 +46,8 @@
         }
       ],
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-updates"
     ],
     "experiments": {
       "typedRoutes": true,
