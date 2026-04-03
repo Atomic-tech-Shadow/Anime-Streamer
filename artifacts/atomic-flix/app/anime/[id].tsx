@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
-import { useAnimeDetails, useSeasons } from "@/hooks/useAnime";
+import { useSeasons } from "@/hooks/useAnime";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_GAP       = 12;
@@ -53,21 +53,17 @@ export default function AnimeDetailScreen() {
     id: string; title: string; image: string;
   }>();
 
-  const { data: details }    = useAnimeDetails(id ?? "");
-  const { data: seasonsData } = useSeasons(id ?? "");
+  const { data: seasonsData, isLoading } = useSeasons(id ?? "");
 
-  const anime    = details?.data ?? {};
   const seasMeta = seasonsData as any;
-  const title    = anime.title ?? seasMeta?.title ?? paramTitle ?? "Anime";
-  const image    = anime.image ?? seasMeta?.image ?? anime.cover ?? anime.thumbnail ?? paramImage ?? "";
-  const synopsis = anime.synopsis ?? anime.description ?? seasMeta?.synopsis ?? "";
-  const genres: string[] = anime.genres ?? seasMeta?.genres ?? [];
-  const extraDetails = anime.details ?? {};
-  const type     = extraDetails.types ?? anime.type ?? "";
-  const status   = extraDetails.status ?? anime.status ?? "";
-  const year     = extraDetails.releaseYear ?? anime.year ?? null;
-  const studio   = extraDetails.studio ?? null;
-  const actuality = extraDetails.actualite ?? null;
+  const title    = seasMeta?.title ?? paramTitle ?? "Anime";
+  const image    = seasMeta?.image ?? paramImage ?? "";
+  const synopsis = seasMeta?.synopsis ?? seasMeta?.description ?? "";
+  const genres: string[] = seasMeta?.genres ?? [];
+  const type     = seasMeta?.type ?? "";
+  const status   = seasMeta?.status ?? "";
+  const year     = seasMeta?.year ?? null;
+  const studio   = seasMeta?.studio ?? null;
 
   const seasons = getSeasons(seasonsData);
 
@@ -86,6 +82,14 @@ export default function AnimeDetailScreen() {
       },
     });
   };
+
+  if (isLoading && !paramTitle) {
+    return (
+      <View style={[styles.root, styles.centered, { backgroundColor: colors.background }]}>
+        <Feather name="loader" size={28} color={colors.neonPurple} />
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
@@ -173,15 +177,6 @@ export default function AnimeDetailScreen() {
           </View>
         ) : null}
 
-        {/* ── Actualité ── */}
-        {actuality ? (
-          <View style={[styles.section, { paddingTop: 16 }]}>
-            <View style={[styles.actualityCard, { backgroundColor: colors.neonPurple + "15", borderColor: colors.neonPurple + "40" }]}>
-              <Feather name="zap" size={14} color={colors.neonPurple} style={{ marginTop: 1 }} />
-              <Text style={[styles.actualityText, { color: colors.foreground }]}>{actuality}</Text>
-            </View>
-          </View>
-        ) : null}
 
         {/* ── Saisons et Films ── */}
         <View style={styles.section}>
@@ -245,6 +240,7 @@ export default function AnimeDetailScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  centered: { alignItems: "center", justifyContent: "center" },
   scroll: { flexGrow: 1 },
 
   hero: { height: 340, justifyContent: "flex-end", position: "relative" },
@@ -269,11 +265,6 @@ const styles = StyleSheet.create({
 
   synopsisCard: { borderRadius: 14, borderWidth: 1, padding: 16 },
   synopsisText: { fontSize: 14, lineHeight: 24 },
-  actualityCard: {
-    flexDirection: "row", alignItems: "flex-start", gap: 10,
-    borderRadius: 12, borderWidth: 1, padding: 12,
-  },
-  actualityText: { flex: 1, fontSize: 13, lineHeight: 20 },
 
   seasonGrid: { flexDirection: "row", flexWrap: "wrap", gap: CARD_GAP },
   seasonCard: {
