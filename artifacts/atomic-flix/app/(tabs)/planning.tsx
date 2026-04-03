@@ -15,6 +15,7 @@ import { Feather } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
 import { usePlanning } from "@/hooks/useAnime";
 import NeonGlow from "@/components/NeonGlow";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const FLAG_BASE = "https://raw.githubusercontent.com/Anime-Sama/IMG/img/autres";
 const LANG_FLAG_URL: Record<string, string> = {
@@ -31,13 +32,13 @@ const LANG_FLAG_URL: Record<string, string> = {
 };
 
 const DAYS = [
-  { key: "monday", label: "Lun" },
-  { key: "tuesday", label: "Mar" },
-  { key: "wednesday", label: "Mer" },
-  { key: "thursday", label: "Jeu" },
-  { key: "friday", label: "Ven" },
-  { key: "saturday", label: "Sam" },
-  { key: "sunday", label: "Dim" },
+  { key: "lundi",    label: "Lun" },
+  { key: "mardi",    label: "Mar" },
+  { key: "mercredi", label: "Mer" },
+  { key: "jeudi",    label: "Jeu" },
+  { key: "vendredi", label: "Ven" },
+  { key: "samedi",   label: "Sam" },
+  { key: "dimanche", label: "Dim" },
 ];
 
 function getPlanningList(data: any): any[] {
@@ -158,11 +159,7 @@ export default function PlanningScreen() {
         </ScrollView>
 
         {isLoading ? (
-          <View style={styles.loadingState}>
-            <Text style={[styles.loadingText, { color: colors.mutedForeground }]}>
-              Chargement...
-            </Text>
-          </View>
+          <LoadingScreen label="Planning" fullscreen={false} style={{ flex: 1, minHeight: 200 }} />
         ) : planningList.length === 0 ? (
           <View style={styles.emptyState}>
             <Feather name="calendar" size={48} color={colors.mutedForeground} />
@@ -308,13 +305,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   dayBtnText: { fontSize: 13, fontWeight: "600" as const },
-  loadingState: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 60,
-  },
-  loadingText: { fontSize: 14 },
   emptyState: {
     alignItems: "center",
     justifyContent: "center",
