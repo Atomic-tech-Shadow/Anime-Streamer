@@ -165,6 +165,25 @@ export default function PlayerScreen() {
     if (embedUrl) Linking.openURL(embedUrl).catch(() => {});
   };
 
+  const currentEpIndex = episodes.findIndex(
+    (e: any) => String(e.number ?? e.episode ?? "") === selectedEpNum
+  );
+  const hasPrev = currentEpIndex > 0;
+  const hasNext = currentEpIndex >= 0 && currentEpIndex < episodes.length - 1;
+
+  const goToPrev = () => {
+    if (!hasPrev) return;
+    const prev = episodes[currentEpIndex - 1];
+    setSelectedEpNum(String(prev.number ?? prev.episode ?? ""));
+    setSelectedServerIdx(0);
+  };
+  const goToNext = () => {
+    if (!hasNext) return;
+    const next = episodes[currentEpIndex + 1];
+    setSelectedEpNum(String(next.number ?? next.episode ?? ""));
+    setSelectedServerIdx(0);
+  };
+
   const episodeItems = episodes.map((ep: any) => ({
     label: `Épisode ${ep.number ?? ep.episode ?? "?"}`,
     value: String(ep.number ?? ep.episode ?? "?"),
@@ -361,6 +380,49 @@ export default function PlayerScreen() {
               />
             </View>
           )}
+
+          {/* ── Prev / Next episode ── */}
+          {episodes.length > 0 && (
+            <View style={styles.epNavRow}>
+              <TouchableOpacity
+                style={[
+                  styles.epNavBtn,
+                  { backgroundColor: colors.card, borderColor: colors.border },
+                  !hasPrev && styles.epNavBtnDisabled,
+                ]}
+                onPress={goToPrev}
+                activeOpacity={hasPrev ? 0.8 : 1}
+                disabled={!hasPrev}
+              >
+                <Feather name="chevron-left" size={20} color={hasPrev ? colors.foreground : colors.mutedForeground} />
+                <Text style={[styles.epNavText, { color: hasPrev ? colors.foreground : colors.mutedForeground }]}>
+                  Précédent
+                </Text>
+              </TouchableOpacity>
+
+              <View style={[styles.epNavCurrent, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <Text style={[styles.epNavCurrentText, { color: colors.neonPurple }]}>
+                  ÉP. {selectedEpNum}
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                style={[
+                  styles.epNavBtn,
+                  { backgroundColor: colors.card, borderColor: colors.border },
+                  !hasNext && styles.epNavBtnDisabled,
+                ]}
+                onPress={goToNext}
+                activeOpacity={hasNext ? 0.8 : 1}
+                disabled={!hasNext}
+              >
+                <Text style={[styles.epNavText, { color: hasNext ? colors.foreground : colors.mutedForeground }]}>
+                  Suivant
+                </Text>
+                <Feather name="chevron-right" size={20} color={hasNext ? colors.foreground : colors.mutedForeground} />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </ScrollView>
 
@@ -456,6 +518,21 @@ const styles = StyleSheet.create({
   openBtnWrap: { marginTop: 4 },
   openBtn: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 22, paddingVertical: 11, borderRadius: 10 },
   openBtnText: { color: "#fff", fontSize: 14, fontWeight: "700" as const },
+
+  epNavRow: {
+    flexDirection: "row", alignItems: "center", gap: 10, marginTop: 4,
+  },
+  epNavBtn: {
+    flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center",
+    gap: 6, paddingVertical: 12, borderRadius: 12, borderWidth: 1,
+  },
+  epNavBtnDisabled: { opacity: 0.4 },
+  epNavText: { fontSize: 13, fontWeight: "700" as const },
+  epNavCurrent: {
+    paddingHorizontal: 14, paddingVertical: 12,
+    borderRadius: 12, borderWidth: 1, alignItems: "center", justifyContent: "center",
+  },
+  epNavCurrentText: { fontSize: 12, fontWeight: "800" as const, letterSpacing: 0.5 },
 
   webviewContainer: {
     aspectRatio: 16 / 9,
