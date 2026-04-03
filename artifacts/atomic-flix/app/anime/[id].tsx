@@ -71,8 +71,6 @@ export default function AnimeDetailScreen() {
 
   const seasons = getSeasons(seasonsData);
 
-  const topPadding = Platform.OS === "web" ? 0 : insets.top;
-
   const handleSeasonPress = (num: number) => {
     const seasonData = seasons.find((s: any) => s.number === num);
     const langs: string[] = seasonData?.languages ?? [];
@@ -110,15 +108,6 @@ export default function AnimeDetailScreen() {
             locations={[0, 0.42, 1]}
             style={StyleSheet.absoluteFill}
           />
-
-          {/* Back button */}
-          <TouchableOpacity
-            style={[styles.backBtn, { top: topPadding + 14, backgroundColor: "rgba(8,8,15,0.55)", borderColor: "rgba(255,255,255,0.12)" }]}
-            onPress={() => router.back()}
-            activeOpacity={0.8}
-          >
-            <Feather name="arrow-left" size={18} color="#fff" />
-          </TouchableOpacity>
 
           <View style={styles.heroContent}>
             {/* Genre pills */}
@@ -259,12 +248,6 @@ const styles = StyleSheet.create({
   scroll: { flexGrow: 1 },
 
   hero: { height: 340, justifyContent: "flex-end", position: "relative" },
-  backBtn: {
-    position: "absolute", left: 16,
-    width: 38, height: 38, borderRadius: 19,
-    alignItems: "center", justifyContent: "center",
-    borderWidth: 1,
-  },
   heroContent: { paddingHorizontal: 18, paddingBottom: 22 },
   heroTitle: {
     color: "#fff", fontSize: 28, fontWeight: "800" as const,
