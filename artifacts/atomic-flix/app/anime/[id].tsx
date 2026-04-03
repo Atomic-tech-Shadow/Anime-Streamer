@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -14,25 +14,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
-import { useAnimeDetails, useEpisodes, useSeasons } from "@/hooks/useAnime";
-import EpisodeItem from "@/components/EpisodeItem";
+import { useAnimeDetails, useSeasons } from "@/hooks/useAnime";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_GAP = 12;
 const CARD_H_PADDING = 16;
 const SEASON_CARD_WIDTH = (SCREEN_WIDTH - CARD_H_PADDING * 2 - CARD_GAP) / 2;
 const SEASON_CARD_HEIGHT = 130;
-
-const LANGS = ["VOSTFR", "VF", "VF/VOSTFR"];
-
-function getEpisodes(data: any): any[] {
-  if (!data) return [];
-  if (Array.isArray(data)) return data;
-  if (data.episodes) return data.episodes;
-  if (data.results) return data.results;
-  if (data.data) return Array.isArray(data.data) ? data.data : [];
-  return [];
-}
 
 function getSeasons(data: any): any[] {
   if (!data) return [];
@@ -46,7 +34,6 @@ export default function AnimeDetailScreen() {
   const colors = useColors();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const scrollRef = useRef<ScrollView>(null);
 
   const { id, title: paramTitle, image: paramImage } = useLocalSearchParams<{
     id: string;
@@ -54,16 +41,8 @@ export default function AnimeDetailScreen() {
     image: string;
   }>();
 
-  const [selectedSeason, setSelectedSeason] = useState(1);
-  const [selectedLang, setSelectedLang] = useState("VOSTFR");
-
   const { data: details } = useAnimeDetails(id ?? "");
   const { data: seasonsData } = useSeasons(id ?? "");
-  const { data: episodesData, isLoading: loadingEpisodes } = useEpisodes(
-    id ?? "",
-    selectedSeason,
-    selectedLang
-  );
 
   const anime = details ?? {};
   const title = anime.title ?? paramTitle ?? "Anime";
@@ -74,39 +53,27 @@ export default function AnimeDetailScreen() {
   const status = anime.status ?? "";
 
   const seasons = getSeasons(seasonsData);
-  const episodes = getEpisodes(episodesData);
 
   const topPadding = Platform.OS === "web" ? 0 : insets.top;
 
   const handleSeasonPress = (num: number) => {
-    setSelectedSeason(num);
-    setTimeout(() => {
-      scrollRef.current?.scrollToEnd({ animated: true });
-    }, 200);
-  };
-
-  const handleEpisodePress = (ep: any) => {
-    const epUrl = ep.url ?? ep.link ?? ep.stream ?? "";
-    if (epUrl) {
-      router.push({
-        pathname: "/player",
-        params: {
-          url: epUrl,
-          title,
-          image,
-          season: String(selectedSeason),
-          episodeNum: String(ep.number ?? ep.episode ?? "?"),
-          animeId: id ?? "",
-          language: selectedLang,
-        },
-      });
-    }
+    router.push({
+      pathname: "/player",
+      params: {
+        url: "",
+        title,
+        image,
+        season: String(num),
+        episodeNum: "1",
+        animeId: id ?? "",
+        language: "VOSTFR",
+      },
+    });
   };
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       <ScrollView
-        ref={scrollRef}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.scroll,
@@ -124,7 +91,6 @@ export default function AnimeDetailScreen() {
             colors={["rgba(8,8,15,0.1)", "rgba(8,8,15,0.95)"]}
             style={StyleSheet.absoluteFill}
           />
-          {/* Back */}
           <TouchableOpacity
             style={[styles.backBtn, { top: topPadding + 12, backgroundColor: "rgba(0,0,0,0.5)" }]}
             onPress={() => router.back()}
@@ -132,9 +98,7 @@ export default function AnimeDetailScreen() {
           >
             <Feather name="arrow-left" size={20} color="#fff" />
           </TouchableOpacity>
-          {/* Content at bottom of hero */}
           <View style={styles.heroContent}>
-            {/* Genres */}
             {genres.length > 0 && (
               <ScrollView
                 horizontal
@@ -190,135 +154,36 @@ export default function AnimeDetailScreen() {
             <Text style={[styles.sectionTitle, { color: colors.neonBlue }]}>Saisons et Films</Text>
           </View>
 
-          {seasons.length === 0 ? (
-            // Fallback: single season card
-            <View style={styles.seasonGrid}>
-              <TouchableOpacity
-                onPress={() => handleSeasonPress(1)}
-                activeOpacity={0.85}
-                style={[
-                  styles.seasonCard,
-                  { borderColor: selectedSeason === 1 ? colors.neonBlue : colors.border },
-                ]}
-              >
-                {image ? (
-                  <Image source={{ uri: image }} style={StyleSheet.absoluteFill} resizeMode="cover" />
-                ) : (
-                  <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.secondary }]} />
-                )}
-                <LinearGradient
-                  colors={["transparent", "rgba(8,8,15,0.82)"]}
-                  style={StyleSheet.absoluteFill}
-                />
-                <View style={styles.seasonCardContent}>
-                  <Text style={styles.seasonCardTitle}>Saison 1</Text>
-                  <View style={styles.seasonTypeBadge}>
-                    <Text style={[styles.seasonTypeText, { color: colors.neonBlue }]}>📺 SÉRIE</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View style={styles.seasonGrid}>
-              {seasons.map((s: any, i: number) => {
-                const num = s.number ?? i + 1;
-                const name = s.name ?? `Saison ${num}`;
-                const isSelected = selectedSeason === num;
-                return (
-                  <TouchableOpacity
-                    key={String(i)}
-                    onPress={() => handleSeasonPress(num)}
-                    activeOpacity={0.85}
-                    style={[
-                      styles.seasonCard,
-                      { borderColor: isSelected ? colors.neonBlue : colors.border },
-                    ]}
-                  >
-                    {image ? (
-                      <Image source={{ uri: image }} style={StyleSheet.absoluteFill} resizeMode="cover" />
-                    ) : (
-                      <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.secondary }]} />
-                    )}
-                    <LinearGradient
-                      colors={["transparent", "rgba(8,8,15,0.85)"]}
-                      style={StyleSheet.absoluteFill}
-                    />
-                    <View style={styles.seasonCardContent}>
-                      <Text style={styles.seasonCardTitle}>{name}</Text>
-                      <View style={styles.seasonTypeBadge}>
-                        <Text style={[styles.seasonTypeText, { color: colors.neonBlue }]}>
-                          📺 {type ? type.toUpperCase() : "SÉRIE"}
-                        </Text>
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          )}
-        </View>
-
-        {/* ── Episodes ── */}
-        <View style={styles.section}>
-          {/* Lang selector */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.langList}
-            style={{ marginBottom: 16 }}
-          >
-            {LANGS.map((lang) => {
-              const isActive = selectedLang === lang;
+          <View style={styles.seasonGrid}>
+            {(seasons.length === 0 ? [{ number: 1, name: "Saison 1" }] : seasons).map((s: any, i: number) => {
+              const num = s.number ?? i + 1;
+              const name = s.name ?? `Saison ${num}`;
               return (
                 <TouchableOpacity
-                  key={lang}
-                  onPress={() => setSelectedLang(lang)}
-                  style={[
-                    styles.langBtn,
-                    {
-                      backgroundColor: isActive ? colors.neonBlue : colors.card,
-                      borderColor: isActive ? colors.neonBlue : colors.border,
-                    },
-                  ]}
+                  key={String(i)}
+                  onPress={() => handleSeasonPress(num)}
+                  activeOpacity={0.82}
+                  style={[styles.seasonCard, { borderColor: colors.neonBlue }]}
                 >
-                  <Text style={[styles.langBtnText, { color: isActive ? colors.background : colors.mutedForeground }]}>
-                    {lang}
-                  </Text>
+                  {image ? (
+                    <Image source={{ uri: image }} style={StyleSheet.absoluteFill} resizeMode="cover" />
+                  ) : (
+                    <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.secondary }]} />
+                  )}
+                  <LinearGradient
+                    colors={["transparent", "rgba(8,8,15,0.85)"]}
+                    style={StyleSheet.absoluteFill}
+                  />
+                  <View style={styles.seasonCardContent}>
+                    <Text style={styles.seasonCardTitle}>{name}</Text>
+                    <Text style={[styles.seasonTypeText, { color: colors.neonBlue }]}>
+                      📺 {type ? type.toUpperCase() : "SÉRIE"}
+                    </Text>
+                  </View>
                 </TouchableOpacity>
               );
             })}
-          </ScrollView>
-
-          {loadingEpisodes ? (
-            <View style={styles.loadState}>
-              <Text style={[styles.loadText, { color: colors.mutedForeground }]}>
-                Chargement des épisodes…
-              </Text>
-            </View>
-          ) : episodes.length === 0 ? (
-            <View style={styles.emptyEp}>
-              <Feather name="film" size={34} color={colors.mutedForeground} />
-              <Text style={[styles.emptyTitle, { color: colors.foreground }]}>Aucun épisode</Text>
-              <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>
-                Essaie une autre saison ou langue
-              </Text>
-            </View>
-          ) : (
-            <View>
-              <Text style={[styles.epCount, { color: colors.mutedForeground }]}>
-                {episodes.length} épisode{episodes.length > 1 ? "s" : ""}
-              </Text>
-              {episodes.map((ep: any, i: number) => (
-                <EpisodeItem
-                  key={ep.url ?? ep.id ?? String(i)}
-                  number={ep.number ?? ep.episode ?? i + 1}
-                  title={ep.title}
-                  thumbnail={ep.thumbnail ?? ep.image}
-                  onPress={() => handleEpisodePress(ep)}
-                />
-              ))}
-            </View>
-          )}
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -328,8 +193,6 @@ export default function AnimeDetailScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   scroll: { flexGrow: 1 },
-
-  // Hero
   hero: {
     height: 320,
     justifyContent: "flex-end",
@@ -362,49 +225,15 @@ const styles = StyleSheet.create({
   metaBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
   metaBadgeText: { fontSize: 12, fontWeight: "700" as const, letterSpacing: 0.3 },
   genreList: { gap: 8, paddingRight: 4 },
-  genreBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
+  genreBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20, borderWidth: 1 },
   genreText: { fontSize: 11 },
-
-  // Sections
-  section: {
-    paddingHorizontal: 16,
-    paddingTop: 24,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 14,
-  },
+  section: { paddingHorizontal: 16, paddingTop: 24 },
+  sectionHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 14 },
   sectionIcon: { fontSize: 18 },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "800" as const,
-    letterSpacing: 0.2,
-  },
-
-  // Synopsis
-  synopsisCard: {
-    borderRadius: 12,
-    borderWidth: 1,
-    padding: 16,
-  },
-  synopsisText: {
-    fontSize: 14,
-    lineHeight: 23,
-  },
-
-  // Season cards
-  seasonGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: CARD_GAP,
-  },
+  sectionTitle: { fontSize: 18, fontWeight: "800" as const, letterSpacing: 0.2 },
+  synopsisCard: { borderRadius: 12, borderWidth: 1, padding: 16 },
+  synopsisText: { fontSize: 14, lineHeight: 23 },
+  seasonGrid: { flexDirection: "row", flexWrap: "wrap", gap: CARD_GAP },
   seasonCard: {
     width: SEASON_CARD_WIDTH,
     height: SEASON_CARD_HEIGHT,
@@ -413,9 +242,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     justifyContent: "flex-end",
   },
-  seasonCardContent: {
-    padding: 10,
-  },
+  seasonCardContent: { padding: 10 },
   seasonCardTitle: {
     color: "#fff",
     fontSize: 14,
@@ -424,30 +251,5 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
   },
-  seasonTypeBadge: {
-    marginTop: 3,
-  },
-  seasonTypeText: {
-    fontSize: 11,
-    fontWeight: "700" as const,
-    letterSpacing: 0.5,
-  },
-
-  // Lang
-  langList: { gap: 8, paddingRight: 4 },
-  langBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  langBtnText: { fontSize: 12, fontWeight: "600" as const },
-
-  // Episodes
-  loadState: { alignItems: "center", paddingTop: 30 },
-  loadText: { fontSize: 14 },
-  emptyEp: { alignItems: "center", paddingTop: 40, gap: 10 },
-  emptyTitle: { fontSize: 16, fontWeight: "700" as const },
-  emptyText: { fontSize: 13, textAlign: "center" },
-  epCount: { fontSize: 13, marginBottom: 12 },
+  seasonTypeText: { fontSize: 11, fontWeight: "700" as const, letterSpacing: 0.5, marginTop: 3 },
 });

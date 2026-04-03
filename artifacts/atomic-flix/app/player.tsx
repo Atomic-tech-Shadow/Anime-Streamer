@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -128,11 +128,24 @@ export default function PlayerScreen() {
   const [showEpisodePicker, setShowEpisodePicker] = useState(false);
   const [showServerPicker, setShowServerPicker] = useState(false);
 
-  const { data: sourcesData, isLoading: loadingSources } = useEpisodeSources(selectedEpisodeUrl);
   const { data: episodesData } = useEpisodes(animeId ?? "", Number(season ?? 1), selectedLang);
-
-  const sources = getSources(sourcesData);
   const episodes = getEpisodes(episodesData);
+
+  // Auto-load episode 1 when arriving from season card (no initial URL)
+  useEffect(() => {
+    if (!selectedEpisodeUrl && episodes.length > 0) {
+      const first = episodes[0];
+      const firstUrl = first.url ?? first.link ?? "";
+      const firstNum = String(first.number ?? first.episode ?? 1);
+      if (firstUrl) {
+        setSelectedEpisodeUrl(firstUrl);
+        setSelectedEpisodeNum(firstNum);
+      }
+    }
+  }, [episodes]);
+
+  const { data: sourcesData, isLoading: loadingSources } = useEpisodeSources(selectedEpisodeUrl);
+  const sources = getSources(sourcesData);
 
   const selectedSource = sources[selectedServerIdx];
   const embedUrl = selectedSource?.embed ?? selectedSource?.url ?? selectedEpisodeUrl ?? "";
