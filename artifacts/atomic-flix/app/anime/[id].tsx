@@ -206,6 +206,7 @@ export default function AnimeDetailScreen() {
               const num   = s.number ?? i + 1;
               const name  = s.name ?? `Saison ${num}`;
               const langs: string[] = s.languages ?? [];
+              const seasonType: string = s.type ?? "";
               return (
                 <TouchableOpacity
                   key={String(i)}
@@ -236,10 +237,10 @@ export default function AnimeDetailScreen() {
 
                   <View style={styles.seasonCardContent}>
                     <Text style={styles.seasonCardTitle} numberOfLines={1}>{name}</Text>
-                    {type ? (
+                    {seasonType ? (
                       <View style={styles.seasonCardMeta}>
                         <Feather name="play-circle" size={10} color="rgba(255,255,255,0.55)" />
-                        <Text style={styles.seasonCardMetaText}>{type.toUpperCase()}</Text>
+                        <Text style={styles.seasonCardMetaText}>{seasonType.toUpperCase()}</Text>
                       </View>
                     ) : null}
                   </View>
