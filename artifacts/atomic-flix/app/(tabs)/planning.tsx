@@ -28,6 +28,7 @@ const DAYS = [
 function getPlanningList(data: any): any[] {
   if (!data) return [];
   if (Array.isArray(data)) return data;
+  if (data.items) return data.items;
   if (data.planning) return data.planning;
   if (data.results) return data.results;
   if (data.data) return Array.isArray(data.data) ? data.data : [];
@@ -39,7 +40,11 @@ function getAnimeImage(item: any): string | undefined {
 }
 
 function getAnimeId(item: any): string {
-  return item?.id ?? item?.anime?.id ?? item?.url ?? item?.title ?? "";
+  return item?.animeId ?? item?.id ?? item?.anime?.id ?? item?.url ?? item?.title ?? "";
+}
+
+function getAnimeTitle(item: any): string {
+  return item?.title ?? item?.animeTitle ?? item?.anime?.title ?? "";
 }
 
 export default function PlanningScreen() {
@@ -157,11 +162,11 @@ export default function PlanningScreen() {
           <View style={styles.list}>
             {planningList.map((item, i) => {
               const id = getAnimeId(item);
-              const title =
-                item.title ?? item.anime?.title ?? "Anime inconnu";
+              const title = getAnimeTitle(item) || "Anime inconnu";
               const img = getAnimeImage(item);
-              const time = item.time ?? item.hour ?? item.schedule;
-              const episode = item.episode ?? item.number;
+              const time = item.releaseTime ?? item.time ?? item.hour ?? item.schedule;
+              const seasonLabel = item.season ? `S${item.season}` : null;
+              const langLabel = item.language ?? null;
 
               return (
                 <TouchableOpacity
@@ -208,23 +213,32 @@ export default function PlanningScreen() {
                     >
                       {title}
                     </Text>
-                    {episode !== undefined && (
+                    {(seasonLabel || langLabel) && (
                       <View style={styles.row}>
-                        <View
-                          style={[
-                            styles.epBadge,
-                            { backgroundColor: colors.neonPurple + "33" },
-                          ]}
-                        >
-                          <Text
+                        {seasonLabel && (
+                          <View
                             style={[
-                              styles.epText,
-                              { color: colors.neonPurple },
+                              styles.epBadge,
+                              { backgroundColor: colors.neonPurple + "33" },
                             ]}
                           >
-                            EP {episode}
-                          </Text>
-                        </View>
+                            <Text style={[styles.epText, { color: colors.neonPurple }]}>
+                              {seasonLabel}
+                            </Text>
+                          </View>
+                        )}
+                        {langLabel && (
+                          <View
+                            style={[
+                              styles.epBadge,
+                              { backgroundColor: colors.neonBlue + "22", marginLeft: 6 },
+                            ]}
+                          >
+                            <Text style={[styles.epText, { color: colors.neonBlue }]}>
+                              {langLabel}
+                            </Text>
+                          </View>
+                        )}
                       </View>
                     )}
                     {time && (

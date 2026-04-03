@@ -21,21 +21,44 @@ import SkeletonCard from "@/components/SkeletonCard";
 import HeroBanner from "@/components/HeroBanner";
 import NeonGlow from "@/components/NeonGlow";
 
-function getAnimeList(data: any): any[] {
+function getPopularList(data: any): any[] {
   if (!data) return [];
   if (Array.isArray(data)) return data;
+  if (data.categories && typeof data.categories === "object") {
+    return Object.values(data.categories as Record<string, any[]>).flat();
+  }
   if (data.results) return data.results;
-  if (data.anime) return data.anime;
   if (data.data) return Array.isArray(data.data) ? data.data : [];
   return [];
 }
 
+function getRecentList(data: any): any[] {
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  if (data.recentEpisodes) return data.recentEpisodes;
+  if (data.results) return data.results;
+  if (data.data) return Array.isArray(data.data) ? data.data : [];
+  return [];
+}
+
+function getRecoList(data: any): any[] {
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  if (data.data) return Array.isArray(data.data) ? data.data : [];
+  if (data.results) return data.results;
+  return [];
+}
+
 function getAnimeId(item: any): string {
-  return item?.id ?? item?.url ?? item?.title ?? "";
+  return item?.id ?? item?.animeId ?? item?.url ?? item?.title ?? item?.animeTitle ?? "";
 }
 
 function getAnimeImage(item: any): string | undefined {
   return item?.image ?? item?.cover ?? item?.thumbnail ?? item?.img;
+}
+
+function getAnimeTitle(item: any): string {
+  return item?.title ?? item?.animeTitle ?? "";
 }
 
 export default function HomeScreen() {
@@ -59,9 +82,9 @@ export default function HomeScreen() {
     refetch: refetchReco,
   } = useRecommendations();
 
-  const popularList = getAnimeList(popular);
-  const recentList = getAnimeList(recent);
-  const recoList = getAnimeList(recommendations);
+  const popularList = getPopularList(popular);
+  const recentList = getRecentList(recent);
+  const recoList = getRecoList(recommendations);
 
   const featured = popularList[0] ?? recentList[0];
 
@@ -72,7 +95,7 @@ export default function HomeScreen() {
     if (id) {
       router.push({
         pathname: "/anime/[id]",
-        params: { id, title: item.title ?? "", image: getAnimeImage(item) ?? "" },
+        params: { id, title: getAnimeTitle(item), image: getAnimeImage(item) ?? "" },
       });
     }
   };
@@ -133,9 +156,9 @@ export default function HomeScreen() {
 
         {featured && (
           <HeroBanner
-            title={featured.title}
+            title={getAnimeTitle(featured)}
             image={getAnimeImage(featured)}
-            type={featured.type}
+            type={featured.type ?? featured.category}
             onPress={() => handleAnimePress(featured)}
           />
         )}
@@ -164,11 +187,11 @@ export default function HomeScreen() {
               keyExtractor={(item, i) => getAnimeId(item) || String(i)}
               renderItem={({ item }) => (
                 <AnimeCard
-                  title={item.title}
+                  title={getAnimeTitle(item)}
                   image={getAnimeImage(item)}
-                  type={item.type}
+                  type={item.type ?? item.category}
                   onPress={() => handleAnimePress(item)}
-                  badge={item.type}
+                  badge={item.type ?? item.category}
                 />
               )}
             />
@@ -195,7 +218,7 @@ export default function HomeScreen() {
               keyExtractor={(item, i) => getAnimeId(item) || String(i)}
               renderItem={({ item }) => (
                 <AnimeCard
-                  title={item.title}
+                  title={getAnimeTitle(item)}
                   image={getAnimeImage(item)}
                   episode={item.episode ?? item.number}
                   size="small"
@@ -217,9 +240,9 @@ export default function HomeScreen() {
               keyExtractor={(item, i) => getAnimeId(item) || String(i)}
               renderItem={({ item }) => (
                 <AnimeCard
-                  title={item.title}
+                  title={getAnimeTitle(item)}
                   image={getAnimeImage(item)}
-                  type={item.type}
+                  type={item.type ?? item.contentType}
                   onPress={() => handleAnimePress(item)}
                 />
               )}
