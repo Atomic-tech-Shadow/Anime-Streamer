@@ -1,0 +1,27 @@
+kind = "mobile"
+previewPath = "/"
+title = "ATOMIC FLIX"
+version = "1.0.0"
+id = "artifacts/atomic-flix"
+router = "expo-domain"
+
+[[integratedSkills]]
+name = "expo"
+version = "1.0.0"
+
+[[services]]
+ensurePreviewReachable = "/status"
+name = "expo"
+paths = [ "/" ]
+localPort = 18751
+
+[services.development]
+run = "pnpm --filter @workspace/atomic-flix run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/atomic-flix", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/atomic-flix", "run", "serve" ]
+
+[services.env]
+PORT = "18751"
+BASE_PATH = "/"
