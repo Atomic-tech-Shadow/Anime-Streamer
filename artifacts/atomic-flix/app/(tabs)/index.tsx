@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Image,
   RefreshControl,
   Platform,
+  Animated,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
@@ -99,7 +100,31 @@ export default function HomeScreen() {
   const recentList = getRecentList(recent);
   const recoList = getRecoList(recommendations);
 
-  const featured = pepitesList[0] ?? popularList[0] ?? recentList[0];
+  const featuredList = useMemo(() => {
+    const combined: any[] = [];
+    const max = Math.max(pepitesList.length, classiquesList.length);
+    for (let i = 0; i < max; i++) {
+      if (pepitesList[i]) combined.push(pepitesList[i]);
+      if (classiquesList[i]) combined.push(classiquesList[i]);
+    }
+    return combined.slice(0, 10);
+  }, [pepitesList, classiquesList]);
+
+  const [featuredIndex, setFeaturedIndex] = useState(0);
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (featuredList.length <= 1) return;
+    const interval = setInterval(() => {
+      Animated.timing(fadeAnim, { toValue: 0, duration: 350, useNativeDriver: true }).start(() => {
+        setFeaturedIndex((prev) => (prev + 1) % featuredList.length);
+        Animated.timing(fadeAnim, { toValue: 1, duration: 350, useNativeDriver: true }).start();
+      });
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [featuredList.length]);
+
+  const featured = featuredList[featuredIndex] ?? popularList[0] ?? recentList[0];
 
   const refreshing = loadingPopular && loadingRecent;
 
@@ -168,12 +193,38 @@ export default function HomeScreen() {
         </View>
 
         {featured && (
-          <HeroBanner
-            title={getAnimeTitle(featured)}
-            image={getAnimeImage(featured)}
-            type={featured.type ?? featured.category}
-            onPress={() => handleAnimePress(featured)}
-          />
+          <View>
+            <Animated.View style={{ opacity: fadeAnim }}>
+              <HeroBanner
+                title={getAnimeTitle(featured)}
+                image={getAnimeImage(featured)}
+                type={featured.type ?? featured.category}
+                onPress={() => handleAnimePress(featured)}
+              />
+            </Animated.View>
+            {featuredList.length > 1 && (
+              <View style={styles.dots}>
+                {featuredList.map((_, i) => (
+                  <TouchableOpacity
+                    key={i}
+                    onPress={() => {
+                      Animated.timing(fadeAnim, { toValue: 0, duration: 250, useNativeDriver: true }).start(() => {
+                        setFeaturedIndex(i);
+                        Animated.timing(fadeAnim, { toValue: 1, duration: 250, useNativeDriver: true }).start();
+                      });
+                    }}
+                    style={[
+                      styles.dot,
+                      {
+                        backgroundColor: i === featuredIndex ? colors.neonPurple : colors.border,
+                        width: i === featuredIndex ? 18 : 6,
+                      },
+                    ]}
+                  />
+                ))}
+              </View>
+            )}
+          </View>
         )}
 
         {classiquesList.length > 0 && (
@@ -327,5 +378,17 @@ const styles = StyleSheet.create({
   list: {
     paddingLeft: 16,
     paddingRight: 4,
+  },
+  dots: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 5,
+    marginTop: -16,
+    marginBottom: 20,
+  },
+  dot: {
+    height: 6,
+    borderRadius: 3,
   },
 });
