@@ -76,7 +76,15 @@ export default function AnimeDetailScreen() {
     if (epUrl) {
       router.push({
         pathname: "/player",
-        params: { url: epUrl, title: `${title} - Ep ${ep.number ?? ep.episode ?? "?"}` },
+        params: {
+          url: epUrl,
+          title,
+          image,
+          season: String(selectedSeason),
+          episodeNum: String(ep.number ?? ep.episode ?? "?"),
+          animeId: id ?? "",
+          language: selectedLang,
+        },
       });
     }
   };
