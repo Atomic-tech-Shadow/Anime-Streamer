@@ -19,7 +19,7 @@
     },
     "android": {
       "backgroundColor": "#08080F",
-      "package": "com.cidmarco.atomicflix",
+      "package": "com.new.atomic-flix",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#08080F"
