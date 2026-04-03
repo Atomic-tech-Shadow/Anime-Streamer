@@ -236,10 +236,6 @@ export default function PlayerScreen() {
                       {meta.flagUrl && (
                         <Image source={{ uri: meta.flagUrl }} style={styles.langFlagImg} resizeMode="cover" />
                       )}
-                      <View>
-                        <Text style={styles.langLabelActive}>{meta.label}</Text>
-                        {meta.sub && <Text style={styles.langSubActive}>{meta.sub}</Text>}
-                      </View>
                     </LinearGradient>
                   ) : (
                     <View style={[styles.langBtn, {
@@ -248,12 +244,8 @@ export default function PlayerScreen() {
                       borderWidth: 1,
                     }]}>
                       {meta.flagUrl && (
-                        <Image source={{ uri: meta.flagUrl }} style={[styles.langFlagImg, { opacity: 0.7 }]} resizeMode="cover" />
+                        <Image source={{ uri: meta.flagUrl }} style={[styles.langFlagImg, { opacity: 0.6 }]} resizeMode="cover" />
                       )}
-                      <View>
-                        <Text style={[styles.langLabel, { color: colors.mutedForeground }]}>{meta.label}</Text>
-                        {meta.sub && <Text style={[styles.langSub, { color: colors.mutedForeground + "99" }]}>{meta.sub}</Text>}
-                      </View>
                     </View>
                   )}
                 </TouchableOpacity>
@@ -426,16 +418,12 @@ const styles = StyleSheet.create({
   langRow: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   langBtnWrap: {},
   langBtn: {
-    flexDirection: "row", alignItems: "center", gap: 8,
-    paddingHorizontal: 16, paddingVertical: 11,
+    alignItems: "center", justifyContent: "center",
+    paddingHorizontal: 12, paddingVertical: 8,
     borderRadius: 12,
   },
   langBtnActive: { borderRadius: 12 },
-  langFlagImg: { width: 30, height: 20, borderRadius: 3 },
-  langLabelActive: { color: "#fff", fontSize: 13, fontWeight: "800" as const, letterSpacing: 0.3 },
-  langSubActive:   { color: "rgba(255,255,255,0.65)", fontSize: 9, fontWeight: "500" as const, marginTop: 1 },
-  langLabel: { fontSize: 13, fontWeight: "700" as const, letterSpacing: 0.3 },
-  langSub:   { fontSize: 9, fontWeight: "500" as const, marginTop: 1 },
+  langFlagImg: { width: 38, height: 26, borderRadius: 4 },
 
   dropdownRow: { flexDirection: "row", gap: 10 },
   dropdown: {

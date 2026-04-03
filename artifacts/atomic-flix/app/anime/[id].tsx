@@ -200,12 +200,11 @@ export default function AnimeDetailScreen() {
                   {langs.length > 0 && (
                     <View style={styles.langBadgeRow}>
                       {langs.slice(0, 4).map((l) => (
-                        <View key={l} style={[styles.langBadge, { backgroundColor: "rgba(8,8,15,0.72)", borderColor: "rgba(255,255,255,0.2)" }]}>
-                          {LANG_FLAG_URL[l] && (
+                        LANG_FLAG_URL[l] ? (
+                          <View key={l} style={[styles.langBadge, { backgroundColor: "rgba(8,8,15,0.72)", borderColor: "rgba(255,255,255,0.2)" }]}>
                             <Image source={{ uri: LANG_FLAG_URL[l] }} style={styles.langBadgeFlagImg} resizeMode="cover" />
-                          )}
-                          <Text style={styles.langBadgeText}>{l}</Text>
-                        </View>
+                          </View>
+                        ) : null
                       ))}
                     </View>
                   )}
@@ -276,8 +275,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6, paddingVertical: 3,
     borderRadius: 6, borderWidth: 1,
   },
-  langBadgeFlagImg: { width: 18, height: 12, borderRadius: 2 },
-  langBadgeText: { color: "#fff", fontSize: 9, fontWeight: "700" as const, letterSpacing: 0.3 },
+  langBadgeFlagImg: { width: 22, height: 15, borderRadius: 2 },
   seasonCardContent: { padding: 11 },
   seasonCardTitle: {
     color: "#fff", fontSize: 13, fontWeight: "800" as const,
