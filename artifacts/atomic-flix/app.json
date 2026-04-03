@@ -19,7 +19,7 @@
     },
     "android": {
       "backgroundColor": "#08080F",
-      "package": "com.newatomic.flix",
+      "package": "com.animestreamer.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#08080F"
