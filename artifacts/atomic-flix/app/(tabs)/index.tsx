@@ -176,6 +176,27 @@ export default function HomeScreen() {
           />
         )}
 
+        {classiquesList.length > 0 && (
+          <View style={styles.section}>
+            <SectionHeader title="Classiques" accent />
+            <FlatList
+              data={classiquesList.slice(0, 15)}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.list}
+              keyExtractor={(item, i) => `cls-${i}-${getAnimeId(item)}`}
+              renderItem={({ item }) => (
+                <AnimeCard
+                  title={getAnimeTitle(item)}
+                  image={getAnimeImage(item)}
+                  type={item.type ?? item.category}
+                  onPress={() => handleAnimePress(item)}
+                />
+              )}
+            />
+          </View>
+        )}
+
         <View style={styles.section}>
           <SectionHeader
             title="✨ Pépites"
@@ -209,27 +230,6 @@ export default function HomeScreen() {
             />
           )}
         </View>
-
-        {classiquesList.length > 0 && (
-          <View style={styles.section}>
-            <SectionHeader title="Classiques" accent />
-            <FlatList
-              data={classiquesList.slice(0, 15)}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.list}
-              keyExtractor={(item, i) => `cls-${i}-${getAnimeId(item)}`}
-              renderItem={({ item }) => (
-                <AnimeCard
-                  title={getAnimeTitle(item)}
-                  image={getAnimeImage(item)}
-                  type={item.type ?? item.category}
-                  onPress={() => handleAnimePress(item)}
-                />
-              )}
-            />
-          </View>
-        )}
 
         <View style={styles.section}>
           <SectionHeader title="Ajouts récents" accent />
