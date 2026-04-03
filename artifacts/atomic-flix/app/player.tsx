@@ -17,19 +17,19 @@ import { Feather } from "@expo/vector-icons";
 import { WebView } from "react-native-webview";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
-import { useEpisodes } from "@/hooks/useAnime";
+import { useEpisodes, useSeasons } from "@/hooks/useAnime";
 
-const LANGS = [
-  { key: "VOSTFR", label: "VO",    flag: null },
-  { key: "VF",     label: "VF",    flag: "🇫🇷" },
-  { key: "VF/VOSTFR", label: "VO+VF", flag: null },
-];
+// Human-readable label for each language key
+const LANG_LABEL: Record<string, string> = {
+  VOSTFR: "VOSTFR",
+  VF:     "VF",
+  VF2:    "VF 2",
+};
 
 function getEpisodeList(data: any): any[] {
   if (!data) return [];
   if (Array.isArray(data)) return data;
   if (data.episodes) return data.episodes;
-  if (data.results) return data.results;
   return [];
 }
 
@@ -37,6 +37,13 @@ function getStreamingSources(episode: any): any[] {
   if (!episode) return [];
   if (Array.isArray(episode.streamingSources)) return episode.streamingSources;
   if (Array.isArray(episode.sources)) return episode.sources;
+  return [];
+}
+
+function getSeasonList(data: any): any[] {
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  if (data.seasons) return data.seasons;
   return [];
 }
 
@@ -92,24 +99,62 @@ export default function PlayerScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const { title, image, season, episodeNum, animeId, language: initialLang } =
-    useLocalSearchParams<{
-      url: string;
-      title: string;
-      image: string;
-      season: string;
-      episodeNum: string;
-      animeId: string;
-      language: string;
-    }>();
+  const {
+    title,
+    image,
+    season,
+    episodeNum,
+    animeId,
+    language: initialLang,
+    availableLanguages: availableLangsParam,
+  } = useLocalSearchParams<{
+    url: string;
+    title: string;
+    image: string;
+    season: string;
+    episodeNum: string;
+    animeId: string;
+    language: string;
+    availableLanguages: string;
+  }>();
 
-  const [selectedLang, setSelectedLang]         = useState(initialLang ?? "VOSTFR");
-  const [selectedEpNum, setSelectedEpNum]       = useState(episodeNum ?? "1");
+  // Parse languages passed from the detail screen (e.g. "VOSTFR,VF")
+  const passedLangs: string[] = availableLangsParam
+    ? availableLangsParam.split(",").filter(Boolean)
+    : [];
+
+  const [selectedLang, setSelectedLang]           = useState(initialLang ?? "VOSTFR");
+  const [selectedEpNum, setSelectedEpNum]         = useState(episodeNum ?? "1");
   const [selectedServerIdx, setSelectedServerIdx] = useState(0);
   const [showEpisodePicker, setShowEpisodePicker] = useState(false);
   const [showServerPicker, setShowServerPicker]   = useState(false);
 
-  // Fetch all episodes (already includes streamingSources per episode)
+  // Fetch seasons to get the authoritative language list for this season
+  const { data: seasonsData } = useSeasons(animeId ?? "");
+  const allSeasons = getSeasonList(seasonsData);
+  const currentSeasonData = allSeasons.find((s: any) => String(s.number) === String(season ?? "1"));
+
+  // Priority: season API > param passed from detail > fallback ["VOSTFR"]
+  const availableLangs: string[] =
+    (currentSeasonData?.languages?.length > 0 ? currentSeasonData.languages : null) ??
+    (passedLangs.length > 0 ? passedLangs : null) ??
+    ["VOSTFR"];
+
+  // If the selected language is not in the available list, switch to the first one
+  useEffect(() => {
+    if (availableLangs.length > 0 && !availableLangs.includes(selectedLang)) {
+      setSelectedLang(availableLangs[0]);
+      setSelectedServerIdx(0);
+    }
+  }, [availableLangs.join(",")]);
+
+  // Reset server index when language changes
+  const handleLangChange = (lang: string) => {
+    setSelectedLang(lang);
+    setSelectedServerIdx(0);
+  };
+
+  // Fetch episodes (each episode already carries streamingSources)
   const { data: episodesData, isLoading: loadingEpisodes } = useEpisodes(
     animeId ?? "",
     Number(season ?? 1),
@@ -117,17 +162,12 @@ export default function PlayerScreen() {
   );
   const episodes = getEpisodeList(episodesData);
 
-  // Reset server when language changes
-  useEffect(() => {
-    setSelectedServerIdx(0);
-  }, [selectedLang]);
-
   // Find the current episode object
-  const currentEpisode = episodes.find(
-    (e: any) => String(e.number ?? e.episode) === selectedEpNum
-  ) ?? episodes[0];
+  const currentEpisode =
+    episodes.find((e: any) => String(e.number ?? e.episode) === selectedEpNum) ??
+    episodes[0];
 
-  // Get its streaming sources
+  // Streaming sources embedded in the episode
   const sources = getStreamingSources(currentEpisode);
 
   // Embed URL for the selected server
@@ -145,7 +185,7 @@ export default function PlayerScreen() {
   }));
 
   const serverItems = sources.map((s: any, i: number) => ({
-    label: `${s.server ?? `Serveur ${i + 1}`}${s.quality ? ` (${s.quality})` : ""}`,
+    label: `${s.server ?? `Serveur ${i + 1}`}${s.quality ? ` · ${s.quality}` : ""}`,
     value: String(i),
   }));
 
@@ -189,14 +229,16 @@ export default function PlayerScreen() {
 
         <View style={styles.body}>
 
-          {/* ── Lang buttons ── */}
+          {/* ── Language buttons (dynamic from API) ── */}
           <View style={styles.langRow}>
-            {LANGS.map((lang) => {
-              const isActive = selectedLang === lang.key;
+            {availableLangs.map((lang) => {
+              const isActive = selectedLang === lang;
+              const label    = LANG_LABEL[lang] ?? lang;
+              const isVF     = lang.startsWith("VF");
               return (
                 <TouchableOpacity
-                  key={lang.key}
-                  onPress={() => setSelectedLang(lang.key)}
+                  key={lang}
+                  onPress={() => handleLangChange(lang)}
                   style={[
                     styles.langBtn,
                     {
@@ -206,9 +248,9 @@ export default function PlayerScreen() {
                   ]}
                   activeOpacity={0.8}
                 >
-                  {lang.flag && <Text style={styles.langFlag}>{lang.flag}</Text>}
+                  {isVF && <Text style={styles.langFlag}>🇫🇷</Text>}
                   <Text style={[styles.langLabel, { color: isActive ? "#fff" : colors.mutedForeground }]}>
-                    {lang.label}
+                    {label}
                   </Text>
                 </TouchableOpacity>
               );
@@ -258,7 +300,9 @@ export default function PlayerScreen() {
             <View style={[styles.playerBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <Feather name="alert-circle" size={28} color={colors.mutedForeground} />
               <Text style={[styles.playerMsg, { color: colors.mutedForeground }]}>
-                {sources.length === 0 ? "Aucune source disponible pour cet épisode" : "Sélectionne un serveur"}
+                {sources.length === 0
+                  ? "Aucune source disponible pour cet épisode"
+                  : "Sélectionne un serveur"}
               </Text>
             </View>
           ) : Platform.OS === "web" ? (
@@ -330,9 +374,9 @@ const styles = StyleSheet.create({
   heroTitle: { color: "#fff", fontSize: 24, fontWeight: "800" as const, letterSpacing: -0.5, textShadowColor: "rgba(0,0,0,0.6)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 },
   heroSeason: { color: "rgba(255,255,255,0.7)", fontSize: 12, fontWeight: "600" as const, letterSpacing: 1.5, marginTop: 4 },
   body: { paddingHorizontal: 16, paddingTop: 20, gap: 16 },
-  langRow: { flexDirection: "row", gap: 10 },
+  langRow: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   langBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10, borderWidth: 1.5 },
-  langFlag: { fontSize: 20 },
+  langFlag: { fontSize: 18 },
   langLabel: { fontSize: 13, fontWeight: "700" as const, letterSpacing: 0.5 },
   dropdownRow: { flexDirection: "row", gap: 10 },
   dropdown: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 12, paddingVertical: 13, borderRadius: 10, borderWidth: 1.5, gap: 6 },

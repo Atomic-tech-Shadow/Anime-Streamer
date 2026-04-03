@@ -68,12 +68,3 @@ export function useEpisodes(animeId: string, season: number, language: string) {
     staleTime: 1000 * 60 * 5,
   });
 }
-
-export function useEpisodeSources(url: string) {
-  return useQuery({
-    queryKey: ["sources", url],
-    queryFn: () => api.episodeSources(url),
-    enabled: !!url,
-    staleTime: 1000 * 60 * 5,
-  });
-}

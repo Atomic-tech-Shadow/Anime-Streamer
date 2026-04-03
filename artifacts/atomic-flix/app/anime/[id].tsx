@@ -57,6 +57,9 @@ export default function AnimeDetailScreen() {
   const topPadding = Platform.OS === "web" ? 0 : insets.top;
 
   const handleSeasonPress = (num: number) => {
+    const seasonData = seasons.find((s: any) => s.number === num);
+    const langs: string[] = seasonData?.languages ?? [];
+    const initialLang = langs[0] ?? "VOSTFR";
     router.push({
       pathname: "/player",
       params: {
@@ -66,7 +69,8 @@ export default function AnimeDetailScreen() {
         season: String(num),
         episodeNum: "1",
         animeId: id ?? "",
-        language: "VOSTFR",
+        language: initialLang,
+        availableLanguages: langs.join(","),
       },
     });
   };
