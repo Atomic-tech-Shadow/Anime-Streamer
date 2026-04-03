@@ -20,17 +20,17 @@ import { useEpisodes, useSeasons } from "@/hooks/useAnime";
 
 const FLAG_BASE = "https://raw.githubusercontent.com/Anime-Sama/IMG/img/autres";
 
-const LANG_META: Record<string, { label: string; flagUrl?: string; sub?: string }> = {
-  VOSTFR: { label: "VOSTFR", flagUrl: `${FLAG_BASE}/flag_jp.png`, sub: "Sous-titré FR" },
-  VO:     { label: "VO",     flagUrl: `${FLAG_BASE}/flag_jp.png`, sub: "Japonais" },
-  VF:     { label: "VF",     flagUrl: `${FLAG_BASE}/flag_fr.png`, sub: "Français" },
-  VF1:    { label: "VF 1",   flagUrl: `${FLAG_BASE}/flag_fr.png`, sub: "Alt. Français" },
-  VF2:    { label: "VF 2",   flagUrl: `${FLAG_BASE}/flag_fr.png`, sub: "Alt. Français" },
-  VA:     { label: "VA",     flagUrl: `${FLAG_BASE}/flag_en.png`, sub: "Anglais" },
-  VAR:    { label: "VAR",    flagUrl: `${FLAG_BASE}/flag_ar.png`, sub: "Arabe" },
-  VKR:    { label: "VKR",    flagUrl: `${FLAG_BASE}/flag_kr.png`, sub: "Coréen" },
-  VCN:    { label: "VCN",    flagUrl: `${FLAG_BASE}/flag_cn.png`, sub: "Chinois" },
-  VQC:    { label: "VQC",    flagUrl: `${FLAG_BASE}/flag_qc.png`, sub: "Québécois" },
+const LANG_META: Record<string, { label: string; flagUrl?: string }> = {
+  VOSTFR: { label: "VO",  flagUrl: `${FLAG_BASE}/flag_jp.png` },
+  VO:     { label: "VO",  flagUrl: `${FLAG_BASE}/flag_jp.png` },
+  VF:     { label: "VF",  flagUrl: `${FLAG_BASE}/flag_fr.png` },
+  VF1:    { label: "VF1", flagUrl: `${FLAG_BASE}/flag_fr.png` },
+  VF2:    { label: "VF2", flagUrl: `${FLAG_BASE}/flag_fr.png` },
+  VA:     { label: "VA",  flagUrl: `${FLAG_BASE}/flag_en.png` },
+  VAR:    { label: "VAR", flagUrl: `${FLAG_BASE}/flag_ar.png` },
+  VKR:    { label: "VKR", flagUrl: `${FLAG_BASE}/flag_kr.png` },
+  VCN:    { label: "VCN", flagUrl: `${FLAG_BASE}/flag_cn.png` },
+  VQC:    { label: "VQC", flagUrl: `${FLAG_BASE}/flag_qc.png` },
 };
 
 function getEpisodeList(data: any): any[] {
@@ -201,7 +201,7 @@ export default function PlayerScreen() {
             ) : null}
             <Text style={styles.heroTitle} numberOfLines={2}>{title ?? "Lecture"}</Text>
             <Text style={[styles.heroEpLabel, { color: "rgba(255,255,255,0.45)" }]}>
-              ÉPISODE {selectedEpNum}  ·  {selectedLang}
+              ÉPISODE {selectedEpNum}  ·  {LANG_META[selectedLang]?.label ?? selectedLang}
             </Text>
           </View>
         </View>
@@ -296,7 +296,7 @@ export default function PlayerScreen() {
             <View style={[styles.nowPlayingDot, { backgroundColor: embedUrl ? "#22c55e" : colors.mutedForeground }]} />
             <Text style={[styles.nowPlayingText, { color: colors.mutedForeground }]}>
               {embedUrl
-                ? `Épisode ${selectedEpNum}  ·  ${currentServer?.server ?? ""}  ·  ${selectedLang}`
+                ? `Épisode ${selectedEpNum}  ·  ${currentServer?.server ?? ""}  ·  ${LANG_META[selectedLang]?.label ?? selectedLang}`
                 : "Sélectionne un épisode"}
             </Text>
           </View>
