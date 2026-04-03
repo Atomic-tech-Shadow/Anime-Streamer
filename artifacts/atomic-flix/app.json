@@ -19,7 +19,7 @@
     },
     "android": {
       "backgroundColor": "#08080F",
-      "package": "com.new.atomic-flix",
+      "package": "com.newatomic.flix",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#08080F"
