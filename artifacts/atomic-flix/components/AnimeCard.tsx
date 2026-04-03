@@ -70,12 +70,7 @@ export default function AnimeCard({
             ]}
           />
         )}
-        <View
-          style={[
-            styles.gradient,
-            { backgroundColor: "rgba(8,8,15,0.6)" },
-          ]}
-        />
+        <View style={styles.gradient} />
         {badge && (
           <View
             style={[
@@ -95,18 +90,17 @@ export default function AnimeCard({
             </Text>
           </View>
         )}
+        <View style={styles.infoOverlay}>
+          <Text style={styles.titleOverlay} numberOfLines={2}>
+            {title}
+          </Text>
+          {type && (
+            <Text style={styles.typeOverlay} numberOfLines={1}>
+              {type}
+            </Text>
+          )}
+        </View>
       </View>
-      <Text
-        style={[styles.title, { color: colors.foreground }]}
-        numberOfLines={2}
-      >
-        {title}
-      </Text>
-      {type && (
-        <Text style={[styles.type, { color: colors.mutedForeground }]}>
-          {type}
-        </Text>
-      )}
     </TouchableOpacity>
   );
 }
@@ -128,7 +122,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: "40%",
+    height: "60%",
+    backgroundColor: "rgba(8,8,15,0.75)",
   },
   badge: {
     position: "absolute",
@@ -146,7 +141,7 @@ const styles = StyleSheet.create({
   },
   episodeBadge: {
     position: "absolute",
-    bottom: 8,
+    top: 8,
     right: 8,
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -157,14 +152,29 @@ const styles = StyleSheet.create({
     fontWeight: "700" as const,
     letterSpacing: 0.5,
   },
-  title: {
-    marginTop: 8,
-    fontSize: 12,
-    fontWeight: "600" as const,
-    lineHeight: 16,
+  infoOverlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 8,
   },
-  type: {
+  titleOverlay: {
+    color: "#ffffff",
+    fontSize: 11,
+    fontWeight: "700" as const,
+    lineHeight: 15,
+    textShadowColor: "rgba(0,0,0,0.8)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  typeOverlay: {
+    color: "rgba(255,255,255,0.65)",
+    fontSize: 9,
+    fontWeight: "500" as const,
     marginTop: 2,
-    fontSize: 10,
+    textShadowColor: "rgba(0,0,0,0.8)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
 });
