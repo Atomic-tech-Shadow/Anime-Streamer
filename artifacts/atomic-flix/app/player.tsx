@@ -218,36 +218,29 @@ export default function PlayerScreen() {
                   key={lang}
                   onPress={() => { setSelectedLang(lang); setSelectedServerIdx(0); }}
                   activeOpacity={0.82}
-                  style={styles.langBtnWrap}
+                  style={[
+                    styles.langBtn,
+                    isActive
+                      ? { borderColor: colors.neonBlue, borderWidth: 2.5, shadowColor: colors.neonBlue, shadowOpacity: 0.5, shadowRadius: 8, shadowOffset: { width: 0, height: 0 }, elevation: 6 }
+                      : { borderColor: colors.border, borderWidth: 1 },
+                  ]}
                 >
-                  {isActive ? (
-                    <LinearGradient
-                      colors={[colors.neonPurple, colors.neonBlue]}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      style={[styles.langBtn, styles.langBtnActive, {
-                        shadowColor: colors.neonPurple,
-                        shadowOffset: { width: 0, height: 4 },
-                        shadowOpacity: 0.55,
-                        shadowRadius: 10,
-                        elevation: 8,
-                      }]}
-                    >
-                      {meta.flagUrl && (
-                        <Image source={{ uri: meta.flagUrl }} style={styles.langFlagImg} resizeMode="cover" />
-                      )}
-                    </LinearGradient>
+                  {/* Flag as full background */}
+                  {meta.flagUrl ? (
+                    <Image
+                      source={{ uri: meta.flagUrl }}
+                      style={StyleSheet.absoluteFill}
+                      resizeMode="cover"
+                    />
                   ) : (
-                    <View style={[styles.langBtn, {
-                      backgroundColor: colors.card,
-                      borderColor: colors.border,
-                      borderWidth: 1,
-                    }]}>
-                      {meta.flagUrl && (
-                        <Image source={{ uri: meta.flagUrl }} style={[styles.langFlagImg, { opacity: 0.6 }]} resizeMode="cover" />
-                      )}
-                    </View>
+                    <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.card }]} />
                   )}
+                  {/* Dark overlay for inactive */}
+                  {!isActive && (
+                    <View style={[StyleSheet.absoluteFill, styles.langBtnOverlay]} />
+                  )}
+                  {/* Label on top */}
+                  <Text style={styles.langBtnLabel}>{meta.label}</Text>
                 </TouchableOpacity>
               );
             })}
@@ -416,14 +409,19 @@ const styles = StyleSheet.create({
   body: { paddingHorizontal: 16, paddingTop: 22, gap: 14, paddingBottom: 30 },
 
   langRow: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  langBtnWrap: {},
   langBtn: {
+    width: 76, height: 52,
+    borderRadius: 12, overflow: "hidden",
     alignItems: "center", justifyContent: "center",
-    paddingHorizontal: 12, paddingVertical: 8,
-    borderRadius: 12,
   },
-  langBtnActive: { borderRadius: 12 },
-  langFlagImg: { width: 38, height: 26, borderRadius: 4 },
+  langBtnOverlay: { backgroundColor: "rgba(0,0,0,0.52)", borderRadius: 12 },
+  langBtnLabel: {
+    color: "#fff", fontSize: 13, fontWeight: "800" as const,
+    letterSpacing: 0.5,
+    textShadowColor: "rgba(0,0,0,0.9)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
 
   dropdownRow: { flexDirection: "row", gap: 10 },
   dropdown: {
