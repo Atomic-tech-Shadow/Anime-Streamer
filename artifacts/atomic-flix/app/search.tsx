@@ -18,6 +18,7 @@ import SearchBar from "@/components/SearchBar";
 function getAnimeList(data: any): any[] {
   if (!data) return [];
   if (Array.isArray(data)) return data;
+  if (data.animes) return data.animes;
   if (data.results) return data.results;
   if (data.anime) return data.anime;
   if (data.data) return Array.isArray(data.data) ? data.data : [];

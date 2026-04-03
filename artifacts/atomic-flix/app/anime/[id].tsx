@@ -56,13 +56,18 @@ export default function AnimeDetailScreen() {
   const { data: details }    = useAnimeDetails(id ?? "");
   const { data: seasonsData } = useSeasons(id ?? "");
 
-  const anime  = details ?? {};
-  const title  = anime.title ?? paramTitle ?? "Anime";
-  const image  = anime.image ?? anime.cover ?? anime.thumbnail ?? paramImage ?? "";
-  const synopsis = anime.synopsis ?? anime.description ?? "";
-  const genres: string[] = anime.genres ?? [];
-  const type   = anime.type ?? "";
-  const status = anime.status ?? "";
+  const anime    = details?.data ?? {};
+  const seasMeta = seasonsData as any;
+  const title    = anime.title ?? seasMeta?.title ?? paramTitle ?? "Anime";
+  const image    = anime.image ?? seasMeta?.image ?? anime.cover ?? anime.thumbnail ?? paramImage ?? "";
+  const synopsis = anime.synopsis ?? anime.description ?? seasMeta?.synopsis ?? "";
+  const genres: string[] = anime.genres ?? seasMeta?.genres ?? [];
+  const extraDetails = anime.details ?? {};
+  const type     = extraDetails.types ?? anime.type ?? "";
+  const status   = extraDetails.status ?? anime.status ?? "";
+  const year     = extraDetails.releaseYear ?? anime.year ?? null;
+  const studio   = extraDetails.studio ?? null;
+  const actuality = extraDetails.actualite ?? null;
 
   const seasons = getSeasons(seasonsData);
 
@@ -148,6 +153,18 @@ export default function AnimeDetailScreen() {
                   <Text style={[styles.metaBadgeText, { color: colors.neonBlue }]}>{status}</Text>
                 </View>
               ) : null}
+              {year ? (
+                <View style={[styles.metaBadge, { backgroundColor: "rgba(255,255,255,0.10)", borderColor: "rgba(255,255,255,0.18)" }]}>
+                  <Feather name="calendar" size={10} color="rgba(255,255,255,0.7)" />
+                  <Text style={[styles.metaBadgeText, { color: "rgba(255,255,255,0.7)" }]}>{year}</Text>
+                </View>
+              ) : null}
+              {studio ? (
+                <View style={[styles.metaBadge, { backgroundColor: "rgba(255,255,255,0.10)", borderColor: "rgba(255,255,255,0.18)" }]}>
+                  <Feather name="film" size={10} color="rgba(255,255,255,0.7)" />
+                  <Text style={[styles.metaBadgeText, { color: "rgba(255,255,255,0.7)" }]}>{studio}</Text>
+                </View>
+              ) : null}
             </View>
           </View>
         </View>
@@ -163,6 +180,16 @@ export default function AnimeDetailScreen() {
               <Text style={[styles.synopsisText, { color: colors.mutedForeground }]}>
                 {synopsis}
               </Text>
+            </View>
+          </View>
+        ) : null}
+
+        {/* ── Actualité ── */}
+        {actuality ? (
+          <View style={[styles.section, { paddingTop: 16 }]}>
+            <View style={[styles.actualityCard, { backgroundColor: colors.neonPurple + "15", borderColor: colors.neonPurple + "40" }]}>
+              <Feather name="zap" size={14} color={colors.neonPurple} style={{ marginTop: 1 }} />
+              <Text style={[styles.actualityText, { color: colors.foreground }]}>{actuality}</Text>
             </View>
           </View>
         ) : null}
@@ -260,6 +287,11 @@ const styles = StyleSheet.create({
 
   synopsisCard: { borderRadius: 14, borderWidth: 1, padding: 16 },
   synopsisText: { fontSize: 14, lineHeight: 24 },
+  actualityCard: {
+    flexDirection: "row", alignItems: "flex-start", gap: 10,
+    borderRadius: 12, borderWidth: 1, padding: 12,
+  },
+  actualityText: { flex: 1, fontSize: 13, lineHeight: 20 },
 
   seasonGrid: { flexDirection: "row", flexWrap: "wrap", gap: CARD_GAP },
   seasonCard: {
