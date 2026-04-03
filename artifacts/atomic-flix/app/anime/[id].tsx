@@ -22,7 +22,19 @@ const CARD_H_PADDING = 16;
 const SEASON_CARD_WIDTH  = (SCREEN_WIDTH - CARD_H_PADDING * 2 - CARD_GAP) / 2;
 const SEASON_CARD_HEIGHT = 140;
 
-const LANG_FLAG: Record<string, string> = { VF: "🇫🇷", VF2: "🇫🇷" };
+const FLAG_BASE = "https://raw.githubusercontent.com/Anime-Sama/IMG/img/autres";
+const LANG_FLAG_URL: Record<string, string> = {
+  VOSTFR: `${FLAG_BASE}/flag_jp.png`,
+  VO:     `${FLAG_BASE}/flag_jp.png`,
+  VF:     `${FLAG_BASE}/flag_fr.png`,
+  VF1:    `${FLAG_BASE}/flag_fr.png`,
+  VF2:    `${FLAG_BASE}/flag_fr.png`,
+  VA:     `${FLAG_BASE}/flag_en.png`,
+  VAR:    `${FLAG_BASE}/flag_ar.png`,
+  VKR:    `${FLAG_BASE}/flag_kr.png`,
+  VCN:    `${FLAG_BASE}/flag_cn.png`,
+  VQC:    `${FLAG_BASE}/flag_qc.png`,
+};
 
 function getSeasons(data: any): any[] {
   if (!data) return [];
@@ -187,9 +199,11 @@ export default function AnimeDetailScreen() {
                   {/* Language badges top-right */}
                   {langs.length > 0 && (
                     <View style={styles.langBadgeRow}>
-                      {langs.slice(0, 3).map((l) => (
+                      {langs.slice(0, 4).map((l) => (
                         <View key={l} style={[styles.langBadge, { backgroundColor: "rgba(8,8,15,0.72)", borderColor: "rgba(255,255,255,0.2)" }]}>
-                          {LANG_FLAG[l] && <Text style={styles.langBadgeFlag}>{LANG_FLAG[l]}</Text>}
+                          {LANG_FLAG_URL[l] && (
+                            <Image source={{ uri: LANG_FLAG_URL[l] }} style={styles.langBadgeFlagImg} resizeMode="cover" />
+                          )}
                           <Text style={styles.langBadgeText}>{l}</Text>
                         </View>
                       ))}
@@ -262,7 +276,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6, paddingVertical: 3,
     borderRadius: 6, borderWidth: 1,
   },
-  langBadgeFlag: { fontSize: 10 },
+  langBadgeFlagImg: { width: 18, height: 12, borderRadius: 2 },
   langBadgeText: { color: "#fff", fontSize: 9, fontWeight: "700" as const, letterSpacing: 0.3 },
   seasonCardContent: { padding: 11 },
   seasonCardTitle: {
