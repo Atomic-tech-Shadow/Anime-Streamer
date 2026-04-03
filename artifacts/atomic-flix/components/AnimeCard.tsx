@@ -5,11 +5,9 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
-  Dimensions,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 interface AnimeCardProps {
   title: string;
@@ -21,6 +19,12 @@ interface AnimeCardProps {
   badge?: string;
 }
 
+const DIMENSIONS = {
+  small:  { width: 110, height: 155 },
+  medium: { width: 140, height: 198 },
+  large:  { width: 180, height: 254 },
+};
+
 export default function AnimeCard({
   title,
   image,
@@ -31,25 +35,21 @@ export default function AnimeCard({
   badge,
 }: AnimeCardProps) {
   const colors = useColors();
-
-  const dimensions = {
-    small: { width: 110, height: 155 },
-    medium: { width: 140, height: 198 },
-    large: { width: 180, height: 254 },
-  }[size];
+  const dim = DIMENSIONS[size];
+  const gradientHeight = type ? 56 : 44;
 
   return (
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.75}
-      style={[styles.container, { width: dimensions.width }]}
+      style={[styles.container, { width: dim.width }]}
     >
       <View
         style={[
           styles.imageContainer,
           {
-            width: dimensions.width,
-            height: dimensions.height,
+            width: dim.width,
+            height: dim.height,
             backgroundColor: colors.card,
             borderColor: colors.border,
           },
@@ -63,34 +63,28 @@ export default function AnimeCard({
           />
         ) : (
           <View
-            style={[
-              StyleSheet.absoluteFill,
-              styles.placeholder,
-              { backgroundColor: colors.secondary },
-            ]}
+            style={[StyleSheet.absoluteFill, { backgroundColor: colors.secondary }]}
           />
         )}
-        <View style={styles.gradient} />
+
         {badge && (
-          <View
-            style={[
-              styles.badge,
-              { backgroundColor: colors.neonPurple },
-            ]}
-          >
+          <View style={[styles.badge, { backgroundColor: colors.neonPurple }]}>
             <Text style={styles.badgeText}>{badge}</Text>
           </View>
         )}
+
         {episode !== undefined && (
-          <View
-            style={[styles.episodeBadge, { backgroundColor: colors.overlay }]}
-          >
+          <View style={[styles.episodeBadge, { backgroundColor: colors.overlay }]}>
             <Text style={[styles.episodeText, { color: colors.neonBlue }]}>
               EP {episode}
             </Text>
           </View>
         )}
-        <View style={styles.infoOverlay}>
+
+        <LinearGradient
+          colors={["transparent", "rgba(8,8,15,0.92)"]}
+          style={[styles.gradient, { height: gradientHeight }]}
+        >
           <Text style={styles.titleOverlay} numberOfLines={2}>
             {title}
           </Text>
@@ -99,7 +93,7 @@ export default function AnimeCard({
               {type}
             </Text>
           )}
-        </View>
+        </LinearGradient>
       </View>
     </TouchableOpacity>
   );
@@ -114,67 +108,55 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 1,
   },
-  placeholder: {
-    flex: 1,
+  badge: {
+    position: "absolute",
+    top: 7,
+    left: 7,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 4,
+    zIndex: 2,
+  },
+  badgeText: {
+    color: "#fff",
+    fontSize: 9,
+    fontWeight: "700" as const,
+    letterSpacing: 0.4,
+  },
+  episodeBadge: {
+    position: "absolute",
+    top: 7,
+    right: 7,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 4,
+    zIndex: 2,
+  },
+  episodeText: {
+    fontSize: 9,
+    fontWeight: "700" as const,
+    letterSpacing: 0.4,
   },
   gradient: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    height: "60%",
-    backgroundColor: "rgba(8,8,15,0.75)",
-  },
-  badge: {
-    position: "absolute",
-    top: 8,
-    left: 8,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  badgeText: {
-    color: "#fff",
-    fontSize: 9,
-    fontWeight: "700" as const,
-    letterSpacing: 0.5,
-  },
-  episodeBadge: {
-    position: "absolute",
-    top: 8,
-    right: 8,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  episodeText: {
-    fontSize: 9,
-    fontWeight: "700" as const,
-    letterSpacing: 0.5,
-  },
-  infoOverlay: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 8,
+    justifyContent: "flex-end",
+    paddingHorizontal: 7,
+    paddingBottom: 7,
   },
   titleOverlay: {
     color: "#ffffff",
     fontSize: 11,
     fontWeight: "700" as const,
-    lineHeight: 15,
-    textShadowColor: "rgba(0,0,0,0.8)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+    lineHeight: 14,
   },
   typeOverlay: {
-    color: "rgba(255,255,255,0.65)",
+    color: "rgba(255,255,255,0.6)",
     fontSize: 9,
     fontWeight: "500" as const,
     marginTop: 2,
-    textShadowColor: "rgba(0,0,0,0.8)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+    lineHeight: 12,
   },
 });
