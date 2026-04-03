@@ -81,8 +81,9 @@ export default function AnimeCard({
         )}
 
         <LinearGradient
-          colors={["transparent", "rgba(8,8,15,0.92)"]}
+          colors={["transparent", "rgba(8,8,15,0.90)"]}
           style={styles.gradient}
+          pointerEvents="none"
         >
           <Text style={styles.titleOverlay} numberOfLines={2}>
             {title}
@@ -106,6 +107,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     overflow: "hidden",
     borderWidth: 1,
+    justifyContent: "flex-end",
   },
   badge: {
     position: "absolute",
@@ -137,11 +139,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
   gradient: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingTop: 20,
+    paddingTop: 18,
     paddingHorizontal: 7,
     paddingBottom: 7,
   },
