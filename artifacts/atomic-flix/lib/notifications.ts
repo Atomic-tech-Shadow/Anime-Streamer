@@ -114,8 +114,8 @@ export async function checkAndNotifyNewEpisodes(recentList: any[]): Promise<void
 
   if (newOnes.length === 0) return;
 
-  if (newOnes.length === 1) {
-    const item        = newOnes[0];
+  for (let i = 0; i < newOnes.length; i++) {
+    const item        = newOnes[i];
     const imageUrl    = getImage(item);
     const attachments = await buildAttachments(imageUrl);
 
@@ -134,26 +134,7 @@ export async function checkAndNotifyNewEpisodes(recentList: any[]): Promise<void
           image:   imageUrl,
         },
       },
-      trigger: null,
-    });
-  } else {
-    const first       = newOnes[0];
-    const imageUrl    = getImage(first);
-    const attachments = await buildAttachments(imageUrl);
-
-    const names = newOnes.slice(0, 3).map(getTitle);
-    const more  = newOnes.length > 3 ? ` et ${newOnes.length - 3} autres` : "";
-
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title:       `${newOnes.length} nouveaux épisodes`,
-        subtitle:    names.join(", ") + more,
-        body:        names.join(", ") + more,
-        sound:       true,
-        attachments,
-        data:        { batch: true },
-      },
-      trigger: null,
+      trigger: i === 0 ? null : { seconds: i, repeats: false } as any,
     });
   }
 }
