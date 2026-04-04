@@ -10,7 +10,10 @@ import {
   RefreshControl,
   Platform,
   Animated,
+  PanResponder,
+  Dimensions,
 } from "react-native";
+
 import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -22,6 +25,8 @@ import SkeletonCard from "@/components/SkeletonCard";
 import HeroBanner from "@/components/HeroBanner";
 import NeonGlow from "@/components/NeonGlow";
 import LoadingScreen from "@/components/LoadingScreen";
+
+const SCREEN_W = Dimensions.get("window").width;
 
 function getPopularList(data: any): any[] {
   if (!data) return [];
@@ -112,15 +117,55 @@ export default function HomeScreen() {
   }, [pepitesList, classiquesList]);
 
   const [featuredIndex, setFeaturedIndex] = useState(0);
-  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const fadeAnim      = useRef(new Animated.Value(1)).current;
+  const slideAnim     = useRef(new Animated.Value(0)).current;
+  const indexRef      = useRef(0);
+  const listLenRef    = useRef(0);
+  const animatingRef  = useRef(false);
+
+  indexRef.current   = featuredIndex;
+  listLenRef.current = featuredList.length;
+
+  const goToIndex = useRef((next: number, direction: 1 | -1) => {
+    if (animatingRef.current) return;
+    animatingRef.current = true;
+    const outX = -direction * SCREEN_W * 0.4;
+    const inX  =  direction * SCREEN_W * 0.4;
+    Animated.parallel([
+      Animated.timing(fadeAnim,  { toValue: 0, duration: 200, useNativeDriver: true }),
+      Animated.timing(slideAnim, { toValue: outX, duration: 200, useNativeDriver: true }),
+    ]).start(() => {
+      slideAnim.setValue(inX);
+      setFeaturedIndex(next);
+      indexRef.current = next;
+      Animated.parallel([
+        Animated.timing(fadeAnim,  { toValue: 1, duration: 260, useNativeDriver: true }),
+        Animated.timing(slideAnim, { toValue: 0, duration: 260, useNativeDriver: true }),
+      ]).start(() => { animatingRef.current = false; });
+    });
+  }).current;
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, g) =>
+        Math.abs(g.dx) > 10 && Math.abs(g.dx) > Math.abs(g.dy) * 1.5,
+      onPanResponderRelease: (_, g) => {
+        const len = listLenRef.current;
+        if (len <= 1) return;
+        if (g.dx < -40) {
+          goToIndex((indexRef.current + 1) % len, 1);
+        } else if (g.dx > 40) {
+          goToIndex((indexRef.current - 1 + len) % len, -1);
+        }
+      },
+    })
+  ).current;
 
   useEffect(() => {
     if (featuredList.length <= 1) return;
     const interval = setInterval(() => {
-      Animated.timing(fadeAnim, { toValue: 0, duration: 350, useNativeDriver: true }).start(() => {
-        setFeaturedIndex((prev) => (prev + 1) % featuredList.length);
-        Animated.timing(fadeAnim, { toValue: 1, duration: 350, useNativeDriver: true }).start();
-      });
+      const len = listLenRef.current;
+      goToIndex((indexRef.current + 1) % len, 1);
     }, 6000);
     return () => clearInterval(interval);
   }, [featuredList.length]);
@@ -220,8 +265,8 @@ export default function HomeScreen() {
         </View>
 
         {featured && (
-          <View>
-            <Animated.View style={{ opacity: fadeAnim }}>
+          <View {...panResponder.panHandlers}>
+            <Animated.View style={{ opacity: fadeAnim, transform: [{ translateX: slideAnim }] }}>
               <HeroBanner
                 title={getAnimeTitle(featured)}
                 image={getAnimeImage(featured)}
@@ -235,10 +280,8 @@ export default function HomeScreen() {
                   <TouchableOpacity
                     key={i}
                     onPress={() => {
-                      Animated.timing(fadeAnim, { toValue: 0, duration: 250, useNativeDriver: true }).start(() => {
-                        setFeaturedIndex(i);
-                        Animated.timing(fadeAnim, { toValue: 1, duration: 250, useNativeDriver: true }).start();
-                      });
+                      const dir: 1 | -1 = i > featuredIndex ? 1 : -1;
+                      goToIndex(i, dir);
                     }}
                     style={[
                       styles.dot,
