@@ -239,23 +239,29 @@ export default function AnimeDetailScreen() {
           </View>
 
           <View style={styles.seasonGrid}>
-            {(seasons.length === 0 ? [{ number: 1, name: "Saison 1", languages: ["VOSTFR"] }] : seasons).map((s: any, i: number) => {
-              const num        = s.number ?? i + 1;
-              const name       = s.name ?? `Saison ${num}`;
-              const langs: string[] = s.languages ?? [];
-              const seasonType: string = s.type ?? "";
-              return (
-                <SeasonCard
-                  key={String(i)}
-                  image={image}
-                  name={name}
-                  langs={langs}
-                  seasonType={seasonType}
-                  onPress={() => handleSeasonPress(num)}
-                  colors={colors}
-                />
-              );
-            })}
+            {isLoading ? (
+              [0, 1].map((i) => (
+                <View key={i} style={[styles.seasonCard, { backgroundColor: colors.card, opacity: 0.4 }]} />
+              ))
+            ) : (
+              (seasons.length === 0 ? [{ number: 1, name: "Saison 1", languages: ["VOSTFR"] }] : seasons).map((s: any, i: number) => {
+                const num        = s.number ?? i + 1;
+                const name       = s.name ?? `Saison ${num}`;
+                const langs: string[] = s.languages ?? [];
+                const seasonType: string = s.type ?? "";
+                return (
+                  <SeasonCard
+                    key={String(i)}
+                    image={image}
+                    name={name}
+                    langs={langs}
+                    seasonType={seasonType}
+                    onPress={() => handleSeasonPress(num)}
+                    colors={colors}
+                  />
+                );
+              })
+            )}
           </View>
         </View>
       </ScrollView>
