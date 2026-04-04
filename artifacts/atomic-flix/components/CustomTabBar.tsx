@@ -13,18 +13,17 @@ import { Feather } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
 
 const SCREEN_W = Dimensions.get("window").width;
-const TAB_BAR_W = SCREEN_W - 48;
+const TAB_BAR_W = SCREEN_W - 56;
 
 interface TabItem {
   name: string;
   label: string;
   icon: string;
-  iconActive: string;
 }
 
 const TABS: TabItem[] = [
-  { name: "index",    label: "Accueil",  icon: "home",     iconActive: "home" },
-  { name: "planning", label: "Planning", icon: "calendar", iconActive: "calendar" },
+  { name: "index",    label: "Accueil",  icon: "home"     },
+  { name: "planning", label: "Planning", icon: "calendar" },
 ];
 
 interface CustomTabBarProps {
@@ -34,52 +33,30 @@ interface CustomTabBarProps {
 }
 
 function TabIcon({ tab, isActive, colors }: { tab: TabItem; isActive: boolean; colors: any }) {
-  const scale     = useRef(new Animated.Value(1)).current;
-  const glowAnim  = useRef(new Animated.Value(0)).current;
-  const bounceY   = useRef(new Animated.Value(0)).current;
+  const scale    = useRef(new Animated.Value(1)).current;
+  const bounceY  = useRef(new Animated.Value(0)).current;
+  const glowAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (isActive) {
-      Animated.parallel([
-        Animated.spring(scale, {
-          toValue: 1.22,
-          useNativeDriver: true,
-          tension: 180,
-          friction: 7,
-        }),
-        Animated.spring(bounceY, {
-          toValue: -5,
-          useNativeDriver: true,
-          tension: 180,
-          friction: 7,
-        }),
-        Animated.timing(glowAnim, {
-          toValue: 1,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      Animated.parallel([
-        Animated.spring(scale, {
-          toValue: 1,
-          useNativeDriver: true,
-          tension: 180,
-          friction: 8,
-        }),
-        Animated.spring(bounceY, {
-          toValue: 0,
-          useNativeDriver: true,
-          tension: 180,
-          friction: 8,
-        }),
-        Animated.timing(glowAnim, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
+    Animated.parallel([
+      Animated.spring(scale, {
+        toValue: isActive ? 1.15 : 1,
+        useNativeDriver: true,
+        tension: 180,
+        friction: 8,
+      }),
+      Animated.spring(bounceY, {
+        toValue: isActive ? -3 : 0,
+        useNativeDriver: true,
+        tension: 180,
+        friction: 8,
+      }),
+      Animated.timing(glowAnim, {
+        toValue: isActive ? 1 : 0,
+        duration: 220,
+        useNativeDriver: true,
+      }),
+    ]).start();
   }, [isActive]);
 
   const color = isActive ? colors.neonPurple : colors.mutedForeground;
@@ -89,21 +66,20 @@ function TabIcon({ tab, isActive, colors }: { tab: TabItem; isActive: boolean; c
       styles.iconWrapper,
       { transform: [{ scale }, { translateY: bounceY }] }
     ]}>
-      {/* Glow ring behind icon */}
       <Animated.View
         style={[
           styles.glowRing,
           {
-            backgroundColor: colors.neonPurple + "30",
+            backgroundColor: colors.neonPurple + "28",
             opacity: glowAnim,
             shadowColor: colors.neonPurple,
             shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: 0.9,
-            shadowRadius: 12,
+            shadowOpacity: 0.8,
+            shadowRadius: 8,
           },
         ]}
       />
-      <Feather name={tab.icon as any} size={22} color={color} />
+      <Feather name={tab.icon as any} size={18} color={color} />
     </Animated.View>
   );
 }
@@ -125,7 +101,7 @@ export default function CustomTabBar({ state, descriptors, navigation }: CustomT
   }, [state.index]);
 
   return (
-    <View style={[styles.container, { paddingBottom: insets.bottom + 10 }]}>
+    <View style={[styles.container, { paddingBottom: insets.bottom + 8 }]}>
       <View style={[
         styles.pill,
         {
@@ -135,14 +111,13 @@ export default function CustomTabBar({ state, descriptors, navigation }: CustomT
           width: TAB_BAR_W,
         }
       ]}>
-        {/* Sliding indicator */}
         <Animated.View
           style={[
             styles.indicator,
             {
               width: tabW,
-              backgroundColor: colors.neonPurple + "18",
-              borderColor: colors.neonPurple + "55",
+              backgroundColor: colors.neonPurple + "15",
+              borderColor: colors.neonPurple + "40",
               transform: [{ translateX: indicatorX }],
             },
           ]}
@@ -155,31 +130,29 @@ export default function CustomTabBar({ state, descriptors, navigation }: CustomT
 
           const onPress = () => {
             const event = navigation.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
-            if (!isActive && !event.defaultPrevented) {
-              navigation.navigate(route.name);
-            }
+            if (!isActive && !event.defaultPrevented) navigation.navigate(route.name);
           };
 
           return (
             <TouchableOpacity
               key={tab.name}
               onPress={onPress}
-              activeOpacity={0.85}
+              activeOpacity={0.8}
               style={styles.tab}
             >
               <TabIcon tab={tab} isActive={isActive} colors={colors} />
-              <Animated.Text
+              <Text
                 style={[
                   styles.label,
                   {
                     color: isActive ? colors.neonPurple : colors.mutedForeground,
                     fontWeight: isActive ? "700" : "500",
-                    opacity: isActive ? 1 : 0.65,
+                    opacity: isActive ? 1 : 0.6,
                   },
                 ]}
               >
                 {tab.label}
-              </Animated.Text>
+              </Text>
             </TouchableOpacity>
           );
         })}
@@ -199,46 +172,46 @@ const styles = StyleSheet.create({
   },
   pill: {
     flexDirection: "row",
-    borderRadius: 28,
+    borderRadius: 20,
     borderWidth: 1,
     overflow: "hidden",
-    height: 64,
+    height: 52,
     ...Platform.select({
       ios: {
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.45,
-        shadowRadius: 24,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.35,
+        shadowRadius: 16,
       },
-      android: { elevation: 20 },
+      android: { elevation: 14 },
     }),
   },
   indicator: {
     position: "absolute",
     top: 0,
     bottom: 0,
-    borderRadius: 28,
+    borderRadius: 20,
     borderWidth: 1,
   },
   tab: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    gap: 3,
+    gap: 2,
   },
   iconWrapper: {
     alignItems: "center",
     justifyContent: "center",
-    width: 36,
-    height: 36,
+    width: 28,
+    height: 28,
   },
   glowRing: {
     position: "absolute",
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
   },
   label: {
-    fontSize: 11,
-    letterSpacing: 0.3,
+    fontSize: 10,
+    letterSpacing: 0.2,
   },
 });
