@@ -1,13 +1,15 @@
-import React from "react";
+import React, { useRef } from "react";
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   TouchableOpacity,
   Platform,
+  Animated,
 } from "react-native";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 
 const FLAG_BASE = "https://raw.githubusercontent.com/Anime-Sama/IMG/img/autres";
@@ -48,32 +50,71 @@ export default function AnimeCard({
   const colors = useColors();
   const dim    = DIMENSIONS[size];
   const flagUrl = language ? LANG_FLAG_URL[language.toUpperCase()] : undefined;
+  const scale  = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    Animated.spring(scale, {
+      toValue: 0.94,
+      useNativeDriver: true,
+      tension: 180,
+      friction: 10,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scale, {
+      toValue: 1,
+      useNativeDriver: true,
+      tension: 180,
+      friction: 10,
+    }).start();
+  };
+
+  const handlePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onPress?.();
+  };
 
   return (
     <TouchableOpacity
-      onPress={onPress}
-      activeOpacity={0.78}
+      onPress={handlePress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      activeOpacity={1}
       style={[styles.container, { width: dim.width }]}
     >
-      <View style={[styles.card, { width: dim.width, height: dim.height, backgroundColor: colors.card }]}>
+      <Animated.View style={[
+        styles.card,
+        { width: dim.width, height: dim.height, backgroundColor: colors.card },
+        { transform: [{ scale }] },
+      ]}>
         {image ? (
-          <Image source={{ uri: image }} style={StyleSheet.absoluteFill} resizeMode="cover" />
+          <Image
+            source={{ uri: image }}
+            style={StyleSheet.absoluteFill}
+            contentFit="cover"
+            transition={300}
+            cachePolicy="memory-disk"
+          />
         ) : (
           <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.secondary }]} />
         )}
 
-        {/* Top-left: custom badge */}
         {badge && (
           <View style={[styles.badge, { backgroundColor: colors.neonPurple }]}>
             <Text style={styles.badgeText}>{badge}</Text>
           </View>
         )}
 
-        {/* Top-right: episode + language pill */}
         {(episode !== undefined || language) && (
           <View style={[styles.episodePill, { backgroundColor: "rgba(8,8,15,0.82)", borderColor: "rgba(255,255,255,0.15)" }]}>
             {flagUrl && (
-              <Image source={{ uri: flagUrl }} style={styles.pillFlag} resizeMode="cover" />
+              <Image
+                source={{ uri: flagUrl }}
+                style={styles.pillFlag}
+                contentFit="cover"
+                cachePolicy="memory-disk"
+              />
             )}
             {episode !== undefined && (
               <Text style={[styles.episodeText, { color: "#fff" }]}>
@@ -83,7 +124,6 @@ export default function AnimeCard({
           </View>
         )}
 
-        {/* Bottom gradient + title */}
         <LinearGradient
           colors={["transparent", "rgba(8,8,15,0.65)", "rgba(8,8,15,0.96)"]}
           locations={[0, 0.45, 1]}
@@ -95,7 +135,7 @@ export default function AnimeCard({
             <Text style={styles.typeLabel} numberOfLines={1}>{type}</Text>
           )}
         </LinearGradient>
-      </View>
+      </Animated.View>
     </TouchableOpacity>
   );
 }

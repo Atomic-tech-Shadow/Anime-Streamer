@@ -7,10 +7,11 @@ import {
   Platform,
   Linking,
   ScrollView,
-  Image,
   Modal,
   FlatList,
 } from "react-native";
+import { Image } from "expo-image";
+import * as Haptics from "expo-haptics";
 import { useLocalSearchParams } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { WebView } from "react-native-webview";
@@ -151,12 +152,14 @@ export default function PlayerScreen() {
 
   const goToPrev = () => {
     if (!hasPrev) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const prev = episodes[currentEpIndex - 1];
     setSelectedEpNum(String(prev.number ?? prev.episode ?? ""));
     setSelectedServerIdx(0);
   };
   const goToNext = () => {
     if (!hasNext) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const next = episodes[currentEpIndex + 1];
     setSelectedEpNum(String(next.number ?? next.episode ?? ""));
     setSelectedServerIdx(0);
@@ -180,7 +183,7 @@ export default function PlayerScreen() {
         {/* ── Hero ── */}
         <View style={styles.hero}>
           {image ? (
-            <Image source={{ uri: image }} style={StyleSheet.absoluteFill} resizeMode="cover" />
+            <Image source={{ uri: image }} style={StyleSheet.absoluteFill} contentFit="cover" transition={400} cachePolicy="memory-disk" />
           ) : (
             <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.card }]} />
           )}
@@ -227,7 +230,8 @@ export default function PlayerScreen() {
                     <Image
                       source={{ uri: meta.flagUrl }}
                       style={StyleSheet.absoluteFill}
-                      resizeMode="cover"
+                      contentFit="cover"
+                      cachePolicy="memory-disk"
                     />
                   ) : (
                     <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.card }]} />

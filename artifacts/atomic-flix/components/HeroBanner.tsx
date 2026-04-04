@@ -2,13 +2,13 @@ import React, { useRef } from "react";
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   TouchableOpacity,
   Dimensions,
   Animated,
   Platform,
 } from "react-native";
+import { Image } from "expo-image";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
@@ -34,21 +34,24 @@ export default function HeroBanner({ title, image, type, onPress, onPlay }: Hero
     <TouchableOpacity activeOpacity={1} onPress={onPress} onPressIn={handlePressIn} onPressOut={handlePressOut}>
       <Animated.View style={[styles.container, { transform: [{ scale }] }]}>
 
-        {/* Background image */}
         {image ? (
-          <Image source={{ uri: image }} style={StyleSheet.absoluteFill} resizeMode="cover" />
+          <Image
+            source={{ uri: image }}
+            style={StyleSheet.absoluteFill}
+            contentFit="cover"
+            transition={400}
+            cachePolicy="memory-disk"
+          />
         ) : (
           <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.card }]} />
         )}
 
-        {/* Cinematic gradient overlay */}
         <LinearGradient
           colors={["rgba(8,8,15,0.08)", "rgba(8,8,15,0.45)", "rgba(8,8,15,0.96)"]}
           locations={[0, 0.4, 1]}
           style={StyleSheet.absoluteFill}
         />
 
-        {/* Content */}
         <View style={styles.content}>
           {type && (
             <View style={[styles.typeBadge, { backgroundColor: colors.neonPurple + "30", borderColor: colors.neonPurple + "55" }]}>
@@ -60,7 +63,6 @@ export default function HeroBanner({ title, image, type, onPress, onPlay }: Hero
           <Text style={styles.title} numberOfLines={2}>{title}</Text>
 
           <View style={styles.actions}>
-            {/* Play button — gradient */}
             <TouchableOpacity onPress={onPlay ?? onPress} activeOpacity={0.82} style={styles.playWrap}>
               <LinearGradient
                 colors={[colors.neonPurple, colors.neonBlue]}
@@ -78,7 +80,6 @@ export default function HeroBanner({ title, image, type, onPress, onPlay }: Hero
               </LinearGradient>
             </TouchableOpacity>
 
-            {/* Info button — glass */}
             <TouchableOpacity
               style={[styles.infoButton, { backgroundColor: "rgba(255,255,255,0.12)", borderColor: "rgba(255,255,255,0.22)" }]}
               onPress={onPress}

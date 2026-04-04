@@ -1,14 +1,16 @@
-import React from "react";
+import React, { useRef } from "react";
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  Image,
   Platform,
   Dimensions,
+  Animated,
 } from "react-native";
+import { Image } from "expo-image";
+import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -43,6 +45,60 @@ function getSeasons(data: any): any[] {
   if (data.seasons) return data.seasons;
   if (data.results) return data.results;
   return [];
+}
+
+function SeasonCard({ image, name, langs, seasonType, onPress, colors }: {
+  image: string; name: string; langs: string[]; seasonType: string;
+  onPress: () => void; colors: any;
+}) {
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () =>
+    Animated.spring(scale, { toValue: 0.95, useNativeDriver: true, tension: 200, friction: 10 }).start();
+  const handlePressOut = () =>
+    Animated.spring(scale, { toValue: 1, useNativeDriver: true, tension: 200, friction: 10 }).start();
+  const handlePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onPress();
+  };
+
+  return (
+    <TouchableOpacity
+      onPress={handlePress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      activeOpacity={1}
+    >
+      <Animated.View style={[styles.seasonCard, { transform: [{ scale }] }]}>
+        {image ? (
+          <Image source={{ uri: image }} style={StyleSheet.absoluteFill} contentFit="cover" transition={300} cachePolicy="memory-disk" />
+        ) : (
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.card }]} />
+        )}
+        <LinearGradient colors={["rgba(8,8,15,0.1)", "rgba(8,8,15,0.88)"]} style={StyleSheet.absoluteFill} />
+
+        {langs.length > 0 && (
+          <View style={styles.langBadgeRow}>
+            {langs.slice(0, 4).map((l) =>
+              LANG_FLAG_URL[l] ? (
+                <Image key={l} source={{ uri: LANG_FLAG_URL[l] }} style={styles.langBadgeFlagImg} contentFit="cover" cachePolicy="memory-disk" />
+              ) : null
+            )}
+          </View>
+        )}
+
+        <View style={styles.seasonCardContent}>
+          <Text style={styles.seasonCardTitle} numberOfLines={1}>{name}</Text>
+          {seasonType ? (
+            <View style={styles.seasonCardMeta}>
+              <Feather name="play-circle" size={10} color="rgba(255,255,255,0.55)" />
+              <Text style={styles.seasonCardMetaText}>{seasonType.toUpperCase()}</Text>
+            </View>
+          ) : null}
+        </View>
+      </Animated.View>
+    </TouchableOpacity>
+  );
 }
 
 export default function AnimeDetailScreen() {
@@ -100,7 +156,7 @@ export default function AnimeDetailScreen() {
         {/* ── Hero ── */}
         <View style={styles.hero}>
           {image ? (
-            <Image source={{ uri: image }} style={StyleSheet.absoluteFill} resizeMode="cover" />
+            <Image source={{ uri: image }} style={StyleSheet.absoluteFill} contentFit="cover" transition={400} cachePolicy="memory-disk" />
           ) : (
             <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.card }]} />
           )}
@@ -184,48 +240,20 @@ export default function AnimeDetailScreen() {
 
           <View style={styles.seasonGrid}>
             {(seasons.length === 0 ? [{ number: 1, name: "Saison 1", languages: ["VOSTFR"] }] : seasons).map((s: any, i: number) => {
-              const num   = s.number ?? i + 1;
-              const name  = s.name ?? `Saison ${num}`;
+              const num        = s.number ?? i + 1;
+              const name       = s.name ?? `Saison ${num}`;
               const langs: string[] = s.languages ?? [];
               const seasonType: string = s.type ?? "";
               return (
-                <TouchableOpacity
+                <SeasonCard
                   key={String(i)}
+                  image={image}
+                  name={name}
+                  langs={langs}
+                  seasonType={seasonType}
                   onPress={() => handleSeasonPress(num)}
-                  activeOpacity={0.82}
-                  style={styles.seasonCard}
-                >
-                  {image ? (
-                    <Image source={{ uri: image }} style={StyleSheet.absoluteFill} resizeMode="cover" />
-                  ) : (
-                    <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.card }]} />
-                  )}
-                  <LinearGradient
-                    colors={["rgba(8,8,15,0.1)", "rgba(8,8,15,0.88)"]}
-                    style={StyleSheet.absoluteFill}
-                  />
-
-                  {/* Language badges top-right */}
-                  {langs.length > 0 && (
-                    <View style={styles.langBadgeRow}>
-                      {langs.slice(0, 4).map((l) => (
-                        LANG_FLAG_URL[l] ? (
-                          <Image key={l} source={{ uri: LANG_FLAG_URL[l] }} style={styles.langBadgeFlagImg} resizeMode="cover" />
-                        ) : null
-                      ))}
-                    </View>
-                  )}
-
-                  <View style={styles.seasonCardContent}>
-                    <Text style={styles.seasonCardTitle} numberOfLines={1}>{name}</Text>
-                    {seasonType ? (
-                      <View style={styles.seasonCardMeta}>
-                        <Feather name="play-circle" size={10} color="rgba(255,255,255,0.55)" />
-                        <Text style={styles.seasonCardMetaText}>{seasonType.toUpperCase()}</Text>
-                      </View>
-                    ) : null}
-                  </View>
-                </TouchableOpacity>
+                  colors={colors}
+                />
               );
             })}
           </View>
