@@ -37,15 +37,17 @@ const LANG_META: Record<string, { label: string; flagUrl?: string }> = {
 
 function getEpisodeList(data: any): any[] {
   if (!data) return [];
-  if (Array.isArray(data)) return data;
-  if (data.episodes) return data.episodes;
-  return [];
+  const list: any[] = Array.isArray(data) ? data : data.episodes ?? [];
+  return list.filter((e: any) => e.available !== false);
 }
 function getStreamingSources(episode: any): any[] {
   if (!episode) return [];
-  if (Array.isArray(episode.streamingSources)) return episode.streamingSources;
-  if (Array.isArray(episode.sources)) return episode.sources;
-  return [];
+  const sources: any[] = Array.isArray(episode.streamingSources)
+    ? episode.streamingSources
+    : Array.isArray(episode.sources)
+      ? episode.sources
+      : [];
+  return [...sources].sort((a, b) => (a.serverNumber ?? 99) - (b.serverNumber ?? 99));
 }
 
 function PickerModal({
@@ -113,13 +115,14 @@ export default function PlayerScreen() {
     season,
     seasonLabel,
     seasonType,
+    seasonName,
     episodeNum,
     animeId,
     language: initialLang,
     availableLanguages: availableLangsParam,
   } = useLocalSearchParams<{
     url: string; title: string; image: string;
-    season: string; seasonLabel: string; seasonType: string;
+    season: string; seasonLabel: string; seasonType: string; seasonName: string;
     episodeNum: string; animeId: string; language: string; availableLanguages: string;
   }>();
 
@@ -206,10 +209,11 @@ export default function PlayerScreen() {
     setSelectedServerIdx(0);
   };
 
-  const episodeItems = episodes.map((ep: any) => ({
-    label: `Épisode ${ep.number ?? ep.episode ?? "?"}`,
-    value: String(ep.number ?? ep.episode ?? "?"),
-  }));
+  const episodeItems = episodes.map((ep: any) => {
+    const num = ep.number ?? ep.episode ?? "?";
+    const epTitle = ep.title && ep.title !== `Épisode ${num}` ? ep.title : `Épisode ${num}`;
+    return { label: epTitle, value: String(num) };
+  });
   const serverItems = sources.map((s: any, i: number) => ({
     label: `${s.server ?? `Serveur ${i + 1}`}${s.quality ? `  ·  ${s.quality}` : ""}`,
     value: String(i),
@@ -240,14 +244,14 @@ export default function PlayerScreen() {
               const isOav  = sType === "oav" || sType === "ova";
               const pillIcon = isFilm ? "film" : isOav ? "star" : "layers";
               const pillLabel = isFilm
-                ? "FILM"
+                ? (seasonName ? seasonName.toUpperCase() : "FILM")
                 : isOav
-                  ? "OAV"
-                  : `SAISON ${seasonLabel ?? season}`;
+                  ? (seasonName ? seasonName.toUpperCase() : "OAV")
+                  : (seasonName ? seasonName : `SAISON ${seasonLabel ?? season}`);
               return (
                 <View style={[styles.seasonPill, { backgroundColor: colors.neonPurple + "28", borderColor: colors.neonPurple + "55" }]}>
                   <Feather name={pillIcon as any} size={10} color={colors.neonPurple} />
-                  <Text style={[styles.seasonPillText, { color: colors.neonPurple }]}>{pillLabel}</Text>
+                  <Text style={[styles.seasonPillText, { color: colors.neonPurple }]} numberOfLines={1}>{pillLabel}</Text>
                 </View>
               );
             })() : null}
@@ -256,10 +260,15 @@ export default function PlayerScreen() {
               {(() => {
                 const sType = (seasonType ?? "").toLowerCase();
                 const isFilm = sType === "film";
+                const epTitle = currentEpisode?.title;
+                const langLabel = LANG_META[selectedLang]?.label ?? selectedLang;
                 if (isFilm && episodes.length <= 1) {
-                  return LANG_META[selectedLang]?.label ?? selectedLang;
+                  return langLabel;
                 }
-                return `ÉPISODE ${selectedEpNum}  ·  ${LANG_META[selectedLang]?.label ?? selectedLang}`;
+                if (epTitle && epTitle !== `Épisode ${selectedEpNum}`) {
+                  return `${epTitle}  ·  ${langLabel}`;
+                }
+                return `ÉPISODE ${selectedEpNum}  ·  ${langLabel}`;
               })()}
             </Text>
           </View>

@@ -132,6 +132,7 @@ export default function AnimeDetailScreen() {
     const seasonValue = seasonData.value ?? seasonData.url?.split("/")[0] ?? String(seasonData.number ?? idx + 1);
     const seasonLabel = String(seasonData.number ?? idx + 1);
     const seasonType: string = seasonData.type ?? "saison";
+    const seasonName: string = seasonData.name ?? "";
     router.push({
       pathname: "/player",
       params: {
@@ -139,6 +140,7 @@ export default function AnimeDetailScreen() {
         season: seasonValue,
         seasonLabel,
         seasonType,
+        seasonName,
         episodeNum: "1",
         animeId: id ?? "",
         language: initialLang,
