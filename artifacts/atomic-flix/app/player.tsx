@@ -22,16 +22,27 @@ import { useSeasonEpisodes } from "@/hooks/useAnime";
 
 const FLAG_BASE = "https://raw.githubusercontent.com/Anime-Sama/IMG/img/autres";
 
-// ── Couche 1 : Domaines vidéo autorisés ─────────────────────────────────────
+// ── Couche 1 : Domaines vidéo autorisés (basés sur l'API réelle) ─────────────
 const ALLOWED_DOMAINS = [
-  "sibnet.ru", "vidmoly.to", "sendvid.com",
-  "dailymotion.com", "youtube.com", "youtu.be",
-  "vimeo.com", "mp4upload.com", "streamtape.com",
-  "kwik.cx", "okru", "ok.ru", "netu.tv",
-  "dropload.io", "anime-sama.fr", "anime-sama.eu", "anime-sama.to",
-  "cloudflare.com", "hcaptcha.com", "recaptcha.net",
-  "google.com", "cdn.statically.io", "gcdn.me",
-  "sibnet.ru", "vidplay.online", "filemoon.sx",
+  // ── Serveurs de streaming confirmés par l'API anime-sama ──────────────────
+  "video.sibnet.ru", "sibnet.ru", "cdn.sibnet.ru", "userdata.sibnet.ru",
+  "vidmoly.to", "cdn.vidmoly.to",
+  "sendvid.com",
+  "smoothpre.com",
+  "oneupload.to",
+
+  // ── Sources anime-sama ────────────────────────────────────────────────────
+  "anime-sama.fr", "anime-sama.eu", "anime-sama.to",
+
+  // ── CDNs utilisés par les players vidéo ──────────────────────────────────
+  "cloudflare.com", "cdnjs.cloudflare.com",
+  "cdn.statically.io", "gcdn.me",
+  "jwplatform.com", "jwpcdn.com", "jwpsrv.com",
+  "cdn.jsdelivr.net",
+  "fonts.googleapis.com", "fonts.gstatic.com",
+
+  // ── Anti-bot / captchas ───────────────────────────────────────────────────
+  "hcaptcha.com", "recaptcha.net", "google.com", "gstatic.com",
 ];
 
 const BLOCKED_SCHEMES = ["tel:", "mailto:", "sms:", "market://", "intent://", "android-app://", "itms://", "itms-apps://"];
