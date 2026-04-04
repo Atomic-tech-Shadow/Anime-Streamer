@@ -47,15 +47,12 @@ export default function HeroBanner({ title, image, type, onPress, onPlay }: Hero
   }, []);
 
   // ── Staggered entrance: reset & replay on each new title ──
-  const badgeOpacity    = useRef(new Animated.Value(0)).current;
-  const badgeY          = useRef(new Animated.Value(18)).current;
   const titleOpacity    = useRef(new Animated.Value(0)).current;
   const titleY          = useRef(new Animated.Value(18)).current;
   const actionsOpacity  = useRef(new Animated.Value(0)).current;
   const actionsY        = useRef(new Animated.Value(18)).current;
 
   useEffect(() => {
-    badgeOpacity.setValue(0);   badgeY.setValue(18);
     titleOpacity.setValue(0);   titleY.setValue(18);
     actionsOpacity.setValue(0); actionsY.setValue(18);
 
@@ -66,7 +63,6 @@ export default function HeroBanner({ title, image, type, onPress, onPlay }: Hero
       ]);
 
     Animated.stagger(140, [
-      makeIn(badgeOpacity, badgeY),
       makeIn(titleOpacity, titleY),
       makeIn(actionsOpacity, actionsY),
     ]).start();
@@ -100,18 +96,6 @@ export default function HeroBanner({ title, image, type, onPress, onPlay }: Hero
 
         {/* Staggered content */}
         <View style={styles.content}>
-
-          {/* Badge */}
-          {type && (
-            <Animated.View style={{ opacity: badgeOpacity, transform: [{ translateY: badgeY }] }}>
-              <View style={[styles.typeBadge, { backgroundColor: colors.neonPurple + "30", borderColor: colors.neonPurple + "55" }]}>
-                <View style={[styles.typeDot, { backgroundColor: colors.neonPurple }]} />
-                <Text style={[styles.typeBadgeText, { color: colors.neonPurple }]}>{type.toUpperCase()}</Text>
-              </View>
-            </Animated.View>
-          )}
-
-          {/* Title */}
           <Animated.Text
             style={[styles.title, { opacity: titleOpacity, transform: [{ translateY: titleY }] }]}
             numberOfLines={2}
@@ -167,15 +151,6 @@ const styles = StyleSheet.create({
     }),
   },
   content: { position: "absolute", bottom: 18, left: 16, right: 16 },
-
-  typeBadge: {
-    flexDirection: "row", alignItems: "center", gap: 6,
-    alignSelf: "flex-start",
-    paddingHorizontal: 10, paddingVertical: 4,
-    borderRadius: 20, borderWidth: 1, marginBottom: 10,
-  },
-  typeDot: { width: 5, height: 5, borderRadius: 3 },
-  typeBadgeText: { fontSize: 9, fontWeight: "800" as const, letterSpacing: 1.2 },
 
   title: {
     color: "#fff", fontSize: 22, fontWeight: "800" as const,
