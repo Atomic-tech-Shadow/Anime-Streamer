@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   ScrollView,
   Modal,
   FlatList,
+  Animated,
 } from "react-native";
 import { Image } from "expo-image";
 import * as Haptics from "expo-haptics";
@@ -128,6 +129,43 @@ export default function PlayerScreen() {
   const [selectedServerIdx, setSelectedServerIdx] = useState(0);
   const [showEpisodePicker, setShowEpisodePicker] = useState(false);
   const [showServerPicker, setShowServerPicker]   = useState(false);
+
+  const webviewRef      = useRef<any>(null);
+  const controlsAnim   = useRef(new Animated.Value(0)).current;
+  const controlsTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const controlsOnRef  = useRef(false);
+
+  const showVideoControls = () => {
+    if (controlsTimer.current) clearTimeout(controlsTimer.current);
+    controlsOnRef.current = true;
+    Animated.timing(controlsAnim, { toValue: 1, duration: 180, useNativeDriver: true }).start();
+    controlsTimer.current = setTimeout(() => {
+      Animated.timing(controlsAnim, { toValue: 0, duration: 400, useNativeDriver: true }).start();
+      controlsOnRef.current = false;
+    }, 2500);
+  };
+
+  const handleFsBtnPress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (!controlsOnRef.current) {
+      showVideoControls();
+    } else {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      if (webviewRef.current) {
+        webviewRef.current.injectJavaScript(`
+          (function(){
+            var v=document.querySelector('video');
+            if(v){ v.requestFullscreen&&v.requestFullscreen()||v.webkitRequestFullscreen&&v.webkitRequestFullscreen(); }
+            else { document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen(); }
+          })();true;
+        `);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (embedUrl) showVideoControls();
+  }, [embedUrl]);
 
   const { data: episodesData, isLoading: loadingEpisodes } = useEpisodes(
     animeId ?? "", Number(season ?? 1), selectedLang
@@ -333,23 +371,39 @@ export default function PlayerScreen() {
               </TouchableOpacity>
             </View>
           ) : (
-            <View style={[styles.webviewContainer, { borderColor: colors.neonPurple + "44" }]}>
-              <WebView
-                key={embedUrl}
-                source={{ uri: embedUrl }}
-                style={styles.webview}
-                allowsFullscreenVideo
-                mediaPlaybackRequiresUserAction={false}
-                javaScriptEnabled
-                domStorageEnabled
-                startInLoadingState
-                renderLoading={() => (
-                  <View style={[StyleSheet.absoluteFill, styles.webviewLoader, { backgroundColor: colors.card }]}>
-                    <Feather name="loader" size={24} color={colors.neonPurple} />
-                    <Text style={[styles.playerMsg, { color: colors.mutedForeground, marginTop: 10 }]}>Chargement…</Text>
-                  </View>
-                )}
-              />
+            <View>
+              <View style={[styles.webviewContainer, { borderColor: colors.neonPurple + "44" }]}>
+                <WebView
+                  ref={webviewRef}
+                  key={embedUrl}
+                  source={{ uri: embedUrl }}
+                  style={styles.webview}
+                  allowsFullscreenVideo
+                  mediaPlaybackRequiresUserAction={false}
+                  javaScriptEnabled
+                  domStorageEnabled
+                  startInLoadingState
+                  renderLoading={() => (
+                    <View style={[StyleSheet.absoluteFill, styles.webviewLoader, { backgroundColor: colors.card }]}>
+                      <Feather name="loader" size={24} color={colors.neonPurple} />
+                      <Text style={[styles.playerMsg, { color: colors.mutedForeground, marginTop: 10 }]}>Chargement…</Text>
+                    </View>
+                  )}
+                />
+              </View>
+
+              {/* Fullscreen overlay — box-none so WebView keeps its touches */}
+              <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+                <Animated.View style={[styles.fsOverlay, { opacity: controlsAnim }]} pointerEvents="box-none">
+                  <TouchableOpacity
+                    style={[styles.fsBtn, { backgroundColor: "rgba(0,0,0,0.62)", borderColor: "rgba(255,255,255,0.18)" }]}
+                    onPress={handleFsBtnPress}
+                    activeOpacity={0.75}
+                  >
+                    <Feather name="maximize" size={16} color="#fff" />
+                  </TouchableOpacity>
+                </Animated.View>
+              </View>
             </View>
           )}
 
@@ -497,6 +551,20 @@ const styles = StyleSheet.create({
     borderRadius: 12, borderWidth: 1, alignItems: "center", justifyContent: "center",
   },
   epNavCurrentText: { fontSize: 12, fontWeight: "800" as const, letterSpacing: 0.5 },
+
+  fsOverlay: {
+    position: "absolute",
+    bottom: 10,
+    right: 10,
+  },
+  fsBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
   webviewContainer: {
     aspectRatio: 16 / 9,
