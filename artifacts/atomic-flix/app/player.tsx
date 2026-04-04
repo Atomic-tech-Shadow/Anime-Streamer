@@ -16,7 +16,7 @@ import { Feather } from "@expo/vector-icons";
 import { WebView } from "react-native-webview";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
-import { useEpisodes, useSeasons } from "@/hooks/useAnime";
+import { useEpisodes } from "@/hooks/useAnime";
 
 const FLAG_BASE = "https://raw.githubusercontent.com/Anime-Sama/IMG/img/autres";
 
@@ -43,12 +43,6 @@ function getStreamingSources(episode: any): any[] {
   if (!episode) return [];
   if (Array.isArray(episode.streamingSources)) return episode.streamingSources;
   if (Array.isArray(episode.sources)) return episode.sources;
-  return [];
-}
-function getSeasonList(data: any): any[] {
-  if (!data) return [];
-  if (Array.isArray(data)) return data;
-  if (data.seasons) return data.seasons;
   return [];
 }
 
@@ -124,31 +118,15 @@ export default function PlayerScreen() {
     episodeNum: string; animeId: string; language: string; availableLanguages: string;
   }>();
 
-  const passedLangs: string[] = availableLangsParam
+  const availableLangs: string[] = availableLangsParam
     ? availableLangsParam.split(",").filter(Boolean)
-    : [];
+    : ["VOSTFR"];
 
-  const [selectedLang, setSelectedLang]           = useState(initialLang ?? "VOSTFR");
+  const [selectedLang, setSelectedLang]           = useState(initialLang ?? availableLangs[0] ?? "VOSTFR");
   const [selectedEpNum, setSelectedEpNum]         = useState(episodeNum ?? "1");
   const [selectedServerIdx, setSelectedServerIdx] = useState(0);
   const [showEpisodePicker, setShowEpisodePicker] = useState(false);
   const [showServerPicker, setShowServerPicker]   = useState(false);
-
-  const { data: seasonsData } = useSeasons(animeId ?? "");
-  const allSeasons = getSeasonList(seasonsData);
-  const currentSeasonData = allSeasons.find((s: any) => String(s.number) === String(season ?? "1"));
-
-  const availableLangs: string[] =
-    (currentSeasonData?.languages?.length > 0 ? currentSeasonData.languages : null) ??
-    (passedLangs.length > 0 ? passedLangs : null) ??
-    ["VOSTFR"];
-
-  useEffect(() => {
-    if (availableLangs.length > 0 && !availableLangs.includes(selectedLang)) {
-      setSelectedLang(availableLangs[0]);
-      setSelectedServerIdx(0);
-    }
-  }, [availableLangs.join(",")]);
 
   const { data: episodesData, isLoading: loadingEpisodes } = useEpisodes(
     animeId ?? "", Number(season ?? 1), selectedLang
