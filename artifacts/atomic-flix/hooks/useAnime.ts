@@ -60,7 +60,7 @@ export function useSeasons(animeId: string) {
   });
 }
 
-export function useEpisodes(animeId: string, season: number, language: string) {
+export function useEpisodes(animeId: string, season: string | number, language: string) {
   return useQuery({
     queryKey: ["episodes", animeId, season, language],
     queryFn: () => api.episodes(animeId, season, language),

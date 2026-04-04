@@ -124,15 +124,22 @@ export default function AnimeDetailScreen() {
 
   const seasons = getSeasons(seasonsData);
 
-  const handleSeasonPress = (num: number) => {
-    const seasonData = seasons.find((s: any) => s.number === num);
+  const handleSeasonPress = (idx: number) => {
+    const seasonData = seasons[idx];
+    if (!seasonData) return;
     const langs: string[] = seasonData?.languages ?? [];
     const initialLang = langs[0] ?? "VOSTFR";
+    const seasonValue = seasonData.value ?? seasonData.url?.split("/")[0] ?? String(seasonData.number ?? idx + 1);
+    const seasonLabel = String(seasonData.number ?? idx + 1);
+    const seasonType: string = seasonData.type ?? "saison";
     router.push({
       pathname: "/player",
       params: {
         url: "", title, image,
-        season: String(num), episodeNum: "1",
+        season: seasonValue,
+        seasonLabel,
+        seasonType,
+        episodeNum: "1",
         animeId: id ?? "",
         language: initialLang,
         availableLanguages: langs.join(","),
@@ -254,7 +261,7 @@ export default function AnimeDetailScreen() {
                   name={name}
                   langs={langs}
                   seasonType={seasonType}
-                  onPress={() => handleSeasonPress(num)}
+                  onPress={() => handleSeasonPress(i)}
                   colors={colors}
                 />
               );

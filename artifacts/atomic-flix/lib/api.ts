@@ -79,8 +79,8 @@ export const api = {
   seasons: (animeId: string) =>
     fetchAPI<any>(`/seasons/${encodeURIComponent(animeId)}`),
 
-  episodes: (animeId: string, season: number = 1, language: string = "VOSTFR") =>
-    fetchAPI<any>(`/episodes/${encodeURIComponent(animeId)}?season=${season}&language=${language}`),
+  episodes: (animeId: string, season: string | number = 1, language: string = "VOSTFR") =>
+    fetchAPI<any>(`/episodes/${encodeURIComponent(animeId)}?season=${encodeURIComponent(String(season))}&language=${language}`),
 
   embed: (animeUrl: string) =>
     fetchAPI<any>(`/embed?url=${encodeURIComponent(animeUrl)}`),

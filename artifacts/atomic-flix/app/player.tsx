@@ -111,12 +111,15 @@ export default function PlayerScreen() {
     title,
     image,
     season,
+    seasonLabel,
+    seasonType,
     episodeNum,
     animeId,
     language: initialLang,
     availableLanguages: availableLangsParam,
   } = useLocalSearchParams<{
-    url: string; title: string; image: string; season: string;
+    url: string; title: string; image: string;
+    season: string; seasonLabel: string; seasonType: string;
     episodeNum: string; animeId: string; language: string; availableLanguages: string;
   }>();
 
@@ -168,7 +171,7 @@ export default function PlayerScreen() {
   }, [embedUrl]);
 
   const { data: episodesData, isLoading: loadingEpisodes } = useEpisodes(
-    animeId ?? "", Number(season ?? 1), selectedLang
+    animeId ?? "", season ?? "1", selectedLang
   );
   const episodes = getEpisodeList(episodesData);
 
@@ -231,15 +234,33 @@ export default function PlayerScreen() {
             style={StyleSheet.absoluteFill}
           />
           <View style={styles.heroContent}>
-            {season ? (
-              <View style={[styles.seasonPill, { backgroundColor: colors.neonPurple + "28", borderColor: colors.neonPurple + "55" }]}>
-                <Feather name="layers" size={10} color={colors.neonPurple} />
-                <Text style={[styles.seasonPillText, { color: colors.neonPurple }]}>SAISON {season}</Text>
-              </View>
-            ) : null}
+            {season ? (() => {
+              const sType = (seasonType ?? "").toLowerCase();
+              const isFilm = sType === "film";
+              const isOav  = sType === "oav" || sType === "ova";
+              const pillIcon = isFilm ? "film" : isOav ? "star" : "layers";
+              const pillLabel = isFilm
+                ? "FILM"
+                : isOav
+                  ? "OAV"
+                  : `SAISON ${seasonLabel ?? season}`;
+              return (
+                <View style={[styles.seasonPill, { backgroundColor: colors.neonPurple + "28", borderColor: colors.neonPurple + "55" }]}>
+                  <Feather name={pillIcon as any} size={10} color={colors.neonPurple} />
+                  <Text style={[styles.seasonPillText, { color: colors.neonPurple }]}>{pillLabel}</Text>
+                </View>
+              );
+            })() : null}
             <Text style={styles.heroTitle} numberOfLines={2}>{title ?? "Lecture"}</Text>
             <Text style={[styles.heroEpLabel, { color: "rgba(255,255,255,0.45)" }]}>
-              ÉPISODE {selectedEpNum}  ·  {LANG_META[selectedLang]?.label ?? selectedLang}
+              {(() => {
+                const sType = (seasonType ?? "").toLowerCase();
+                const isFilm = sType === "film";
+                if (isFilm && episodes.length <= 1) {
+                  return LANG_META[selectedLang]?.label ?? selectedLang;
+                }
+                return `ÉPISODE ${selectedEpNum}  ·  ${LANG_META[selectedLang]?.label ?? selectedLang}`;
+              })()}
             </Text>
           </View>
         </View>
