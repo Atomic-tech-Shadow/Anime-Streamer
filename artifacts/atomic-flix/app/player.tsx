@@ -18,7 +18,7 @@ import { Feather } from "@expo/vector-icons";
 import { WebView } from "react-native-webview";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
-import { useEpisodes } from "@/hooks/useAnime";
+import { useSeasonEpisodes } from "@/hooks/useAnime";
 
 const FLAG_BASE = "https://raw.githubusercontent.com/Anime-Sama/IMG/img/autres";
 
@@ -173,8 +173,8 @@ export default function PlayerScreen() {
     if (embedUrl) showVideoControls();
   }, [embedUrl]);
 
-  const { data: episodesData, isLoading: loadingEpisodes } = useEpisodes(
-    animeId ?? "", season ?? "1", selectedLang
+  const { data: episodesData, isLoading: loadingEpisodes } = useSeasonEpisodes(
+    animeId ?? "", season ?? "saison1", selectedLang
   );
   const episodes = getEpisodeList(episodesData);
 
