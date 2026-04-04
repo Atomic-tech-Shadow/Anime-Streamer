@@ -18,7 +18,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 import { useSeasons } from "@/hooks/useAnime";
 import LoadingScreen from "@/components/LoadingScreen";
-import SkeletonCard from "@/components/SkeletonCard";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_GAP       = 12;
@@ -239,12 +238,11 @@ export default function AnimeDetailScreen() {
             <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Saisons & Films</Text>
           </View>
 
+          {isLoading ? (
+            <LoadingScreen fullscreen={false} style={{ height: 140 }} />
+          ) : (
           <View style={styles.seasonGrid}>
-            {isLoading ? (
-              [0, 1].map((i) => (
-                <SkeletonCard key={i} width={SEASON_CARD_WIDTH} height={SEASON_CARD_HEIGHT} />
-              ))
-            ) : seasons.map((s: any, i: number) => {
+            {seasons.map((s: any, i: number) => {
               const num = s.number ?? i + 1;
               const name = s.name ?? `Saison ${num}`;
               const langs: string[] = s.languages ?? [];
@@ -262,6 +260,7 @@ export default function AnimeDetailScreen() {
               );
             })}
           </View>
+          )}
         </View>
       </ScrollView>
     </View>
