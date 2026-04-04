@@ -1,5 +1,4 @@
 uploads = []
-outputs = []
 
 [[generated]]
 id = "sZpc0aS1c9EZqdFEZ-BuB"
@@ -12,3 +11,9 @@ id = "mP5hwFxYIXKwAZiOB85Bv"
 uri = "file://artifacts/atomic-flix/assets/images/splash.png"
 type = "image"
 title = "generated_image"
+
+[[outputs]]
+id = "Mga58eah76zgqY7Cie1x7"
+uri = "file://README.md"
+type = "text"
+title = "README GitHub — ATOMIC FLIX"
