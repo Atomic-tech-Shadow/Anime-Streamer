@@ -22,6 +22,130 @@ import { useSeasonEpisodes } from "@/hooks/useAnime";
 
 const FLAG_BASE = "https://raw.githubusercontent.com/Anime-Sama/IMG/img/autres";
 
+// ── Couche 1 : Domaines vidéo autorisés ─────────────────────────────────────
+const ALLOWED_DOMAINS = [
+  "sibnet.ru", "vidmoly.to", "sendvid.com",
+  "dailymotion.com", "youtube.com", "youtu.be",
+  "vimeo.com", "mp4upload.com", "streamtape.com",
+  "kwik.cx", "okru", "ok.ru", "netu.tv",
+  "dropload.io", "anime-sama.fr", "anime-sama.eu", "anime-sama.to",
+  "cloudflare.com", "hcaptcha.com", "recaptcha.net",
+  "google.com", "cdn.statically.io", "gcdn.me",
+  "sibnet.ru", "vidplay.online", "filemoon.sx",
+];
+
+const BLOCKED_SCHEMES = ["tel:", "mailto:", "sms:", "market://", "intent://", "android-app://", "itms://", "itms-apps://"];
+
+function isDomainAllowed(url: string, currentUrl: string): boolean {
+  try {
+    const parsed = new URL(url);
+    const scheme = parsed.protocol;
+    if (BLOCKED_SCHEMES.some((s) => url.startsWith(s))) return false;
+    if (!["http:", "https:", "about:", "blob:"].includes(scheme)) return false;
+    if (url === "about:blank" || url.startsWith("blob:")) return true;
+    const host = parsed.hostname.replace(/^www\./, "");
+    if (ALLOWED_DOMAINS.some((d) => host === d || host.endsWith("." + d))) return true;
+    try {
+      const currentHost = new URL(currentUrl).hostname.replace(/^www\./, "");
+      if (host === currentHost || host.endsWith("." + currentHost)) return true;
+    } catch {}
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+// ── Couche 2 : JS injecté avant le contenu de la page ───────────────────────
+const INJECTED_JS_BEFORE = `
+(function() {
+  // Bloquer window.open
+  window.open = function() { return null; };
+
+  // Bloquer window.location
+  try {
+    Object.defineProperty(window, 'location', {
+      configurable: false,
+      enumerable: true,
+      get: function() { return window._safeLocation || location; },
+      set: function() { return false; }
+    });
+  } catch(e) {}
+
+  // Bloquer location.href, assign, replace
+  try {
+    var proto = window.Location ? window.Location.prototype : Object.getPrototypeOf(window.location);
+    var _origHref = Object.getOwnPropertyDescriptor(proto, 'href');
+    if (_origHref) {
+      Object.defineProperty(proto, 'href', {
+        get: _origHref.get,
+        set: function() { return false; },
+        configurable: true
+      });
+    }
+    proto.assign   = function() { return false; };
+    proto.replace  = function() { return false; };
+  } catch(e) {}
+
+  // Bloquer les clics sur liens externes (capture phase)
+  document.addEventListener('click', function(e) {
+    var el = e.target;
+    while (el && el.tagName !== 'A') el = el.parentElement;
+    if (el && el.tagName === 'A') {
+      var href = el.getAttribute('href');
+      if (href && href !== '#' && !href.startsWith('javascript:') && !href.startsWith('blob:')) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return false;
+      }
+    }
+    var tgt = e.target;
+    if (tgt) {
+      var onclick = tgt.getAttribute && tgt.getAttribute('onclick');
+      var dataHref = tgt.getAttribute && tgt.getAttribute('data-href');
+      if ((onclick && (onclick.includes('location') || onclick.includes('open'))) || dataHref) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return false;
+      }
+    }
+  }, true);
+
+  // Bloquer les soumissions de formulaire vers des URL externes
+  document.addEventListener('submit', function(e) {
+    var form = e.target;
+    if (form && form.action && form.action !== '#' && !form.action.startsWith('javascript:')) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+  }, true);
+
+  // Wrapper addEventListener pour bloquer les listeners publicitaires
+  var _origAddEvent = EventTarget.prototype.addEventListener;
+  EventTarget.prototype.addEventListener = function(type, listener, options) {
+    if (type === 'click' || type === 'touchstart') {
+      var el = this;
+      if (el && el.getAttribute) {
+        if (el.getAttribute('data-redirect') || el.getAttribute('onclick')) {
+          return;
+        }
+      }
+    }
+    return _origAddEvent.call(this, type, listener, options);
+  };
+
+  // Bloquer les créations de balises <script> vers des domaines publicitaires
+  var _origCreate = document.createElement.bind(document);
+  document.createElement = function(tag) {
+    var el = _origCreate(tag);
+    return el;
+  };
+})();
+true;
+`;
+
 const LANG_META: Record<string, { label: string; flagUrl?: string }> = {
   VOSTFR: { label: "VO",  flagUrl: `${FLAG_BASE}/flag_jp.png` },
   VO:     { label: "VO",  flagUrl: `${FLAG_BASE}/flag_jp.png` },
@@ -413,6 +537,28 @@ export default function PlayerScreen() {
                   javaScriptEnabled
                   domStorageEnabled
                   startInLoadingState
+
+                  // ── Couche 1 : Props natives anti-popup ──────────────────
+                  setSupportMultipleWindows={false}
+                  allowFileAccess={false}
+                  allowUniversalAccessFromFileURLs={false}
+                  mixedContentMode="never"
+                  originWhitelist={["*"]}
+
+                  // ── Couche 2 : JS injecté avant le chargement ────────────
+                  injectedJavaScriptBeforeContentLoaded={INJECTED_JS_BEFORE}
+
+                  // ── Couche 3 : Whitelist native des domaines ─────────────
+                  onShouldStartLoadWithRequest={(request) => {
+                    const url = request.url;
+                    if (!url || url === "about:blank" || url.startsWith("blob:")) return true;
+                    if (BLOCKED_SCHEMES.some((s) => url.startsWith(s))) return false;
+                    return isDomainAllowed(url, embedUrl);
+                  }}
+
+                  // ── Couche 4 : Bloquer toute nouvelle fenêtre ────────────
+                  onOpenWindow={() => false}
+
                   renderLoading={() => (
                     <View style={[StyleSheet.absoluteFill, styles.webviewLoader, { backgroundColor: colors.card }]}>
                       <Feather name="loader" size={24} color={colors.neonPurple} />
