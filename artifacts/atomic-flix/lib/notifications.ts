@@ -22,24 +22,48 @@ export async function requestNotificationPermissions(): Promise<boolean> {
   return status === "granted";
 }
 
-function buildEpisodeKey(item: any): string {
-  const title = item?.animeTitle ?? item?.title ?? "";
-  const ep    = item?.episode ?? item?.episodeNumber ?? item?.ep ?? "";
-  const lang  = item?.language ?? item?.lang ?? "";
-  return `${title}::${ep}::${lang}`.toLowerCase();
-}
-
-function buildEpisodeTitle(item: any): string {
+function getTitle(item: any): string {
   return item?.animeTitle ?? item?.title ?? "Anime inconnu";
 }
 
-function buildEpisodeBody(item: any): string {
-  const ep   = item?.episode ?? item?.episodeNumber ?? item?.ep;
-  const lang = item?.language ?? item?.lang;
+function getImage(item: any): string | undefined {
+  return item?.image ?? item?.cover ?? item?.thumbnail ?? item?.img;
+}
+
+function getSeason(item: any): number | undefined {
+  const s = item?.season ?? item?.saison;
+  return s != null ? Number(s) : undefined;
+}
+
+function getEpisode(item: any): string | number | undefined {
+  return item?.episode ?? item?.episodeNumber ?? item?.ep;
+}
+
+function getLanguage(item: any): string | undefined {
+  return item?.language ?? item?.lang;
+}
+
+function getAnimeId(item: any): string {
+  return item?.animeId ?? item?.id ?? item?.url ?? "";
+}
+
+function buildEpisodeKey(item: any): string {
+  const title = getTitle(item);
+  const season = getSeason(item) ?? "";
+  const ep     = getEpisode(item) ?? "";
+  const lang   = getLanguage(item) ?? "";
+  return `${title}::s${season}::e${ep}::${lang}`.toLowerCase();
+}
+
+function buildSubtitle(item: any): string {
   const parts: string[] = [];
-  if (ep   != null) parts.push(`Épisode ${ep}`);
-  if (lang)         parts.push(lang);
-  return parts.join(" · ") || "Nouvel épisode disponible";
+  const season = getSeason(item);
+  const ep     = getEpisode(item);
+  const lang   = getLanguage(item);
+  if (season != null) parts.push(`Saison ${season}`);
+  if (ep      != null) parts.push(`Épisode ${ep}`);
+  if (lang)            parts.push(lang);
+  return parts.join(" · ");
 }
 
 async function getSeenKeys(): Promise<Set<string>> {
@@ -54,9 +78,18 @@ async function getSeenKeys(): Promise<Set<string>> {
 
 async function saveSeenKeys(keys: Set<string>): Promise<void> {
   try {
-    const arr = Array.from(keys).slice(-300);
+    const arr = Array.from(keys).slice(-500);
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
   } catch {}
+}
+
+async function buildAttachments(imageUrl: string | undefined): Promise<Notifications.NotificationContentInput["attachments"]> {
+  if (!imageUrl || Platform.OS !== "ios") return undefined;
+  try {
+    return [{ url: imageUrl, thumbnailHidden: false }];
+  } catch {
+    return undefined;
+  }
 }
 
 export async function checkAndNotifyNewEpisodes(recentList: any[]): Promise<void> {
@@ -66,7 +99,7 @@ export async function checkAndNotifyNewEpisodes(recentList: any[]): Promise<void
   const granted = await requestNotificationPermissions();
   if (!granted) return;
 
-  const seen   = await getSeenKeys();
+  const seen    = await getSeenKeys();
   const newOnes: any[] = [];
 
   for (const item of recentList) {
@@ -77,32 +110,48 @@ export async function checkAndNotifyNewEpisodes(recentList: any[]): Promise<void
     }
   }
 
-  if (newOnes.length === 0) {
-    await saveSeenKeys(seen);
-    return;
-  }
-
   await saveSeenKeys(seen);
 
+  if (newOnes.length === 0) return;
+
   if (newOnes.length === 1) {
-    const item = newOnes[0];
+    const item        = newOnes[0];
+    const imageUrl    = getImage(item);
+    const attachments = await buildAttachments(imageUrl);
+
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: buildEpisodeTitle(item),
-        body:  buildEpisodeBody(item),
-        sound: true,
-        data:  { animeId: item?.animeId ?? item?.id ?? "" },
+        title:       getTitle(item),
+        subtitle:    buildSubtitle(item),
+        body:        buildSubtitle(item),
+        sound:       true,
+        attachments,
+        data: {
+          animeId: getAnimeId(item),
+          season:  getSeason(item),
+          episode: getEpisode(item),
+          lang:    getLanguage(item),
+          image:   imageUrl,
+        },
       },
       trigger: null,
     });
   } else {
+    const first       = newOnes[0];
+    const imageUrl    = getImage(first);
+    const attachments = await buildAttachments(imageUrl);
+
+    const names = newOnes.slice(0, 3).map(getTitle);
+    const more  = newOnes.length > 3 ? ` et ${newOnes.length - 3} autres` : "";
+
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: `${newOnes.length} nouveaux épisodes`,
-        body:  newOnes.slice(0, 3).map(buildEpisodeTitle).join(", ") +
-               (newOnes.length > 3 ? ` et ${newOnes.length - 3} autres…` : ""),
-        sound: true,
-        data:  { batch: true },
+        title:       `${newOnes.length} nouveaux épisodes`,
+        subtitle:    names.join(", ") + more,
+        body:        names.join(", ") + more,
+        sound:       true,
+        attachments,
+        data:        { batch: true },
       },
       trigger: null,
     });
