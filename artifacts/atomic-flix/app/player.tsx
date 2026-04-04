@@ -30,6 +30,7 @@ const ALLOWED_DOMAINS = [
   "sendvid.com",
   "smoothpre.com",
   "oneupload.to",
+  "myvi.top", "www.myvi.top",
 
   // ── Sources anime-sama ────────────────────────────────────────────────────
   "anime-sama.fr", "anime-sama.eu", "anime-sama.to",
