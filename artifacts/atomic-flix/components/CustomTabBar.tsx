@@ -33,9 +33,8 @@ interface CustomTabBarProps {
 }
 
 function TabIcon({ tab, isActive, colors }: { tab: TabItem; isActive: boolean; colors: any }) {
-  const scale    = useRef(new Animated.Value(1)).current;
-  const bounceY  = useRef(new Animated.Value(0)).current;
-  const glowAnim = useRef(new Animated.Value(0)).current;
+  const scale   = useRef(new Animated.Value(1)).current;
+  const bounceY = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.parallel([
@@ -46,15 +45,10 @@ function TabIcon({ tab, isActive, colors }: { tab: TabItem; isActive: boolean; c
         friction: 8,
       }),
       Animated.spring(bounceY, {
-        toValue: isActive ? -3 : 0,
+        toValue: isActive ? -2 : 0,
         useNativeDriver: true,
         tension: 180,
         friction: 8,
-      }),
-      Animated.timing(glowAnim, {
-        toValue: isActive ? 1 : 0,
-        duration: 220,
-        useNativeDriver: true,
       }),
     ]).start();
   }, [isActive]);
@@ -62,23 +56,7 @@ function TabIcon({ tab, isActive, colors }: { tab: TabItem; isActive: boolean; c
   const color = isActive ? colors.neonPurple : colors.mutedForeground;
 
   return (
-    <Animated.View style={[
-      styles.iconWrapper,
-      { transform: [{ scale }, { translateY: bounceY }] }
-    ]}>
-      <Animated.View
-        style={[
-          styles.glowRing,
-          {
-            backgroundColor: colors.neonPurple + "28",
-            opacity: glowAnim,
-            shadowColor: colors.neonPurple,
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: 0.8,
-            shadowRadius: 8,
-          },
-        ]}
-      />
+    <Animated.View style={{ transform: [{ scale }, { translateY: bounceY }] }}>
       <Feather name={tab.icon as any} size={18} color={color} />
     </Animated.View>
   );
@@ -196,19 +174,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    gap: 2,
-  },
-  iconWrapper: {
-    alignItems: "center",
-    justifyContent: "center",
-    width: 28,
-    height: 28,
-  },
-  glowRing: {
-    position: "absolute",
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    gap: 3,
   },
   label: {
     fontSize: 10,
