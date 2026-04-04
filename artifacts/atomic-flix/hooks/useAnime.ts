@@ -60,10 +60,6 @@ export function useSeasons(animeId: string) {
   });
 }
 
-export function needsEmbedEndpoint(seasonValue: string): boolean {
-  return !/^saison\d/.test(seasonValue);
-}
-
 export function useEpisodes(animeId: string, season: string | number, language: string, enabled = true) {
   return useQuery({
     queryKey: ["episodes", animeId, season, language],
@@ -73,18 +69,6 @@ export function useEpisodes(animeId: string, season: string | number, language: 
   });
 }
 
-export function useEmbedEpisodes(animeId: string, season: string, language: string, enabled = true) {
-  return useQuery({
-    queryKey: ["embed-episodes", animeId, season, language],
-    queryFn: () => api.embedEpisodes(animeId, season, language),
-    enabled: enabled && !!animeId && !!season,
-    staleTime: 1000 * 60 * 5,
-  });
-}
-
 export function useSeasonEpisodes(animeId: string, season: string, language: string) {
-  const isEmbed = needsEmbedEndpoint(season);
-  const standard = useEpisodes(animeId, season, language, !isEmbed);
-  const embed    = useEmbedEpisodes(animeId, season, language, isEmbed);
-  return isEmbed ? embed : standard;
+  return useEpisodes(animeId, season, language);
 }
