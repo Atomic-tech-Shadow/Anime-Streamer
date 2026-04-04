@@ -19,6 +19,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { usePopular, useRecent, useRecommendations } from "@/hooks/useAnime";
+import { checkAndNotifyNewEpisodes } from "@/lib/notifications";
 import AnimeCard from "@/components/AnimeCard";
 import SectionHeader from "@/components/SectionHeader";
 import SkeletonCard from "@/components/SkeletonCard";
@@ -169,6 +170,12 @@ export default function HomeScreen() {
     }, 6000);
     return () => clearInterval(interval);
   }, [featuredList.length]);
+
+  useEffect(() => {
+    if (recentList.length > 0) {
+      checkAndNotifyNewEpisodes(recentList);
+    }
+  }, [recentList]);
 
   const featured = featuredList[featuredIndex] ?? popularList[0] ?? recentList[0];
 
