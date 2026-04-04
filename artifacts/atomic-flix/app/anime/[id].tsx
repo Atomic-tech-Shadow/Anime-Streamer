@@ -244,7 +244,7 @@ export default function AnimeDetailScreen() {
                 <View key={i} style={[styles.seasonCard, { backgroundColor: colors.card, opacity: 0.4 }]} />
               ))
             ) : (
-              (seasons.length === 0 ? [{ number: 1, name: "Saison 1", languages: ["VOSTFR"] }] : seasons).map((s: any, i: number) => {
+              seasons.map((s: any, i: number) => {
                 const num        = s.number ?? i + 1;
                 const name       = s.name ?? `Saison ${num}`;
                 const langs: string[] = s.languages ?? [];
