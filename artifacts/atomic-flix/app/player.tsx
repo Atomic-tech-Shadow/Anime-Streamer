@@ -292,16 +292,6 @@ export default function PlayerScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* ── Now playing strip ── */}
-          <View style={[styles.nowPlaying, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <View style={[styles.nowPlayingDot, { backgroundColor: embedUrl ? "#22c55e" : colors.mutedForeground }]} />
-            <Text style={[styles.nowPlayingText, { color: colors.mutedForeground }]}>
-              {embedUrl
-                ? `Épisode ${selectedEpNum}  ·  ${currentServer?.server ?? ""}  ·  ${LANG_META[selectedLang]?.label ?? selectedLang}`
-                : "Sélectionne un épisode"}
-            </Text>
-          </View>
-
           {/* ── Player ── */}
           {isLoading ? (
             <View style={[styles.playerBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -479,14 +469,6 @@ const styles = StyleSheet.create({
   dropdownValue: { fontSize: 14, fontWeight: "700" as const, marginTop: 1 },
   qualityBadge: { paddingHorizontal: 7, paddingVertical: 3, borderRadius: 6, borderWidth: 1 },
   qualityText: { fontSize: 9, fontWeight: "800" as const, letterSpacing: 0.5 },
-
-  nowPlaying: {
-    flexDirection: "row", alignItems: "center", gap: 8,
-    paddingHorizontal: 14, paddingVertical: 10,
-    borderRadius: 10, borderWidth: 1,
-  },
-  nowPlayingDot: { width: 7, height: 7, borderRadius: 4 },
-  nowPlayingText: { fontSize: 11, fontWeight: "500" as const, flex: 1 },
 
   playerBox: {
     height: 210, borderRadius: 14, borderWidth: 1,
