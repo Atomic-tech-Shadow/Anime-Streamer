@@ -92,6 +92,15 @@ async function buildAttachments(imageUrl: string | undefined): Promise<Notificat
   }
 }
 
+function buildAndroidConfig(imageUrl: string | undefined): Notifications.NotificationContentInput["android"] {
+  if (!imageUrl || Platform.OS !== "android") return undefined;
+  return {
+    largeIcon: imageUrl,
+    bigLargeIcon: imageUrl,
+    bigPicture: imageUrl,
+  } as any;
+}
+
 export async function checkAndNotifyNewEpisodes(recentList: any[]): Promise<void> {
   if (!recentList || recentList.length === 0) return;
   if (Platform.OS === "web") return;
@@ -115,9 +124,10 @@ export async function checkAndNotifyNewEpisodes(recentList: any[]): Promise<void
   if (newOnes.length === 0) return;
 
   for (let i = 0; i < newOnes.length; i++) {
-    const item        = newOnes[i];
-    const imageUrl    = getImage(item);
-    const attachments = await buildAttachments(imageUrl);
+    const item          = newOnes[i];
+    const imageUrl      = getImage(item);
+    const attachments   = await buildAttachments(imageUrl);
+    const androidConfig = buildAndroidConfig(imageUrl);
 
     await Notifications.scheduleNotificationAsync({
       content: {
@@ -126,6 +136,7 @@ export async function checkAndNotifyNewEpisodes(recentList: any[]): Promise<void
         body:        buildSubtitle(item),
         sound:       true,
         attachments,
+        android:     androidConfig,
         data: {
           animeId: getAnimeId(item),
           season:  getSeason(item),
