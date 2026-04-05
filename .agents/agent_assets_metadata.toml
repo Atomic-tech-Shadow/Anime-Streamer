@@ -29,3 +29,9 @@ id = "X6JHkP8JKBpgBfMWcylbu"
 uri = "file://artifacts/atomic-flix/store-listing.md"
 type = "text"
 title = "ATOMIC FLIX — Fiche de publication store"
+
+[[outputs]]
+id = "cuzyL0G1ztl-LbcL3YkAm"
+uri = "file://artifacts/atomic-flix/store-listing.txt"
+type = "text"
+title = "ATOMIC FLIX — Fiche store (texte)"
