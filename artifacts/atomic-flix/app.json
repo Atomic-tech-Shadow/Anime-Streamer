@@ -29,6 +29,7 @@
     "android": {
       "backgroundColor": "#08080F",
       "package": "com.animestreamer.app",
+      "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#08080F"
