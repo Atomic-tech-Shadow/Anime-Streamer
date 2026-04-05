@@ -19,6 +19,7 @@ import { WebView } from "react-native-webview";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 import { useSeasonEpisodes } from "@/hooks/useAnime";
+import { useHistory } from "@/hooks/useHistory";
 
 const FLAG_BASE = "https://raw.githubusercontent.com/Anime-Sama/IMG/img/autres";
 
@@ -339,6 +340,8 @@ export default function PlayerScreen() {
   const [showEpisodePicker, setShowEpisodePicker] = useState(false);
   const [showServerPicker, setShowServerPicker]   = useState(false);
 
+  const { addToHistory } = useHistory();
+
   const webviewRef      = useRef<any>(null);
   const controlsAnim   = useRef(new Animated.Value(0)).current;
   const controlsTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -375,6 +378,25 @@ export default function PlayerScreen() {
   useEffect(() => {
     if (embedUrl) showVideoControls();
   }, [embedUrl]);
+
+  useEffect(() => {
+    if (!embedUrl || !animeId || !title) return;
+    const timer = setTimeout(() => {
+      addToHistory({
+        animeId: animeId ?? "",
+        title: title ?? "",
+        image: image ?? "",
+        season: season ?? "",
+        seasonLabel: seasonLabel ?? "",
+        seasonName: seasonName ?? "",
+        seasonType: seasonType ?? "",
+        episodeNum: selectedEpNum,
+        language: selectedLang,
+        availableLanguages: availableLangsParam ?? selectedLang,
+      });
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [embedUrl, selectedEpNum, selectedLang]);
 
   const { data: episodesData, isLoading: loadingEpisodes } = useSeasonEpisodes(
     animeId ?? "", season ?? "saison1", selectedLang

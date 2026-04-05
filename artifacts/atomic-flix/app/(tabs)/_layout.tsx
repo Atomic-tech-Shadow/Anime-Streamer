@@ -12,6 +12,10 @@ function NativeTabLayout() {
         <Icon sf={{ default: "house", selected: "house.fill" }} />
         <Label>Accueil</Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="history">
+        <Icon sf={{ default: "clock", selected: "clock.fill" }} />
+        <Label>Historique</Label>
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="planning">
         <Icon sf={{ default: "calendar", selected: "calendar.fill" }} />
         <Label>Planning</Label>
@@ -26,8 +30,9 @@ function ClassicTabLayout() {
       tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{ headerShown: false }}
     >
-      <Tabs.Screen name="index"    options={{ title: "Accueil"  }} />
-      <Tabs.Screen name="planning" options={{ title: "Planning" }} />
+      <Tabs.Screen name="index"    options={{ title: "Accueil"    }} />
+      <Tabs.Screen name="history"  options={{ title: "Historique" }} />
+      <Tabs.Screen name="planning" options={{ title: "Planning"   }} />
     </Tabs>
   );
 }
