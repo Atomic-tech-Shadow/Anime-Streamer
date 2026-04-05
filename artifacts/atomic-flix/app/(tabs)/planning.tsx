@@ -56,6 +56,7 @@ function getPlanningList(data: any): any[] {
   return [];
 }
 
+
 function getAnimeImage(item: any): string | undefined {
   return item?.image ?? item?.cover ?? item?.thumbnail ?? item?.anime?.image;
 }
