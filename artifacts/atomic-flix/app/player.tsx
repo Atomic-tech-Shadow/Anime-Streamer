@@ -545,7 +545,13 @@ export default function PlayerScreen() {
                 <WebView
                   ref={webviewRef}
                   key={embedUrl}
-                  source={{ uri: embedUrl }}
+                  source={{
+                    uri: embedUrl,
+                    headers: {
+                      Referer: "https://anime-sama.to",
+                      Origin: "https://anime-sama.to",
+                    },
+                  }}
                   style={styles.webview}
                   allowsFullscreenVideo
                   mediaPlaybackRequiresUserAction={false}
