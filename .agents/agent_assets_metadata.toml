@@ -17,3 +17,9 @@ id = "Mga58eah76zgqY7Cie1x7"
 uri = "file://README.md"
 type = "text"
 title = "README GitHub — ATOMIC FLIX"
+
+[[outputs]]
+id = "WnUKsWsUpEurIeuId6LZI"
+uri = "file://artifacts/atomic-flix/assets/images/icon_preview.png"
+type = "image"
+title = "Icon Preview — A + Symbole + F"
