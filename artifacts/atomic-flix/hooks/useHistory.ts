@@ -23,33 +23,33 @@ export function useHistory() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => {
+  const reload = useCallback(() => {
     AsyncStorage.getItem(STORAGE_KEY)
       .then((raw) => {
-        if (raw) setHistory(JSON.parse(raw));
+        setHistory(raw ? JSON.parse(raw) : []);
       })
+      .catch(() => setHistory([]))
       .finally(() => setLoaded(true));
   }, []);
 
-  const persist = useCallback((entries: HistoryEntry[]) => {
-    setHistory(entries);
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(entries)).catch(() => {});
+  useEffect(() => {
+    reload();
   }, []);
 
   const addToHistory = useCallback((entry: Omit<HistoryEntry, "id" | "watchedAt">) => {
-    setHistory((prev) => {
+    const newEntry: HistoryEntry = {
+      ...entry,
+      id: `${entry.animeId}-${entry.season}-${entry.episodeNum}-${entry.language}`,
+      watchedAt: Date.now(),
+    };
+    AsyncStorage.getItem(STORAGE_KEY).then((raw) => {
+      const prev: HistoryEntry[] = raw ? JSON.parse(raw) : [];
       const filtered = prev.filter(
-        (h) => !(h.animeId === entry.animeId && h.season === entry.season && h.episodeNum === entry.episodeNum && h.language === entry.language)
+        (h) => h.id !== newEntry.id
       );
-      const newEntry: HistoryEntry = {
-        ...entry,
-        id: `${entry.animeId}-${entry.season}-${entry.episodeNum}-${entry.language}`,
-        watchedAt: Date.now(),
-      };
       const updated = [newEntry, ...filtered].slice(0, MAX_ENTRIES);
       AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated)).catch(() => {});
-      return updated;
-    });
+    }).catch(() => {});
   }, []);
 
   const removeFromHistory = useCallback((id: string) => {
@@ -61,8 +61,9 @@ export function useHistory() {
   }, []);
 
   const clearHistory = useCallback(() => {
-    persist([]);
-  }, [persist]);
+    setHistory([]);
+    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify([])).catch(() => {});
+  }, []);
 
-  return { history, loaded, addToHistory, removeFromHistory, clearHistory };
+  return { history, loaded, reload, addToHistory, removeFromHistory, clearHistory };
 }
