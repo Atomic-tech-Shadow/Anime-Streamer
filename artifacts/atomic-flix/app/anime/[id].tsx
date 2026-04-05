@@ -8,6 +8,7 @@ import {
   Platform,
   Dimensions,
   Animated,
+  ActivityIndicator,
 } from "react-native";
 import { Image } from "expo-image";
 import * as Haptics from "expo-haptics";
@@ -17,7 +18,7 @@ import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 import { useSeasons } from "@/hooks/useAnime";
-import LoadingScreen from "@/components/LoadingScreen";
+
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_GAP       = 12;
@@ -150,7 +151,11 @@ export default function AnimeDetailScreen() {
   };
 
   if (isLoading && !paramTitle) {
-    return <LoadingScreen label="Chargement" />;
+    return (
+      <View style={[styles.root, { backgroundColor: colors.background, alignItems: "center", justifyContent: "center" }]}>
+        <ActivityIndicator size="large" color={colors.neonPurple} />
+      </View>
+    );
   }
 
   return (
@@ -248,7 +253,9 @@ export default function AnimeDetailScreen() {
           </View>
 
           {isLoading ? (
-            <LoadingScreen fullscreen={false} style={{ height: 140 }} />
+            <View style={{ height: 140, alignItems: "center", justifyContent: "center" }}>
+              <ActivityIndicator size="large" color={colors.neonPurple} />
+            </View>
           ) : (
           <View style={styles.seasonGrid}>
             {seasons.map((s: any, i: number) => {

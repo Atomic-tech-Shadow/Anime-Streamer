@@ -7,6 +7,7 @@ import {
   FlatList,
   Animated,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
@@ -16,7 +17,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 import { useHistory, HistoryEntry } from "@/hooks/useHistory";
 import NeonGlow from "@/components/NeonGlow";
-import LoadingScreen from "@/components/LoadingScreen";
 
 const FLAG_BASE = "https://raw.githubusercontent.com/Anime-Sama/IMG/img/autres";
 const LANG_FLAG: Record<string, string> = {
@@ -147,7 +147,11 @@ export default function HistoryScreen() {
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
 
   if (!loaded) {
-    return <LoadingScreen label="Historique" />;
+    return (
+      <View style={[styles.root, { backgroundColor: colors.background, alignItems: "center", justifyContent: "center" }]}>
+        <ActivityIndicator size="large" color={colors.neonPurple} />
+      </View>
+    );
   }
 
   const handleResume = (item: HistoryEntry) => {

@@ -8,6 +8,7 @@ import {
   Animated,
   Platform,
   Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
@@ -17,7 +18,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 import { usePlanning } from "@/hooks/useAnime";
 import NeonGlow from "@/components/NeonGlow";
-import LoadingScreen from "@/components/LoadingScreen";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 
@@ -279,7 +279,9 @@ export default function PlanningScreen() {
 
         {/* ── Content ── */}
         {isLoading ? (
-          <LoadingScreen label="Planning" fullscreen={false} style={{ flex: 1, minHeight: 200 }} />
+          <View style={{ flex: 1, minHeight: 200, alignItems: "center", justifyContent: "center" }}>
+            <ActivityIndicator size="large" color={colors.neonPurple} />
+          </View>
         ) : planningList.length === 0 ? (
           <View style={styles.empty}>
             <View style={[styles.emptyIcon, { backgroundColor: colors.card, borderColor: colors.border }]}>
