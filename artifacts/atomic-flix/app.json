@@ -5,7 +5,7 @@
     "owner": "cidmarco",
     "version": "1.2.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/icon_preview.png",
     "scheme": "atomic-flix",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
@@ -31,12 +31,12 @@
       "package": "com.atomicflix.app",
       "usesCleartextTraffic": true,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/icon.png",
+        "foregroundImage": "./assets/images/icon_preview.png",
         "backgroundColor": "#08080F"
       }
     },
     "web": {
-      "favicon": "./assets/images/icon.png",
+      "favicon": "./assets/images/icon_preview.png",
       "backgroundColor": "#08080F"
     },
     "plugins": [
@@ -67,7 +67,7 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/images/icon.png",
+          "icon": "./assets/images/icon_preview.png",
           "color": "#7c3aed",
           "iosDisplayInForeground": true
         }
