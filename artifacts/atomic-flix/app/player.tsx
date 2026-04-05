@@ -31,6 +31,9 @@ const ALLOWED_DOMAINS = [
   "smoothpre.com",
   "oneupload.to",
   "myvi.top", "www.myvi.top",
+  "vidmoly.net",
+  "embed4me.com", "lpayer.embed4me.com",
+  "vk.com", "vkvideo.ru",
 
   // ── Sources anime-sama ────────────────────────────────────────────────────
   "anime-sama.fr", "anime-sama.eu", "anime-sama.to",
