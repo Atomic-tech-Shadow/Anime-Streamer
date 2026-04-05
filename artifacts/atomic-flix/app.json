@@ -28,7 +28,7 @@
     },
     "android": {
       "backgroundColor": "#08080F",
-      "package": "com.animestreamer.app",
+      "package": "com.atomicflix.app",
       "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
