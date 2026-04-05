@@ -58,43 +58,17 @@ function OrbitParticle({
 
   return (
     <Animated.View style={[StyleSheet.absoluteFill, { alignItems: "center", justifyContent: "center", transform: [{ rotate: spin }] }]}>
-      <View style={{ position: "absolute", top: -radius - size / 2 }}>
-        {/* Outer glow layer */}
-        <View
-          style={{
-            position: "absolute",
-            width: size * 3,
-            height: size * 3,
-            borderRadius: size * 1.5,
-            backgroundColor: color,
-            opacity: 0.15,
-            top: -(size),
-            left: -(size),
-          }}
-        />
-        {/* Inner glow layer */}
-        <View
-          style={{
-            position: "absolute",
-            width: size * 1.8,
-            height: size * 1.8,
-            borderRadius: size,
-            backgroundColor: color,
-            opacity: 0.35,
-            top: -(size * 0.4),
-            left: -(size * 0.4),
-          }}
-        />
-        {/* Core dot */}
-        <View
-          style={{
-            width: size,
-            height: size,
-            borderRadius: size / 2,
-            backgroundColor: color,
-          }}
-        />
-      </View>
+      <View
+        style={{
+          position: "absolute",
+          top: -radius - size / 2,
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          backgroundColor: color,
+          boxShadow: `0 0 ${size * 3}px ${size * 1.5}px ${color}`,
+        }}
+      />
     </Animated.View>
   );
 }
