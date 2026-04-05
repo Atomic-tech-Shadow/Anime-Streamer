@@ -151,6 +151,70 @@ const INJECTED_JS_BEFORE = `
     return _origAddEvent.call(this, type, listener, options);
   };
 
+  // ── Forcer HTTPS sur toutes les requêtes réseau (fix ERR_CLEARTEXT) ─────────
+  function upgradeUrl(url) {
+    if (typeof url === 'string' && url.indexOf('http://') === 0) {
+      return 'https://' + url.slice(7);
+    }
+    return url;
+  }
+
+  // fetch
+  var _origFetch = window.fetch;
+  window.fetch = function(input, opts) {
+    if (typeof input === 'string') input = upgradeUrl(input);
+    else if (input && input.url) input = new Request(upgradeUrl(input.url), input);
+    return _origFetch.call(this, input, opts);
+  };
+
+  // XMLHttpRequest
+  var _origXHROpen = XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open = function(method, url) {
+    var args = Array.prototype.slice.call(arguments);
+    args[1] = upgradeUrl(url);
+    return _origXHROpen.apply(this, args);
+  };
+
+  // HTMLMediaElement.src (video/audio)
+  try {
+    var mediaSrcDesc = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'src');
+    if (mediaSrcDesc && mediaSrcDesc.set) {
+      Object.defineProperty(HTMLMediaElement.prototype, 'src', {
+        get: mediaSrcDesc.get,
+        set: function(val) { return mediaSrcDesc.set.call(this, upgradeUrl(val)); },
+        configurable: true
+      });
+    }
+  } catch(e) {}
+
+  // HTMLSourceElement.src
+  try {
+    var sourceSrcDesc = Object.getOwnPropertyDescriptor(HTMLSourceElement.prototype, 'src');
+    if (sourceSrcDesc && sourceSrcDesc.set) {
+      Object.defineProperty(HTMLSourceElement.prototype, 'src', {
+        get: sourceSrcDesc.get,
+        set: function(val) { return sourceSrcDesc.set.call(this, upgradeUrl(val)); },
+        configurable: true
+      });
+    }
+  } catch(e) {}
+
+  // MutationObserver pour intercepter les nœuds ajoutés dynamiquement
+  try {
+    var mo = new MutationObserver(function(mutations) {
+      mutations.forEach(function(m) {
+        m.addedNodes.forEach(function(node) {
+          if (!node.getAttribute) return;
+          var src = node.getAttribute('src');
+          if (src && src.indexOf('http://') === 0) {
+            node.setAttribute('src', upgradeUrl(src));
+          }
+        });
+      });
+    });
+    mo.observe(document.documentElement || document, { childList: true, subtree: true });
+  } catch(e) {}
+
   // Bloquer les créations de balises <script> vers des domaines publicitaires
   var _origCreate = document.createElement.bind(document);
   document.createElement = function(tag) {
