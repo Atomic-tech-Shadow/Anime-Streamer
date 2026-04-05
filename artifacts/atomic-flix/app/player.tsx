@@ -320,7 +320,8 @@ export default function PlayerScreen() {
   const currentEpisode =
     episodes.find((e: any) => String(e.number ?? e.episode) === selectedEpNum) ?? episodes[0];
   const sources  = getStreamingSources(currentEpisode);
-  const embedUrl = sources[selectedServerIdx]?.url ?? "";
+  const rawEmbedUrl = sources[selectedServerIdx]?.url ?? "";
+  const embedUrl = rawEmbedUrl.replace(/^http:\/\//i, "https://");
   const currentServer = sources[selectedServerIdx];
 
   const handleOpenExternal = () => {
