@@ -7,7 +7,6 @@ import {
   FlatList,
   Animated,
   Platform,
-  ActivityIndicator,
 } from "react-native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
@@ -17,6 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 import { useHistory, HistoryEntry } from "@/hooks/useHistory";
 import NeonGlow from "@/components/NeonGlow";
+import SpinnerLoader from "@/components/SpinnerLoader";
 
 const FLAG_BASE = "https://raw.githubusercontent.com/Anime-Sama/IMG/img/autres";
 const LANG_FLAG: Record<string, string> = {
@@ -148,8 +148,8 @@ export default function HistoryScreen() {
 
   if (!loaded) {
     return (
-      <View style={[styles.root, { backgroundColor: colors.background, alignItems: "center", justifyContent: "center" }]}>
-        <ActivityIndicator size="large" color={colors.neonPurple} />
+      <View style={[styles.root, { backgroundColor: colors.background }]}>
+        <SpinnerLoader fullscreen />
       </View>
     );
   }

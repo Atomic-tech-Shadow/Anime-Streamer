@@ -6,7 +6,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Platform,
-  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -15,6 +14,7 @@ import { useColors } from "@/hooks/useColors";
 import { useSearch } from "@/hooks/useAnime";
 import AnimeCard from "@/components/AnimeCard";
 import SearchBar from "@/components/SearchBar";
+import SpinnerLoader from "@/components/SpinnerLoader";
 
 
 function getAnimeList(data: any): any[] {
@@ -86,9 +86,7 @@ export default function SearchScreen() {
           </Text>
         </View>
       ) : isLoading ? (
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          <ActivityIndicator size="large" color={colors.neonPurple} />
-        </View>
+        <SpinnerLoader fullscreen />
       ) : results.length === 0 ? (
         <View style={styles.emptyState}>
           <Feather name="frown" size={48} color={colors.mutedForeground} />

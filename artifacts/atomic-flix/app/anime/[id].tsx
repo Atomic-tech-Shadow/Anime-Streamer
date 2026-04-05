@@ -8,7 +8,6 @@ import {
   Platform,
   Dimensions,
   Animated,
-  ActivityIndicator,
 } from "react-native";
 import { Image } from "expo-image";
 import * as Haptics from "expo-haptics";
@@ -18,6 +17,7 @@ import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 import { useSeasons } from "@/hooks/useAnime";
+import SpinnerLoader from "@/components/SpinnerLoader";
 
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -152,8 +152,8 @@ export default function AnimeDetailScreen() {
 
   if (isLoading && !paramTitle) {
     return (
-      <View style={[styles.root, { backgroundColor: colors.background, alignItems: "center", justifyContent: "center" }]}>
-        <ActivityIndicator size="large" color={colors.neonPurple} />
+      <View style={[styles.root, { backgroundColor: colors.background }]}>
+        <SpinnerLoader fullscreen />
       </View>
     );
   }
@@ -253,9 +253,7 @@ export default function AnimeDetailScreen() {
           </View>
 
           {isLoading ? (
-            <View style={{ height: 140, alignItems: "center", justifyContent: "center" }}>
-              <ActivityIndicator size="large" color={colors.neonPurple} />
-            </View>
+            <SpinnerLoader style={{ height: 140 }} />
           ) : (
           <View style={styles.seasonGrid}>
             {seasons.map((s: any, i: number) => {
