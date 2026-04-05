@@ -30,6 +30,7 @@
       "backgroundColor": "#08080F",
       "package": "com.atomicflix.app",
       "usesCleartextTraffic": true,
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon_preview.png",
         "backgroundColor": "#08080F"
