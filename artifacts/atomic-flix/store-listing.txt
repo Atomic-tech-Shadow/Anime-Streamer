@@ -1,4 +1,4 @@
-ATOMIC FLIX — Fiche de publication store
+ATOMIC FLIX - Fiche de publication store
 ==========================================
 
 
@@ -8,76 +8,90 @@ Nom de l'app      : ATOMIC FLIX
 Package           : com.atomicflix.app
 Version           : 1.3.0
 Version Code      : 1
-Catégorie         : Divertissement / Streaming vidéo
-Langue principale : Français
+Categorie         : Divertissement / Streaming video
+Langue principale : Francais
 Orientation       : Portrait
-Âge minimum       : 12+
+Age minimum       : 12+
 
 
-DESCRIPTION COURTE (80 caractères max)
+DESCRIPTION COURTE (80 caracteres max)
 ---------------------------------------
-Regarde tes animes préférés en VOSTFR, VF et VO — gratuit et sans pub.
+Regarde tes animes preferes en VOSTFR, VF et VO - gratuit et sans pub.
 
 
 DESCRIPTION COMPLETE
 --------------------
-ATOMIC FLIX est l'application ultime pour les fans d'anime francophones. Accède à une immense bibliothèque d'animes en streaming, suivi de tes épisodes et planning de diffusion, le tout dans une interface sombre et fluide pensée pour l'immersion totale.
+ATOMIC FLIX est l'application ultime pour les fans d'anime francophones.
+Accede a une immense bibliotheque d'animes en streaming, suivi de tes
+episodes et planning de diffusion, le tout dans une interface sombre et
+fluide pensee pour l'immersion totale.
 
-🎌 Une bibliothèque complète
-Parcours des centaines de séries et films d'animation japonaise : des classiques intemporels aux dernières sorties, en passant par les pépites méconnues. Chaque titre dispose de sa fiche complète : synopsis, genres, studio, statut (en cours / terminé) et année de sortie.
+Une bibliotheque complete
+Parcours des centaines de series et films d'animation japonaise : des
+classiques intemporels aux dernieres sorties, en passant par les pepites
+meconnues. Chaque titre dispose de sa fiche complete : synopsis, genres,
+studio, statut (en cours / termine) et annee de sortie.
 
-🌐 Toutes les versions audio et sous-titres
+Toutes les versions audio et sous-titres
 Regarde tes animes dans la langue de ton choix :
-- VOSTFR — Version originale sous-titrée en français
-- VF — Doublage français
-- VO — Version originale japonaise
-- Et bien d'autres (VA, VAR, VKR…)
+- VOSTFR : Version originale sous-titree en francais
+- VF     : Doublage francais
+- VO     : Version originale japonaise
+- Et bien d'autres (VA, VAR, VKR...)
 
-📺 Lecture fluide multi-serveurs
-Le lecteur intégré est optimisé pour une lecture sans accroc. En cas de problème sur un serveur, bascule instantanément sur une alternative. Les pubs et pop-ups intrusives des hébergeurs sont automatiquement bloqués pour une expérience propre.
+Lecture fluide multi-serveurs
+Le lecteur integre est optimise pour une lecture sans accroc. En cas de
+probleme sur un serveur, bascule instantanement sur une alternative.
+Les pubs et pop-ups intrusives sont automatiquement bloques.
 
-📅 Planning de diffusion
-Ne rate plus jamais un épisode. Consulte le calendrier de diffusion jour par jour (lundi au dimanche) et sache exactement quand sort le prochain épisode de tes séries préférées.
+Planning de diffusion
+Ne rate plus jamais un episode. Consulte le calendrier de diffusion jour
+par jour (lundi au dimanche) et sache exactement quand sort le prochain
+episode de tes series preferees.
 
-🕐 Historique et reprise automatique
-L'app mémorise ta progression sur chaque épisode. Reprends exactement là où tu t'es arrêté, sur n'importe quelle série.
+Historique et reprise automatique
+L'app memorise ta progression sur chaque episode. Reprends exactement la
+ou tu t'es arrete, sur n'importe quelle serie.
 
-🔔 Notifications de nouveaux épisodes
-Active les notifications pour tes séries en cours et sois alerté dès qu'un nouvel épisode est disponible. Ne manque plus rien.
+Notifications de nouveaux episodes
+Active les notifications pour tes series en cours et sois alerte des
+qu'un nouvel episode est disponible. Ne manque plus rien.
 
-🎨 Interface pensée pour les fans
-Un design sombre avec des accents néon, des animations fluides et une navigation intuitive par onglets : Accueil, Recherche, Planning, Historique.
+Interface pensee pour les fans
+Un design sombre avec des accents neon, des animations fluides et une
+navigation intuitive par onglets : Accueil, Recherche, Planning, Historique.
 
 ATOMIC FLIX. L'anime, sans compromis.
 
 
 NOUVEAUTES VERSION 1.3.0
 -------------------------
-- Nouvelle icône de l'application
-- Améliorations de stabilité et de performance
+- Nouvelle icone de l'application
+- Ameliorations de stabilite et de performance
 - Corrections de bugs divers
 
 
 MOTS-CLES / TAGS
 -----------------
-anime, streaming, VOSTFR, VF, manga, otaku, animé, japonais, film anime, série animée, planning anime, gratuit
+anime, streaming, VOSTFR, VF, manga, otaku, anime, japonais, film anime,
+serie animee, planning anime, gratuit
 
 
 CLASSIFICATION DU CONTENU
 --------------------------
-Violence        : Modérée (violence fictive dans certains animes)
-Langage         : Léger
+Violence        : Moderee (violence fictive dans certains animes)
+Langage         : Leger
 Contenu sexuel  : Aucun
-Âge recommandé  : 12+
+Age recommande  : 12+
 
 
 ICONES ET CAPTURES D'ECRAN REQUISES
 -------------------------------------
-Icône app (hi-res)          : 512 x 512 px (PNG)
+Icone app (hi-res)          : 512 x 512 px (PNG)
 Feature graphic             : 1024 x 500 px
-Captures d'écran téléphone  : Min. 2, format portrait (ex: 1080 x 1920)
+Captures d'ecran telephone  : Min. 2, format portrait (ex: 1080 x 1920)
 
-Fichier icône disponible : assets/images/icon_preview.png
+Fichier icone disponible : assets/images/icon_preview.png
 
 
 LIENS UTILES
