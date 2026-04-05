@@ -3,7 +3,7 @@
     "name": "ATOMIC FLIX",
     "slug": "atomic-flix",
     "owner": "cidmarco",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon_preview.png",
     "scheme": "atomic-flix",
