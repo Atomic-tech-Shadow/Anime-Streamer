@@ -564,7 +564,7 @@ export default function PlayerScreen() {
                   setSupportMultipleWindows={false}
                   allowFileAccess={false}
                   allowUniversalAccessFromFileURLs={false}
-                  mixedContentMode="compatibility"
+                  mixedContentMode="always"
                   originWhitelist={["*"]}
 
                   // ── Couche 2 : JS injecté avant le chargement ────────────
