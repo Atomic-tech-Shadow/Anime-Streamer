@@ -159,7 +159,10 @@ function PlanningRow({ item, index, colors, onPress }: {
   const title       = getAnimeTitle(item) || "Anime inconnu";
   const img         = getAnimeImage(item);
   const time        = item.releaseTime ?? item.time ?? item.hour ?? item.schedule;
-  const seasonLabel = item.season ? `S${item.season}` : null;
+  const rawSeason = item.season ? String(item.season) : null;
+  const seasonLabel = rawSeason
+    ? rawSeason.toLowerCase().startsWith("s") ? rawSeason : `S${rawSeason}`
+    : null;
   const langLabel   = item.language ?? null;
 
   return (
