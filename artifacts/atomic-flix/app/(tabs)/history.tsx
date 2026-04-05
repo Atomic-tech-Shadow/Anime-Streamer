@@ -16,6 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 import { useHistory, HistoryEntry } from "@/hooks/useHistory";
 import NeonGlow from "@/components/NeonGlow";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const FLAG_BASE = "https://raw.githubusercontent.com/Anime-Sama/IMG/img/autres";
 const LANG_FLAG: Record<string, string> = {
@@ -141,9 +142,13 @@ export default function HistoryScreen() {
   const colors = useColors();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { history, removeFromHistory, clearHistory } = useHistory();
+  const { history, loaded, removeFromHistory, clearHistory } = useHistory();
 
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
+
+  if (!loaded) {
+    return <LoadingScreen label="Historique" />;
+  }
 
   const handleResume = (item: HistoryEntry) => {
     router.push({
