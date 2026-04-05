@@ -308,7 +308,7 @@ export default function HomeScreen() {
           <View style={styles.section}>
             <SectionHeader title="Classiques" accent />
             <FlatList
-              data={classiquesList.slice(0, 15)}
+              data={classiquesList}
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.list}
@@ -341,7 +341,7 @@ export default function HomeScreen() {
             />
           ) : (
             <FlatList
-              data={(pepitesList.length > 0 ? pepitesList : popularList).slice(0, 15)}
+              data={pepitesList.length > 0 ? pepitesList : popularList}
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.list}
@@ -372,7 +372,7 @@ export default function HomeScreen() {
             />
           ) : (
             <FlatList
-              data={recentList.slice(0, 15)}
+              data={recentList}
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.list}
@@ -396,7 +396,7 @@ export default function HomeScreen() {
           <View style={styles.section}>
             <SectionHeader title="Recommandations" accent />
             <FlatList
-              data={recoList.slice(0, 12)}
+              data={recoList}
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.list}
