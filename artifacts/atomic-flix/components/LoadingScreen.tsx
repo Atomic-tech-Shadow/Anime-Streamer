@@ -321,6 +321,17 @@ export default function LoadingScreen({ label, fullscreen = true, style }: Loadi
         </Animated.Text>
       )}
 
+      {/* ── Credit ───────────────────────────────────────────────────── */}
+      <Animated.Text
+        style={[
+          styles.creditText,
+          { color: colors.mutedForeground, opacity: taglineOpacity },
+        ]}
+      >
+        by{" "}
+        <Text style={{ color: colors.neonPurple, fontWeight: "700" }}>Shadow</Text>
+      </Animated.Text>
+
       {/* ── Bottom scan bar ──────────────────────────────────────────── */}
       <View style={[styles.scanBarTrack, { width: BAR_W, borderColor: colors.neonPurple + "25" }]}>
         <View style={[styles.scanBarBg, { backgroundColor: colors.neonPurple + "12" }]} />
@@ -434,6 +445,14 @@ const styles = StyleSheet.create({
     letterSpacing: 3,
     textTransform: "uppercase",
     marginTop: -20,
+  },
+
+  creditText: {
+    position: "absolute",
+    bottom: 80,
+    fontSize: 12,
+    fontWeight: "400",
+    letterSpacing: 1.5,
   },
 
   // Scan bar
