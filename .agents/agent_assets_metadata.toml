@@ -23,3 +23,9 @@ id = "WnUKsWsUpEurIeuId6LZI"
 uri = "file://artifacts/atomic-flix/assets/images/icon_preview.png"
 type = "image"
 title = "Icon Final — A ⛛ F serrés"
+
+[[outputs]]
+id = "X6JHkP8JKBpgBfMWcylbu"
+uri = "file://artifacts/atomic-flix/store-listing.md"
+type = "text"
+title = "ATOMIC FLIX — Fiche de publication store"
