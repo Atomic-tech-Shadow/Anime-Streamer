@@ -1,10 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { Image } from "expo-image";
 import React, { useEffect, useState } from "react";
 import {
   Linking,
   Modal,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -12,12 +14,16 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const CONSENT_KEY = "@atomic_flix_consent_accepted";
+const CONSENT_KEY = "@atomic_flix_consent_v2";
 const PRIVACY_URL = "https://privacy-plolicy.zone.id/";
+const TERMS_URL   = "https://privacy-plolicy.zone.id/terms";
 
 export default function ConsentModal() {
-  const [visible, setVisible] = useState(false);
-  const [checked, setChecked] = useState(false);
+  const [visible, setVisible]           = useState(false);
+  const [checkedPrivacy, setPrivacy]    = useState(false);
+  const [checkedTerms, setTerms]        = useState(false);
+
+  const allChecked = checkedPrivacy && checkedTerms;
 
   useEffect(() => {
     AsyncStorage.getItem(CONSENT_KEY).then((val) => {
@@ -38,70 +44,90 @@ export default function ConsentModal() {
         <SafeAreaView style={styles.safeArea} edges={["bottom"]}>
           <View style={styles.card}>
 
-            {/* Logo / titre */}
-            <View style={styles.header}>
-              <LinearGradient
-                colors={["#7c3aed", "#3b82f6"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.iconWrap}
-              >
-                <Feather name="play" size={26} color="#fff" />
-              </LinearGradient>
-              <Text style={styles.appName}>ATOMIC FLIX</Text>
-              <Text style={styles.subtitle}>
-                Avant de continuer, merci de lire et accepter nos conditions.
-              </Text>
-            </View>
-
-            {/* Bloc Privacy Policy */}
-            <View style={styles.policyBox}>
-              <Feather name="shield" size={16} color="#7c3aed" style={{ marginTop: 1 }} />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.policyTitle}>Politique de confidentialité</Text>
-                <Text style={styles.policyDesc}>
-                  Nous collectons uniquement les données nécessaires au bon fonctionnement de l'application.
-                </Text>
-                <TouchableOpacity
-                  onPress={() => Linking.openURL(PRIVACY_URL)}
-                  activeOpacity={0.75}
-                >
-                  <Text style={styles.policyLink}>Lire la politique de confidentialité →</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Checkbox */}
-            <TouchableOpacity
-              style={styles.checkRow}
-              onPress={() => setChecked((v) => !v)}
-              activeOpacity={0.8}
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              bounces={false}
+              contentContainerStyle={styles.scrollContent}
             >
-              <View style={[styles.checkbox, checked && styles.checkboxChecked]}>
-                {checked && <Feather name="check" size={13} color="#fff" />}
+              {/* Icône app + titre */}
+              <View style={styles.header}>
+                <Image
+                  source={require("../assets/images/icon_preview.png")}
+                  style={styles.appIcon}
+                  contentFit="contain"
+                />
+                <Text style={styles.appName}>ATOMIC FLIX</Text>
+                <Text style={styles.subtitle}>
+                  Avant de continuer, merci de lire et accepter nos conditions.
+                </Text>
               </View>
-              <Text style={styles.checkLabel}>
-                J'ai lu et j'accepte la politique de confidentialité
-              </Text>
-            </TouchableOpacity>
+
+              {/* Bloc Politique de confidentialité */}
+              <View style={styles.policyBox}>
+                <Feather name="shield" size={16} color="#7c3aed" style={{ marginTop: 2 }} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.policyTitle}>Politique de confidentialité</Text>
+                  <Text style={styles.policyDesc}>
+                    Nous ne collectons aucune donnée personnelle.
+                  </Text>
+                  <TouchableOpacity onPress={() => Linking.openURL(PRIVACY_URL)} activeOpacity={0.75}>
+                    <Text style={styles.policyLink}>Lire la politique de confidentialité →</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Bloc Conditions d'utilisation */}
+              <View style={[styles.policyBox, { borderColor: "rgba(59,130,246,0.25)", backgroundColor: "rgba(59,130,246,0.06)" }]}>
+                <Feather name="file-text" size={16} color="#3b82f6" style={{ marginTop: 2 }} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.policyTitle}>Conditions d'utilisation</Text>
+                  <Text style={styles.policyDesc}>
+                    L'application est fournie à titre personnel et non commercial. Tout usage abusif est interdit.
+                  </Text>
+                  <TouchableOpacity onPress={() => Linking.openURL(TERMS_URL)} activeOpacity={0.75}>
+                    <Text style={[styles.policyLink, { color: "#3b82f6" }]}>Lire les conditions d'utilisation →</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Checkbox privacy */}
+              <TouchableOpacity style={styles.checkRow} onPress={() => setPrivacy((v) => !v)} activeOpacity={0.8}>
+                <View style={[styles.checkbox, checkedPrivacy && styles.checkboxChecked]}>
+                  {checkedPrivacy && <Feather name="check" size={12} color="#fff" />}
+                </View>
+                <Text style={styles.checkLabel}>
+                  J'ai lu et j'accepte la politique de confidentialité
+                </Text>
+              </TouchableOpacity>
+
+              {/* Checkbox terms */}
+              <TouchableOpacity style={styles.checkRow} onPress={() => setTerms((v) => !v)} activeOpacity={0.8}>
+                <View style={[styles.checkbox, checkedTerms && { backgroundColor: "#3b82f6", borderColor: "#3b82f6" }]}>
+                  {checkedTerms && <Feather name="check" size={12} color="#fff" />}
+                </View>
+                <Text style={styles.checkLabel}>
+                  J'ai lu et j'accepte les conditions d'utilisation
+                </Text>
+              </TouchableOpacity>
+            </ScrollView>
 
             {/* Bouton Continuer */}
             <TouchableOpacity
               onPress={handleAccept}
-              disabled={!checked}
+              disabled={!allChecked}
               activeOpacity={0.85}
-              style={{ marginTop: 8 }}
+              style={{ marginTop: 6 }}
             >
               <LinearGradient
-                colors={checked ? ["#7c3aed", "#3b82f6"] : ["#2a2a3a", "#2a2a3a"]}
+                colors={allChecked ? ["#7c3aed", "#3b82f6"] : ["#1e1e2e", "#1e1e2e"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={[styles.continueBtn, !checked && styles.continueBtnDisabled]}
+                style={[styles.continueBtn, !allChecked && styles.continueBtnDisabled]}
               >
-                <Text style={[styles.continueBtnText, !checked && { color: "#555" }]}>
+                <Text style={[styles.continueBtnText, !allChecked && { color: "#444" }]}>
                   Continuer
                 </Text>
-                <Feather name="arrow-right" size={16} color={checked ? "#fff" : "#555"} />
+                <Feather name="arrow-right" size={16} color={allChecked ? "#fff" : "#444"} />
               </LinearGradient>
             </TouchableOpacity>
 
@@ -123,23 +149,26 @@ const styles = StyleSheet.create({
     backgroundColor: "#0f0f1a",
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingTop: 20,
     paddingBottom: 20,
-    gap: 18,
     borderTopWidth: 1,
     borderColor: "rgba(124,58,237,0.25)",
+    maxHeight: "90%",
+  },
+  scrollContent: {
+    gap: 14,
+    paddingBottom: 8,
   },
   header: {
     alignItems: "center",
     gap: 10,
-    paddingTop: 6,
+    paddingTop: 4,
   },
-  iconWrap: {
-    width: 60,
-    height: 60,
+  appIcon: {
+    width: 72,
+    height: 72,
     borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
   },
   appName: {
     color: "#fff",
@@ -148,16 +177,16 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
   },
   subtitle: {
-    color: "rgba(255,255,255,0.5)",
+    color: "rgba(255,255,255,0.45)",
     fontSize: 13,
     textAlign: "center",
     lineHeight: 19,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
   },
   policyBox: {
     flexDirection: "row",
     gap: 12,
-    backgroundColor: "rgba(124,58,237,0.08)",
+    backgroundColor: "rgba(124,58,237,0.07)",
     borderRadius: 14,
     padding: 14,
     borderWidth: 1,
@@ -165,33 +194,33 @@ const styles = StyleSheet.create({
   },
   policyTitle: {
     color: "#fff",
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "700",
     marginBottom: 4,
   },
   policyDesc: {
-    color: "rgba(255,255,255,0.5)",
+    color: "rgba(255,255,255,0.45)",
     fontSize: 12,
     lineHeight: 17,
-    marginBottom: 8,
+    marginBottom: 7,
   },
   policyLink: {
     color: "#7c3aed",
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "600",
   },
   checkRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    paddingVertical: 4,
+    paddingVertical: 2,
   },
   checkbox: {
     width: 22,
     height: 22,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.25)",
+    borderColor: "rgba(255,255,255,0.22)",
     backgroundColor: "transparent",
     alignItems: "center",
     justifyContent: "center",
@@ -202,7 +231,7 @@ const styles = StyleSheet.create({
     borderColor: "#7c3aed",
   },
   checkLabel: {
-    color: "rgba(255,255,255,0.75)",
+    color: "rgba(255,255,255,0.7)",
     fontSize: 13,
     flex: 1,
     lineHeight: 18,
@@ -214,10 +243,9 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 15,
     borderRadius: 14,
+    marginTop: 2,
   },
-  continueBtnDisabled: {
-    opacity: 0.6,
-  },
+  continueBtnDisabled: { opacity: 0.5 },
   continueBtnText: {
     color: "#fff",
     fontSize: 16,
