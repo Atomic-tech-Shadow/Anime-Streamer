@@ -19,11 +19,8 @@ const PRIVACY_URL = "https://privacy-plolicy.zone.id/";
 const TERMS_URL   = "https://privacy-plolicy.zone.id/terms";
 
 export default function ConsentModal() {
-  const [visible, setVisible]           = useState(false);
-  const [checkedPrivacy, setPrivacy]    = useState(false);
-  const [checkedTerms, setTerms]        = useState(false);
-
-  const allChecked = checkedPrivacy && checkedTerms;
+  const [visible, setVisible]   = useState(false);
+  const [checked, setChecked]   = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem(CONSENT_KEY).then((val) => {
@@ -90,23 +87,13 @@ export default function ConsentModal() {
                 </View>
               </View>
 
-              {/* Checkbox privacy */}
-              <TouchableOpacity style={styles.checkRow} onPress={() => setPrivacy((v) => !v)} activeOpacity={0.8}>
-                <View style={[styles.checkbox, checkedPrivacy && styles.checkboxChecked]}>
-                  {checkedPrivacy && <Feather name="check" size={12} color="#fff" />}
+              {/* Checkbox unique */}
+              <TouchableOpacity style={styles.checkRow} onPress={() => setChecked((v) => !v)} activeOpacity={0.8}>
+                <View style={[styles.checkbox, checked && styles.checkboxChecked]}>
+                  {checked && <Feather name="check" size={12} color="#fff" />}
                 </View>
                 <Text style={styles.checkLabel}>
-                  J'ai lu et j'accepte la politique de confidentialité
-                </Text>
-              </TouchableOpacity>
-
-              {/* Checkbox terms */}
-              <TouchableOpacity style={styles.checkRow} onPress={() => setTerms((v) => !v)} activeOpacity={0.8}>
-                <View style={[styles.checkbox, checkedTerms && { backgroundColor: "#3b82f6", borderColor: "#3b82f6" }]}>
-                  {checkedTerms && <Feather name="check" size={12} color="#fff" />}
-                </View>
-                <Text style={styles.checkLabel}>
-                  J'ai lu et j'accepte les conditions d'utilisation
+                  J'ai lu et j'accepte la politique de confidentialité et les conditions d'utilisation
                 </Text>
               </TouchableOpacity>
             </ScrollView>
@@ -114,20 +101,20 @@ export default function ConsentModal() {
             {/* Bouton Continuer */}
             <TouchableOpacity
               onPress={handleAccept}
-              disabled={!allChecked}
+              disabled={!checked}
               activeOpacity={0.85}
               style={{ marginTop: 6 }}
             >
               <LinearGradient
-                colors={allChecked ? ["#7c3aed", "#3b82f6"] : ["#1e1e2e", "#1e1e2e"]}
+                colors={checked ? ["#7c3aed", "#3b82f6"] : ["#1e1e2e", "#1e1e2e"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={[styles.continueBtn, !allChecked && styles.continueBtnDisabled]}
+                style={[styles.continueBtn, !checked && styles.continueBtnDisabled]}
               >
-                <Text style={[styles.continueBtnText, !allChecked && { color: "#444" }]}>
+                <Text style={[styles.continueBtnText, !checked && { color: "#444" }]}>
                   Continuer
                 </Text>
-                <Feather name="arrow-right" size={16} color={allChecked ? "#fff" : "#444"} />
+                <Feather name="arrow-right" size={16} color={checked ? "#fff" : "#444"} />
               </LinearGradient>
             </TouchableOpacity>
 
