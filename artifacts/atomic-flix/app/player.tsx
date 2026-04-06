@@ -693,24 +693,6 @@ export default function PlayerScreen() {
               {/* Controls overlay — box-none so WebView keeps its touches */}
               <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
                 <Animated.View style={[styles.fsOverlay, { opacity: controlsAnim }]} pointerEvents="box-none">
-                  {/* Bouton rotation manuelle */}
-                  <TouchableOpacity
-                    style={[styles.fsBtn, { backgroundColor: "rgba(0,0,0,0.62)", borderColor: "rgba(255,255,255,0.18)", marginRight: 8 }]}
-                    onPress={async () => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      if (isLandscape) {
-                        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-                        setTimeout(() => ScreenOrientation.unlockAsync(), 800);
-                      } else {
-                        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
-                        setTimeout(() => ScreenOrientation.unlockAsync(), 800);
-                      }
-                    }}
-                    activeOpacity={0.75}
-                    pointerEvents="auto"
-                  >
-                    <Feather name={isLandscape ? "rotate-ccw" : "rotate-cw"} size={16} color="#fff" />
-                  </TouchableOpacity>
                   {/* Bouton plein écran */}
                   <TouchableOpacity
                     style={[styles.fsBtn, { backgroundColor: "rgba(0,0,0,0.62)", borderColor: "rgba(255,255,255,0.18)" }]}
@@ -744,11 +726,22 @@ export default function PlayerScreen() {
                 </Text>
               </TouchableOpacity>
 
-              <View style={[styles.epNavCurrent, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                <Text style={[styles.epNavCurrentText, { color: colors.neonPurple }]}>
-                  ÉP. {selectedEpNum}
-                </Text>
-              </View>
+              <TouchableOpacity
+                style={[styles.epNavCurrent, { backgroundColor: colors.card, borderColor: colors.border }]}
+                onPress={async () => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  if (isLandscape) {
+                    await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+                    setTimeout(() => ScreenOrientation.unlockAsync(), 800);
+                  } else {
+                    await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+                    setTimeout(() => ScreenOrientation.unlockAsync(), 800);
+                  }
+                }}
+                activeOpacity={0.8}
+              >
+                <Feather name={isLandscape ? "rotate-ccw" : "rotate-cw"} size={20} color={colors.neonPurple} />
+              </TouchableOpacity>
 
               <TouchableOpacity
                 style={[
