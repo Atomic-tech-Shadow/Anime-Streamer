@@ -348,34 +348,23 @@ export default function PlayerScreen() {
   const controlsTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
   const controlsOnRef  = useRef(false);
 
-  const [isLandscape, setIsLandscape]   = useState(false);
-  const forceLandscapeRef               = useRef(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
-    ScreenOrientation.unlockAsync();
-
-    const sub = ScreenOrientation.addOrientationChangeListener((e) => {
-      const o = e.orientationInfo.orientation;
-      const landscape =
-        o === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
-        o === ScreenOrientation.Orientation.LANDSCAPE_RIGHT;
-
-      // Si l'utilisateur a verrouillé le paysage et que le système tente
-      // de revenir en portrait (ex: sortie du player natif), on re-verrouille.
-      if (forceLandscapeRef.current && !landscape) {
-        ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
-        return;
-      }
-
-      setIsLandscape(landscape);
-    });
-
     return () => {
-      forceLandscapeRef.current = false;
-      ScreenOrientation.removeOrientationChangeListener(sub);
       ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
     };
   }, []);
+
+  const openFullscreen = async () => {
+    await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+    setIsFullscreen(true);
+  };
+
+  const closeFullscreen = async () => {
+    setIsFullscreen(false);
+    await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+  };
 
   const showVideoControls = () => {
     if (controlsTimer.current) clearTimeout(controlsTimer.current);
@@ -720,17 +709,9 @@ export default function PlayerScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={async () => {
+                onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  if (forceLandscapeRef.current) {
-                    forceLandscapeRef.current = false;
-                    await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-                    setIsLandscape(false);
-                  } else {
-                    forceLandscapeRef.current = true;
-                    await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
-                    setIsLandscape(true);
-                  }
+                  openFullscreen();
                 }}
                 activeOpacity={0.8}
               >
@@ -782,6 +763,57 @@ export default function PlayerScreen() {
         onClose={() => setShowServerPicker(false)}
         colors={colors}
       />
+
+      {/* ── Modal plein écran vidéo ── */}
+      <Modal
+        visible={isFullscreen}
+        transparent={false}
+        animationType="fade"
+        statusBarTranslucent
+        onRequestClose={closeFullscreen}
+        supportedOrientations={["landscape"]}
+      >
+        <View style={styles.fsModal}>
+          <WebView
+            key={"fs-" + embedUrl}
+            source={{
+              uri: embedUrl,
+              headers: {
+                Referer: "https://anime-sama.to",
+                Origin: "https://anime-sama.to",
+              },
+            }}
+            style={StyleSheet.absoluteFill}
+            allowsFullscreenVideo
+            mediaPlaybackRequiresUserAction={false}
+            javaScriptEnabled
+            domStorageEnabled
+            startInLoadingState
+            setSupportMultipleWindows={false}
+            allowFileAccess={false}
+            allowUniversalAccessFromFileURLs={false}
+            mixedContentMode="always"
+            originWhitelist={["*"]}
+            injectedJavaScriptBeforeContentLoaded={INJECTED_JS_BEFORE}
+            onShouldStartLoadWithRequest={(request) => {
+              const url = request.url;
+              if (!url || url === "about:blank" || url.startsWith("blob:")) return true;
+              if (BLOCKED_SCHEMES.some((s) => url.startsWith(s))) return false;
+              return isDomainAllowed(url, embedUrl);
+            }}
+            onOpenWindow={() => false}
+            renderLoading={() => (
+              <View style={[StyleSheet.absoluteFill, { backgroundColor: "#000", alignItems: "center", justifyContent: "center" }]}>
+                <Feather name="loader" size={28} color="#7c3aed" />
+              </View>
+            )}
+          />
+          {/* Bouton fermer */}
+          <TouchableOpacity style={styles.fsCloseBtn} onPress={closeFullscreen} activeOpacity={0.8}>
+            <Feather name="x" size={18} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </Modal>
 
     </View>
   );
@@ -870,6 +902,16 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
   },
 
+  fsModal: {
+    flex: 1, backgroundColor: "#000",
+  },
+  fsCloseBtn: {
+    position: "absolute", top: 14, right: 14,
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.2)",
+  },
   fsOverlay: {
     position: "absolute",
     bottom: 10,
