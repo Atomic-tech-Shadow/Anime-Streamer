@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as FileSystem from "expo-file-system";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
@@ -83,21 +84,35 @@ async function saveSeenKeys(keys: Set<string>): Promise<void> {
   } catch {}
 }
 
-async function buildAttachments(imageUrl: string | undefined): Promise<Notifications.NotificationContentInput["attachments"]> {
-  if (!imageUrl || Platform.OS !== "ios") return undefined;
+async function downloadImageToCache(imageUrl: string): Promise<string | null> {
   try {
-    return [{ url: imageUrl, thumbnailHidden: false }];
+    const ext = imageUrl.split("?")[0].split(".").pop()?.toLowerCase() ?? "jpg";
+    const safeExt = ["jpg", "jpeg", "png", "gif", "webp"].includes(ext) ? ext : "jpg";
+    const filename = `notif_img_${Date.now()}.${safeExt}`;
+    const localUri = `${FileSystem.cacheDirectory}${filename}`;
+    const result = await FileSystem.downloadAsync(imageUrl, localUri);
+    if (result.status === 200) return result.uri;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+async function buildAttachments(localUri: string | null): Promise<Notifications.NotificationContentInput["attachments"]> {
+  if (!localUri || Platform.OS !== "ios") return undefined;
+  try {
+    return [{ url: localUri, thumbnailHidden: false }];
   } catch {
     return undefined;
   }
 }
 
-function buildAndroidConfig(imageUrl: string | undefined): Notifications.NotificationContentInput["android"] {
-  if (!imageUrl || Platform.OS !== "android") return undefined;
+function buildAndroidConfig(localUri: string | null): Notifications.NotificationContentInput["android"] {
+  if (!localUri || Platform.OS !== "android") return undefined;
   return {
-    largeIcon: imageUrl,
-    bigLargeIcon: imageUrl,
-    bigPicture: imageUrl,
+    largeIcon: localUri,
+    bigLargeIcon: localUri,
+    bigPicture: localUri,
   } as any;
 }
 
@@ -126,8 +141,9 @@ export async function checkAndNotifyNewEpisodes(recentList: any[]): Promise<void
   for (let i = 0; i < newOnes.length; i++) {
     const item          = newOnes[i];
     const imageUrl      = getImage(item);
-    const attachments   = await buildAttachments(imageUrl);
-    const androidConfig = buildAndroidConfig(imageUrl);
+    const localUri      = imageUrl ? await downloadImageToCache(imageUrl) : null;
+    const attachments   = await buildAttachments(localUri);
+    const androidConfig = buildAndroidConfig(localUri);
 
     await Notifications.scheduleNotificationAsync({
       content: {
