@@ -10,6 +10,7 @@ import {
   Modal,
   FlatList,
   Animated,
+  useWindowDimensions,
 } from "react-native";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { Image } from "expo-image";
@@ -349,22 +350,10 @@ export default function PlayerScreen() {
   const controlsOnRef  = useRef(false);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const { width: screenW, height: screenH } = useWindowDimensions();
 
-  useEffect(() => {
-    return () => {
-      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-    };
-  }, []);
-
-  const openFullscreen = async () => {
-    await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
-    setIsFullscreen(true);
-  };
-
-  const closeFullscreen = async () => {
-    setIsFullscreen(false);
-    await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-  };
+  const openFullscreen  = () => setIsFullscreen(true);
+  const closeFullscreen = () => setIsFullscreen(false);
 
   const showVideoControls = () => {
     if (controlsTimer.current) clearTimeout(controlsTimer.current);
@@ -764,56 +753,56 @@ export default function PlayerScreen() {
         colors={colors}
       />
 
-      {/* ── Modal plein écran vidéo ── */}
-      <Modal
-        visible={isFullscreen}
-        transparent={false}
-        animationType="fade"
-        statusBarTranslucent
-        onRequestClose={closeFullscreen}
-        supportedOrientations={["landscape"]}
-      >
-        <View style={styles.fsModal}>
-          <WebView
-            key={"fs-" + embedUrl}
-            source={{
-              uri: embedUrl,
-              headers: {
-                Referer: "https://anime-sama.to",
-                Origin: "https://anime-sama.to",
-              },
-            }}
-            style={StyleSheet.absoluteFill}
-            allowsFullscreenVideo
-            mediaPlaybackRequiresUserAction={false}
-            javaScriptEnabled
-            domStorageEnabled
-            startInLoadingState
-            setSupportMultipleWindows={false}
-            allowFileAccess={false}
-            allowUniversalAccessFromFileURLs={false}
-            mixedContentMode="always"
-            originWhitelist={["*"]}
-            injectedJavaScriptBeforeContentLoaded={INJECTED_JS_BEFORE}
-            onShouldStartLoadWithRequest={(request) => {
-              const url = request.url;
-              if (!url || url === "about:blank" || url.startsWith("blob:")) return true;
-              if (BLOCKED_SCHEMES.some((s) => url.startsWith(s))) return false;
-              return isDomainAllowed(url, embedUrl);
-            }}
-            onOpenWindow={() => false}
-            renderLoading={() => (
-              <View style={[StyleSheet.absoluteFill, { backgroundColor: "#000", alignItems: "center", justifyContent: "center" }]}>
-                <Feather name="loader" size={28} color="#7c3aed" />
-              </View>
-            )}
-          />
-          {/* Bouton fermer */}
+      {/* ── Overlay plein écran vidéo (rotation CSS) ── */}
+      {isFullscreen && embedUrl ? (
+        <View style={[styles.fsOverlayContainer, { width: screenW, height: screenH }]}>
+          {/* WebView pivoté 90° pour simuler le paysage sans changer l'orientation système */}
+          <View style={{
+            width: screenH,
+            height: screenW,
+            transform: [{ rotate: "90deg" }],
+          }}>
+            <WebView
+              key={"fs-" + embedUrl}
+              source={{
+                uri: embedUrl,
+                headers: {
+                  Referer: "https://anime-sama.to",
+                  Origin: "https://anime-sama.to",
+                },
+              }}
+              style={{ flex: 1 }}
+              allowsFullscreenVideo
+              mediaPlaybackRequiresUserAction={false}
+              javaScriptEnabled
+              domStorageEnabled
+              startInLoadingState
+              setSupportMultipleWindows={false}
+              allowFileAccess={false}
+              allowUniversalAccessFromFileURLs={false}
+              mixedContentMode="always"
+              originWhitelist={["*"]}
+              injectedJavaScriptBeforeContentLoaded={INJECTED_JS_BEFORE}
+              onShouldStartLoadWithRequest={(request) => {
+                const url = request.url;
+                if (!url || url === "about:blank" || url.startsWith("blob:")) return true;
+                if (BLOCKED_SCHEMES.some((s) => url.startsWith(s))) return false;
+                return isDomainAllowed(url, embedUrl);
+              }}
+              onOpenWindow={() => false}
+              renderLoading={() => (
+                <View style={{ flex: 1, backgroundColor: "#000", alignItems: "center", justifyContent: "center" }}>
+                  <Feather name="loader" size={28} color="#7c3aed" />
+                </View>
+              )}
+            />
+          </View>
+          {/* Bouton fermer (en dehors du container rotaté, position portrait) */}
           <TouchableOpacity style={styles.fsCloseBtn} onPress={closeFullscreen} activeOpacity={0.8}>
             <Feather name="x" size={18} color="#fff" />
           </TouchableOpacity>
         </View>
-      </Modal>
+      ) : null}
 
     </View>
   );
@@ -902,15 +891,18 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
   },
 
-  fsModal: {
-    flex: 1, backgroundColor: "#000",
+  fsOverlayContainer: {
+    position: "absolute", top: 0, left: 0,
+    backgroundColor: "#000", zIndex: 999,
+    alignItems: "center", justifyContent: "center",
   },
   fsCloseBtn: {
-    position: "absolute", top: 14, right: 14,
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: "rgba(0,0,0,0.6)",
+    position: "absolute", top: 20, left: 16,
+    width: 38, height: 38, borderRadius: 19,
+    backgroundColor: "rgba(0,0,0,0.7)",
     alignItems: "center", justifyContent: "center",
-    borderWidth: 1, borderColor: "rgba(255,255,255,0.2)",
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.25)",
+    zIndex: 1000,
   },
   fsOverlay: {
     position: "absolute",
