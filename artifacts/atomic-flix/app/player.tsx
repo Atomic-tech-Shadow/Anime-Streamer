@@ -224,6 +224,16 @@ const INJECTED_JS_BEFORE = `
     var el = _origCreate(tag);
     return el;
   };
+
+  // ── Détection fullscreen → message vers React Native ─────────────────────
+  function onFsChange() {
+    var active = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    window.ReactNativeWebView && window.ReactNativeWebView.postMessage(
+      JSON.stringify({ type: 'fullscreen', active: active })
+    );
+  }
+  document.addEventListener('fullscreenchange', onFsChange);
+  document.addEventListener('webkitfullscreenchange', onFsChange);
 })();
 true;
 `;
@@ -661,6 +671,18 @@ export default function PlayerScreen() {
                     return isDomainAllowed(url, embedUrl);
                   }}
                   onOpenWindow={() => false}
+                  onMessage={(event) => {
+                    try {
+                      const msg = JSON.parse(event.nativeEvent.data);
+                      if (msg.type === 'fullscreen') {
+                        if (msg.active) {
+                          ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+                        } else {
+                          ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+                        }
+                      }
+                    } catch {}
+                  }}
                   renderLoading={() => (
                     <View style={[StyleSheet.absoluteFill, styles.webviewLoader, { backgroundColor: colors.card }]}>
                       <Feather name="loader" size={24} color={colors.neonPurple} />
@@ -698,29 +720,44 @@ export default function PlayerScreen() {
                   if (webviewRef.current) {
                     webviewRef.current.injectJavaScript(`
                       (function(){
+                        // 1. Essayer de cliquer le bouton natif du player
                         var selectors = [
-                          '.jw-icon-fullscreen',
+                          '.jw-icon-fullscreen',           // JWPlayer
                           '.jw-settings-fullscreen',
-                          '[class*="fullscreen"]',
-                          '[class*="full-screen"]',
+                          '[data-plyr="fullscreen"]',      // Plyr
+                          '.plyr__control--fullscreen',
+                          '.vjs-fullscreen-control',       // VideoJS
+                          '.fp-fullscreen',                // Flowplayer
+                          '.mejs__fullscreen-button',      // MediaElement.js
+                          '.ytp-fullscreen-button',        // YouTube style
+                          '.icon-fullscreen',
+                          'button[class*="fullscreen"]',
+                          'div[class*="fullscreen"]',
                           'button[title*="ullscreen"]',
                           'button[aria-label*="ullscreen"]',
-                          '[data-plyr="fullscreen"]',
-                          '.vjs-fullscreen-control',
-                          '.fp-fullscreen',
                           '[title="Fullscreen"]',
                           '[title="Full screen"]',
                           '[title="Plein écran"]',
+                          '[title="Agrandir"]',
                         ];
                         for (var i = 0; i < selectors.length; i++) {
                           var btn = document.querySelector(selectors[i]);
-                          if (btn) { btn.click(); return; }
+                          if (btn) {
+                            btn.click();
+                            return;
+                          }
                         }
+                        // 2. Fallback direct sur l'élément vidéo
                         var v = document.querySelector('video');
                         if (v) {
-                          if (v.webkitEnterFullscreen) v.webkitEnterFullscreen();
-                          else if (v.requestFullscreen) v.requestFullscreen();
+                          if (v.webkitEnterFullscreen) { v.webkitEnterFullscreen(); return; }
+                          if (v.requestFullscreen) { v.requestFullscreen(); return; }
+                          if (v.webkitRequestFullscreen) { v.webkitRequestFullscreen(); return; }
                         }
+                        // 3. Fullscreen sur le document entier
+                        var el = document.documentElement;
+                        if (el.requestFullscreen) el.requestFullscreen();
+                        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
                       })();true;
                     `);
                   }
