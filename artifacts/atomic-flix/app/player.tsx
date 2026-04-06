@@ -717,10 +717,8 @@ export default function PlayerScreen() {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   if (isLandscape) {
                     await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-                    setTimeout(() => ScreenOrientation.unlockAsync(), 800);
                   } else {
                     await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
-                    setTimeout(() => ScreenOrientation.unlockAsync(), 800);
                   }
                 }}
                 activeOpacity={0.8}
