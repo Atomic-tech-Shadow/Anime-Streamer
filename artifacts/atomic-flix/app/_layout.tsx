@@ -16,6 +16,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import ConsentModal from "@/components/ConsentModal";
 import UpdateBanner from "@/components/UpdateBanner";
 import { requestNotificationPermissions } from "@/lib/notifications";
 
@@ -94,6 +95,7 @@ export default function RootLayout() {
             <KeyboardProvider>
               <RootLayoutNav />
               <UpdateBanner />
+              <ConsentModal />
             </KeyboardProvider>
           </GestureHandlerRootView>
         </QueryClientProvider>
