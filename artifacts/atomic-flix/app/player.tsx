@@ -349,11 +349,6 @@ export default function PlayerScreen() {
   const controlsTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
   const controlsOnRef  = useRef(false);
 
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const { width: screenW, height: screenH } = useWindowDimensions();
-
-  const openFullscreen  = () => setIsFullscreen(true);
-  const closeFullscreen = () => setIsFullscreen(false);
 
   const showVideoControls = () => {
     if (controlsTimer.current) clearTimeout(controlsTimer.current);
@@ -700,7 +695,35 @@ export default function PlayerScreen() {
               <TouchableOpacity
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  openFullscreen();
+                  if (webviewRef.current) {
+                    webviewRef.current.injectJavaScript(`
+                      (function(){
+                        var selectors = [
+                          '.jw-icon-fullscreen',
+                          '.jw-settings-fullscreen',
+                          '[class*="fullscreen"]',
+                          '[class*="full-screen"]',
+                          'button[title*="ullscreen"]',
+                          'button[aria-label*="ullscreen"]',
+                          '[data-plyr="fullscreen"]',
+                          '.vjs-fullscreen-control',
+                          '.fp-fullscreen',
+                          '[title="Fullscreen"]',
+                          '[title="Full screen"]',
+                          '[title="Plein écran"]',
+                        ];
+                        for (var i = 0; i < selectors.length; i++) {
+                          var btn = document.querySelector(selectors[i]);
+                          if (btn) { btn.click(); return; }
+                        }
+                        var v = document.querySelector('video');
+                        if (v) {
+                          if (v.webkitEnterFullscreen) v.webkitEnterFullscreen();
+                          else if (v.requestFullscreen) v.requestFullscreen();
+                        }
+                      })();true;
+                    `);
+                  }
                 }}
                 activeOpacity={0.8}
               >
@@ -753,56 +776,6 @@ export default function PlayerScreen() {
         colors={colors}
       />
 
-      {/* ── Overlay plein écran vidéo (rotation CSS) ── */}
-      {isFullscreen && embedUrl ? (
-        <View style={[styles.fsOverlayContainer, { width: screenW, height: screenH }]}>
-          {/* WebView pivoté 90° pour simuler le paysage sans changer l'orientation système */}
-          <View style={{
-            width: screenH,
-            height: screenW,
-            transform: [{ rotate: "90deg" }],
-          }}>
-            <WebView
-              key={"fs-" + embedUrl}
-              source={{
-                uri: embedUrl,
-                headers: {
-                  Referer: "https://anime-sama.to",
-                  Origin: "https://anime-sama.to",
-                },
-              }}
-              style={{ flex: 1 }}
-              allowsFullscreenVideo
-              mediaPlaybackRequiresUserAction={false}
-              javaScriptEnabled
-              domStorageEnabled
-              startInLoadingState
-              setSupportMultipleWindows={false}
-              allowFileAccess={false}
-              allowUniversalAccessFromFileURLs={false}
-              mixedContentMode="always"
-              originWhitelist={["*"]}
-              injectedJavaScriptBeforeContentLoaded={INJECTED_JS_BEFORE}
-              onShouldStartLoadWithRequest={(request) => {
-                const url = request.url;
-                if (!url || url === "about:blank" || url.startsWith("blob:")) return true;
-                if (BLOCKED_SCHEMES.some((s) => url.startsWith(s))) return false;
-                return isDomainAllowed(url, embedUrl);
-              }}
-              onOpenWindow={() => false}
-              renderLoading={() => (
-                <View style={{ flex: 1, backgroundColor: "#000", alignItems: "center", justifyContent: "center" }}>
-                  <Feather name="loader" size={28} color="#7c3aed" />
-                </View>
-              )}
-            />
-          </View>
-          {/* Bouton fermer (en dehors du container rotaté, position portrait) */}
-          <TouchableOpacity style={styles.fsCloseBtn} onPress={closeFullscreen} activeOpacity={0.8}>
-            <Feather name="x" size={18} color="#fff" />
-          </TouchableOpacity>
-        </View>
-      ) : null}
 
     </View>
   );
