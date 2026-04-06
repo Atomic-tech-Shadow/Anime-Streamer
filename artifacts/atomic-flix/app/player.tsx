@@ -256,6 +256,12 @@ function getEpisodeList(data: any): any[] {
   const list: any[] = Array.isArray(data) ? data : data.episodes ?? [];
   return list.filter((e: any) => e.available !== false);
 }
+function isSibnet(s: any): boolean {
+  const name = (s.server ?? s.name ?? "").toLowerCase();
+  const url  = (s.url ?? "").toLowerCase();
+  return name.includes("sibnet") || url.includes("sibnet");
+}
+
 function getStreamingSources(episode: any): any[] {
   if (!episode) return [];
   const sources: any[] = Array.isArray(episode.streamingSources)
@@ -263,7 +269,11 @@ function getStreamingSources(episode: any): any[] {
     : Array.isArray(episode.sources)
       ? episode.sources
       : [];
-  return [...sources].sort((a, b) => (a.serverNumber ?? 99) - (b.serverNumber ?? 99));
+  return [...sources].sort((a, b) => {
+    if (isSibnet(a) && !isSibnet(b)) return -1;
+    if (!isSibnet(a) && isSibnet(b)) return 1;
+    return (a.serverNumber ?? 99) - (b.serverNumber ?? 99);
+  });
 }
 
 function PickerModal({
