@@ -1,4 +1,5 @@
 import * as Updates from "expo-updates";
+import { reloadAppAsync } from "expo";
 import React, { useEffect, useState, useRef } from "react";
 import {
   View,
@@ -7,12 +8,13 @@ import {
   StyleSheet,
   Animated,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
 
-type BannerState = "idle" | "available" | "downloading" | "ready";
+type BannerState = "idle" | "available" | "downloading" | "ready" | "restarting";
 
 export default function UpdateBanner() {
   const colors = useColors();
@@ -81,9 +83,14 @@ export default function UpdateBanner() {
   };
 
   const handleApply = async () => {
+    setBannerState("restarting");
     try {
       await Updates.reloadAsync();
-    } catch (_) {}
+    } catch (_) {
+      try {
+        await reloadAppAsync();
+      } catch (__) {}
+    }
   };
 
   if (bannerState === "idle") return null;
@@ -99,7 +106,7 @@ export default function UpdateBanner() {
         {/* Icon */}
         <View style={styles.iconBox}>
           <Feather
-            name={bannerState === "ready" ? "refresh-cw" : "download-cloud"}
+            name={bannerState === "ready" || bannerState === "restarting" ? "refresh-cw" : "download-cloud"}
             size={18}
             color="#fff"
           />
@@ -131,6 +138,9 @@ export default function UpdateBanner() {
           {bannerState === "ready" && (
             <Text style={styles.text}>Prêt à installer</Text>
           )}
+          {bannerState === "restarting" && (
+            <Text style={styles.text}>Redémarrage en cours...</Text>
+          )}
         </View>
 
         {/* Actions */}
@@ -149,6 +159,9 @@ export default function UpdateBanner() {
             <TouchableOpacity onPress={handleApply} style={styles.btnNow}>
               <Text style={styles.btnNowText}>Mettre à jour</Text>
             </TouchableOpacity>
+          )}
+          {bannerState === "restarting" && (
+            <ActivityIndicator size="small" color="#fff" />
           )}
         </View>
       </View>
