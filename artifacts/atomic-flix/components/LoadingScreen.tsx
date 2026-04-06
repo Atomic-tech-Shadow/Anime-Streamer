@@ -312,6 +312,13 @@ export default function LoadingScreen({ label, fullscreen = true, style }: Loadi
           <Text style={[styles.tagline, { color: colors.neonBlue }]}>STREAMING SANS LIMITES</Text>
           <View style={[styles.dividerLine, { backgroundColor: colors.neonPurple + "50" }]} />
         </Animated.View>
+
+        <Animated.Text
+          style={[styles.creditText, { color: colors.mutedForeground, opacity: taglineOpacity }]}
+        >
+          by{" "}
+          <Text style={{ color: colors.neonPurple, fontWeight: "700" }}>Shadow</Text>
+        </Animated.Text>
       </Animated.View>
 
       {/* ── Page label (e.g. "Historique") ──────────────────────────── */}
@@ -320,17 +327,6 @@ export default function LoadingScreen({ label, fullscreen = true, style }: Loadi
           {label}
         </Animated.Text>
       )}
-
-      {/* ── Credit ───────────────────────────────────────────────────── */}
-      <Animated.Text
-        style={[
-          styles.creditText,
-          { color: colors.mutedForeground, opacity: taglineOpacity },
-        ]}
-      >
-        by{" "}
-        <Text style={{ color: colors.neonPurple, fontWeight: "700" }}>Shadow</Text>
-      </Animated.Text>
 
       {/* ── Bottom scan bar ──────────────────────────────────────────── */}
       <View style={[styles.scanBarTrack, { width: BAR_W, borderColor: colors.neonPurple + "25" }]}>
@@ -448,11 +444,11 @@ const styles = StyleSheet.create({
   },
 
   creditText: {
-    position: "absolute",
-    bottom: 80,
-    fontSize: 12,
+    marginTop: 8,
+    fontSize: 11,
     fontWeight: "400",
-    letterSpacing: 1.5,
+    letterSpacing: 2,
+    textAlign: "center",
   },
 
   // Scan bar
