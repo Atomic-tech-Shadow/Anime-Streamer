@@ -713,7 +713,6 @@ export default function PlayerScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.epNavCurrent, { backgroundColor: colors.card, borderColor: colors.border }]}
                 onPress={async () => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   if (isLandscape) {
@@ -726,7 +725,17 @@ export default function PlayerScreen() {
                 }}
                 activeOpacity={0.8}
               >
-                <Feather name={isLandscape ? "rotate-ccw" : "rotate-cw"} size={20} color={colors.neonPurple} />
+                <LinearGradient
+                  colors={[colors.neonPurple, colors.neonBlue]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.rotateBtn}
+                >
+                  <Feather name={isLandscape ? "smartphone" : "monitor"} size={16} color="#fff" />
+                  <Text style={styles.rotateBtnText}>
+                    {isLandscape ? "Portrait" : "Paysage"}
+                  </Text>
+                </LinearGradient>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -849,6 +858,12 @@ const styles = StyleSheet.create({
     borderRadius: 12, borderWidth: 1, alignItems: "center", justifyContent: "center",
   },
   epNavCurrentText: { fontSize: 12, fontWeight: "800" as const, letterSpacing: 0.5 },
+  rotateBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center",
+    gap: 6, paddingHorizontal: 16, paddingVertical: 12,
+    borderRadius: 12,
+  },
+  rotateBtnText: { color: "#fff", fontSize: 12, fontWeight: "700" as const, letterSpacing: 0.3 },
 
   fsOverlay: {
     position: "absolute",
