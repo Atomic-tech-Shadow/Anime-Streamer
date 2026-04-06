@@ -58,6 +58,7 @@
   },
   "dependencies": {
     "babel-preset-expo": "^55.0.15",
+    "expo-screen-orientation": "^9.0.8",
     "expo-updates": "~29.0.16",
     "react-native-webview": "13.13.5"
   }

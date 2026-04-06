@@ -10,8 +10,8 @@ import {
   Modal,
   FlatList,
   Animated,
-  useWindowDimensions,
 } from "react-native";
+import * as ScreenOrientation from "expo-screen-orientation";
 import { Image } from "expo-image";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams } from "expo-router";
@@ -348,34 +348,24 @@ export default function PlayerScreen() {
   const controlsTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
   const controlsOnRef  = useRef(false);
 
-  const { width: SW, height: SH } = useWindowDimensions();
-  const MINI_W = 190;
-  const MINI_H = Math.round((MINI_W * 9) / 16);
-  const MINI_MARGIN = 14;
+  const [isLandscape, setIsLandscape] = useState(false);
 
-  const [isMini, setIsMini] = useState(false);
-  const [playerPos, setPlayerPos] = useState({ x: 16, y: 340, width: SW - 32, height: Math.round((SW - 32) * 9 / 16) });
-  const placeholderRef = useRef<View>(null);
-  const miniAnim = useRef(new Animated.Value(0)).current;
-
-  const updatePlayerPos = () => {
-    placeholderRef.current?.measureInWindow((x, y, w, h) => {
-      if (w > 0 && h > 0) setPlayerPos({ x, y, width: w, height: h });
-    });
-  };
-
-  const toggleMini = () => {
+  const toggleRotation = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    const toMini = !isMini;
-    setIsMini(toMini);
-    Animated.spring(miniAnim, {
-      toValue: toMini ? 1 : 0,
-      useNativeDriver: false,
-      tension: 80,
-      friction: 9,
-    }).start();
-    if (!toMini) setTimeout(updatePlayerPos, 80);
+    if (isLandscape) {
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+      setIsLandscape(false);
+    } else {
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+      setIsLandscape(true);
+    }
   };
+
+  useEffect(() => {
+    return () => {
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+    };
+  }, []);
 
   const showVideoControls = () => {
     if (controlsTimer.current) clearTimeout(controlsTimer.current);
@@ -479,12 +469,7 @@ export default function PlayerScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        bounces={false}
-        onScroll={() => { if (!isMini) updatePlayerPos(); }}
-        scrollEventThrottle={16}
-      >
+      <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
 
         {/* ── Hero ── */}
         <View style={styles.hero}>
@@ -662,32 +647,69 @@ export default function PlayerScreen() {
               </TouchableOpacity>
             </View>
           ) : (
-            <View
-              ref={placeholderRef}
-              onLayout={updatePlayerPos}
-              style={[styles.webviewContainer, {
-                borderColor: isMini ? colors.neonPurple + "33" : "transparent",
-                borderStyle: isMini ? "dashed" : "solid",
-              }]}
-            >
-              {isMini ? (
-                <View style={styles.miniPlaceholder}>
-                  <Feather name="minimize-2" size={22} color={colors.neonPurple} />
-                  <Text style={[styles.miniPlaceholderText, { color: colors.mutedForeground }]}>
-                    Mini lecteur actif
-                  </Text>
+            <View>
+              <View style={[styles.webviewContainer, { borderColor: colors.neonPurple + "44" }]}>
+                <WebView
+                  ref={webviewRef}
+                  key={embedUrl}
+                  source={{
+                    uri: embedUrl,
+                    headers: {
+                      Referer: "https://anime-sama.to",
+                      Origin: "https://anime-sama.to",
+                    },
+                  }}
+                  style={styles.webview}
+                  allowsFullscreenVideo
+                  mediaPlaybackRequiresUserAction={false}
+                  javaScriptEnabled
+                  domStorageEnabled
+                  startInLoadingState
+                  setSupportMultipleWindows={false}
+                  allowFileAccess={false}
+                  allowUniversalAccessFromFileURLs={false}
+                  mixedContentMode="always"
+                  originWhitelist={["*"]}
+                  injectedJavaScriptBeforeContentLoaded={INJECTED_JS_BEFORE}
+                  onShouldStartLoadWithRequest={(request) => {
+                    const url = request.url;
+                    if (!url || url === "about:blank" || url.startsWith("blob:")) return true;
+                    if (BLOCKED_SCHEMES.some((s) => url.startsWith(s))) return false;
+                    return isDomainAllowed(url, embedUrl);
+                  }}
+                  onOpenWindow={() => false}
+                  renderLoading={() => (
+                    <View style={[StyleSheet.absoluteFill, styles.webviewLoader, { backgroundColor: colors.card }]}>
+                      <Feather name="loader" size={24} color={colors.neonPurple} />
+                      <Text style={[styles.playerMsg, { color: colors.mutedForeground, marginTop: 10 }]}>Chargement…</Text>
+                    </View>
+                  )}
+                />
+              </View>
+
+              {/* Controls overlay — box-none so WebView keeps its touches */}
+              <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+                <Animated.View style={[styles.fsOverlay, { opacity: controlsAnim }]} pointerEvents="box-none">
+                  {/* Bouton rotation */}
                   <TouchableOpacity
-                    onPress={toggleMini}
-                    activeOpacity={0.8}
-                    style={[styles.miniExpandBtn, { backgroundColor: colors.neonPurple + "22", borderColor: colors.neonPurple + "55" }]}
+                    style={[styles.fsBtn, { backgroundColor: "rgba(0,0,0,0.62)", borderColor: "rgba(255,255,255,0.18)", marginRight: 8 }]}
+                    onPress={toggleRotation}
+                    activeOpacity={0.75}
+                    pointerEvents="auto"
                   >
-                    <Feather name="maximize-2" size={13} color={colors.neonPurple} />
-                    <Text style={[styles.miniExpandBtnText, { color: colors.neonPurple }]}>Agrandir</Text>
+                    <Feather name={isLandscape ? "smartphone" : "rotate-cw"} size={16} color="#fff" />
                   </TouchableOpacity>
-                </View>
-              ) : (
-                <View style={{ flex: 1, backgroundColor: colors.card }} />
-              )}
+                  {/* Bouton plein écran */}
+                  <TouchableOpacity
+                    style={[styles.fsBtn, { backgroundColor: "rgba(0,0,0,0.62)", borderColor: "rgba(255,255,255,0.18)" }]}
+                    onPress={handleFsBtnPress}
+                    activeOpacity={0.75}
+                    pointerEvents="auto"
+                  >
+                    <Feather name="maximize" size={16} color="#fff" />
+                  </TouchableOpacity>
+                </Animated.View>
+              </View>
             </View>
           )}
 
@@ -755,96 +777,6 @@ export default function PlayerScreen() {
         colors={colors}
       />
 
-      {/* ── Floating WebView (always mounted, animates between normal & mini) ── */}
-      {embedUrl && Platform.OS !== "web" && (
-        <Animated.View
-          style={[
-            styles.floatingPlayer,
-            {
-              left: miniAnim.interpolate({ inputRange: [0, 1], outputRange: [playerPos.x, SW - MINI_W - MINI_MARGIN] }),
-              top: miniAnim.interpolate({ inputRange: [0, 1], outputRange: [playerPos.y, SH - MINI_H - MINI_MARGIN - 30] }),
-              width: miniAnim.interpolate({ inputRange: [0, 1], outputRange: [playerPos.width, MINI_W] }),
-              height: miniAnim.interpolate({ inputRange: [0, 1], outputRange: [playerPos.height, MINI_H] }),
-              borderRadius: miniAnim.interpolate({ inputRange: [0, 1], outputRange: [14, 12] }),
-              elevation: miniAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 12] }),
-            },
-          ]}
-        >
-          <WebView
-            ref={webviewRef}
-            key={embedUrl}
-            source={{
-              uri: embedUrl,
-              headers: {
-                Referer: "https://anime-sama.to",
-                Origin: "https://anime-sama.to",
-              },
-            }}
-            style={styles.webview}
-            allowsFullscreenVideo
-            mediaPlaybackRequiresUserAction={false}
-            javaScriptEnabled
-            domStorageEnabled
-            startInLoadingState
-            setSupportMultipleWindows={false}
-            allowFileAccess={false}
-            allowUniversalAccessFromFileURLs={false}
-            mixedContentMode="always"
-            originWhitelist={["*"]}
-            injectedJavaScriptBeforeContentLoaded={INJECTED_JS_BEFORE}
-            onShouldStartLoadWithRequest={(request) => {
-              const url = request.url;
-              if (!url || url === "about:blank" || url.startsWith("blob:")) return true;
-              if (BLOCKED_SCHEMES.some((s) => url.startsWith(s))) return false;
-              return isDomainAllowed(url, embedUrl);
-            }}
-            onOpenWindow={() => false}
-            renderLoading={() => (
-              <View style={[StyleSheet.absoluteFill, styles.webviewLoader, { backgroundColor: colors.card }]}>
-                <Feather name="loader" size={24} color={colors.neonPurple} />
-                <Text style={[styles.playerMsg, { color: colors.mutedForeground, marginTop: 10 }]}>Chargement…</Text>
-              </View>
-            )}
-          />
-
-          {/* Controls quand normal */}
-          {!isMini && (
-            <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-              <Animated.View style={[styles.fsOverlay, { opacity: controlsAnim }]} pointerEvents="box-none">
-                {/* Bouton mini */}
-                <TouchableOpacity
-                  style={[styles.fsBtn, { backgroundColor: "rgba(0,0,0,0.62)", borderColor: "rgba(255,255,255,0.18)", marginRight: 8 }]}
-                  onPress={toggleMini}
-                  activeOpacity={0.75}
-                >
-                  <Feather name="minimize-2" size={16} color="#fff" />
-                </TouchableOpacity>
-                {/* Bouton plein écran */}
-                <TouchableOpacity
-                  style={[styles.fsBtn, { backgroundColor: "rgba(0,0,0,0.62)", borderColor: "rgba(255,255,255,0.18)" }]}
-                  onPress={handleFsBtnPress}
-                  activeOpacity={0.75}
-                >
-                  <Feather name="maximize" size={16} color="#fff" />
-                </TouchableOpacity>
-              </Animated.View>
-            </View>
-          )}
-
-          {/* Controls quand mini */}
-          {isMini && (
-            <View style={styles.miniControls} pointerEvents="box-none">
-              <TouchableOpacity
-                style={[styles.miniControlBtn, { backgroundColor: "rgba(0,0,0,0.7)" }]}
-                onPress={toggleMini}
-                activeOpacity={0.8}
-              >
-                <Feather name="maximize-2" size={13} color="#fff" />
-              </TouchableOpacity>
-            </View>
-          )}
-        </Animated.View>
-      )}
     </View>
   );
 }
@@ -951,56 +883,6 @@ const styles = StyleSheet.create({
   },
   webview: { flex: 1 },
   webviewLoader: { alignItems: "center", justifyContent: "center" },
-
-  floatingPlayer: {
-    position: "absolute",
-    overflow: "hidden",
-    zIndex: 9999,
-    ...Platform.select({
-      ios: { shadowColor: "#000", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.45, shadowRadius: 16 },
-      android: {},
-    }),
-  },
-
-  miniPlaceholder: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-  },
-  miniPlaceholderText: {
-    fontSize: 13,
-    fontWeight: "600" as const,
-  },
-  miniExpandBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    marginTop: 4,
-  },
-  miniExpandBtnText: {
-    fontSize: 12,
-    fontWeight: "700" as const,
-  },
-
-  miniControls: {
-    position: "absolute",
-    top: 6,
-    right: 6,
-    flexDirection: "row",
-    gap: 6,
-  },
-  miniControlBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
 
   modalBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.65)" },
   modalSheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingTop: 14, paddingBottom: 36, paddingHorizontal: 16 },
