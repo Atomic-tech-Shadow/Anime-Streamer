@@ -713,12 +713,23 @@ export default function PlayerScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={async () => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  if (isLandscape) {
-                    await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-                  } else {
-                    await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  if (webviewRef.current) {
+                    webviewRef.current.injectJavaScript(`
+                      (function(){
+                        var v = document.querySelector('video');
+                        if (v) {
+                          if (v.requestFullscreen) v.requestFullscreen();
+                          else if (v.webkitRequestFullscreen) v.webkitRequestFullscreen();
+                          else if (v.webkitEnterFullscreen) v.webkitEnterFullscreen();
+                        } else {
+                          var el = document.documentElement;
+                          if (el.requestFullscreen) el.requestFullscreen();
+                          else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+                        }
+                      })();true;
+                    `);
                   }
                 }}
                 activeOpacity={0.8}
