@@ -690,20 +690,6 @@ export default function PlayerScreen() {
                 />
               </View>
 
-              {/* Controls overlay — box-none so WebView keeps its touches */}
-              <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-                <Animated.View style={[styles.fsOverlay, { opacity: controlsAnim }]} pointerEvents="box-none">
-                  {/* Bouton plein écran */}
-                  <TouchableOpacity
-                    style={[styles.fsBtn, { backgroundColor: "rgba(0,0,0,0.62)", borderColor: "rgba(255,255,255,0.18)" }]}
-                    onPress={handleFsBtnPress}
-                    activeOpacity={0.75}
-                    pointerEvents="auto"
-                  >
-                    <Feather name="maximize" size={16} color="#fff" />
-                  </TouchableOpacity>
-                </Animated.View>
-              </View>
             </View>
           )}
 
