@@ -368,7 +368,7 @@ export default function HomeScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.list}
               keyExtractor={(i) => String(i)}
-              renderItem={() => <SkeletonCard width={110} height={155} />}
+              renderItem={() => <SkeletonCard width={142} height={200} />}
             />
           ) : (
             <FlatList
@@ -384,7 +384,6 @@ export default function HomeScreen() {
                   episode={item.episode ?? item.number}
                   language={item.language}
                   season={item.season}
-                  size="small"
                   onPress={() => handleRecentPress(item)}
                 />
               )}
