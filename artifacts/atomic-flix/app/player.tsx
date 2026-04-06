@@ -15,7 +15,7 @@ import * as ScreenOrientation from "expo-screen-orientation";
 import { Image } from "expo-image";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams } from "expo-router";
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { WebView } from "react-native-webview";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
@@ -731,10 +731,7 @@ export default function PlayerScreen() {
                   end={{ x: 1, y: 1 }}
                   style={styles.rotateBtn}
                 >
-                  <Feather name={isLandscape ? "smartphone" : "monitor"} size={16} color="#fff" />
-                  <Text style={styles.rotateBtnText}>
-                    {isLandscape ? "Portrait" : "Paysage"}
-                  </Text>
+                  <MaterialIcons name="screen-rotation" size={22} color="#fff" />
                 </LinearGradient>
               </TouchableOpacity>
 
@@ -859,11 +856,10 @@ const styles = StyleSheet.create({
   },
   epNavCurrentText: { fontSize: 12, fontWeight: "800" as const, letterSpacing: 0.5 },
   rotateBtn: {
-    flexDirection: "row", alignItems: "center", justifyContent: "center",
-    gap: 6, paddingHorizontal: 16, paddingVertical: 12,
-    borderRadius: 12,
+    width: 46, height: 46,
+    borderRadius: 14,
+    alignItems: "center", justifyContent: "center",
   },
-  rotateBtnText: { color: "#fff", fontSize: 12, fontWeight: "700" as const, letterSpacing: 0.3 },
 
   fsOverlay: {
     position: "absolute",
