@@ -350,19 +350,22 @@ export default function PlayerScreen() {
 
   const [isLandscape, setIsLandscape] = useState(false);
 
-  const toggleRotation = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    if (isLandscape) {
-      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-      setIsLandscape(false);
-    } else {
-      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
-      setIsLandscape(true);
-    }
-  };
-
   useEffect(() => {
+    // Déverrouiller la rotation quand on entre dans le player
+    ScreenOrientation.unlockAsync();
+
+    // Écouter les changements d'orientation
+    const sub = ScreenOrientation.addOrientationChangeListener((e) => {
+      const o = e.orientationInfo.orientation;
+      const landscape =
+        o === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
+        o === ScreenOrientation.Orientation.LANDSCAPE_RIGHT;
+      setIsLandscape(landscape);
+    });
+
     return () => {
+      // Reverrouiller en portrait quand on quitte le player
+      ScreenOrientation.removeOrientationChangeListener(sub);
       ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
     };
   }, []);
@@ -690,14 +693,23 @@ export default function PlayerScreen() {
               {/* Controls overlay — box-none so WebView keeps its touches */}
               <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
                 <Animated.View style={[styles.fsOverlay, { opacity: controlsAnim }]} pointerEvents="box-none">
-                  {/* Bouton rotation */}
+                  {/* Bouton rotation manuelle */}
                   <TouchableOpacity
                     style={[styles.fsBtn, { backgroundColor: "rgba(0,0,0,0.62)", borderColor: "rgba(255,255,255,0.18)", marginRight: 8 }]}
-                    onPress={toggleRotation}
+                    onPress={async () => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      if (isLandscape) {
+                        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+                        setTimeout(() => ScreenOrientation.unlockAsync(), 800);
+                      } else {
+                        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+                        setTimeout(() => ScreenOrientation.unlockAsync(), 800);
+                      }
+                    }}
                     activeOpacity={0.75}
                     pointerEvents="auto"
                   >
-                    <Feather name={isLandscape ? "smartphone" : "rotate-cw"} size={16} color="#fff" />
+                    <Feather name={isLandscape ? "rotate-ccw" : "rotate-cw"} size={16} color="#fff" />
                   </TouchableOpacity>
                   {/* Bouton plein écran */}
                   <TouchableOpacity
