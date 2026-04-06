@@ -85,10 +85,10 @@ export default function UpdateBanner() {
   const handleApply = async () => {
     setBannerState("restarting");
     try {
-      await Updates.reloadAsync();
+      await reloadAppAsync();
     } catch (_) {
       try {
-        await reloadAppAsync();
+        await Updates.reloadAsync();
       } catch (__) {}
     }
   };
