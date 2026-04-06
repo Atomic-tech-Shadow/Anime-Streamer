@@ -3,7 +3,7 @@
     "name": "ATOMIC FLIX",
     "slug": "atomic-flix",
     "owner": "cidmarco",
-    "version": "1.3.0",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon_preview.png",
     "scheme": "atomic-flix",
@@ -30,7 +30,7 @@
       "backgroundColor": "#08080F",
       "package": "com.atomicflix.app",
       "usesCleartextTraffic": true,
-      "versionCode": 1,
+      "versionCode": 2,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon_preview.png",
         "backgroundColor": "#08080F"
