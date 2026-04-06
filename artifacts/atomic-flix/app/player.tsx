@@ -713,8 +713,9 @@ export default function PlayerScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={() => {
+                onPress={async () => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
                   if (webviewRef.current) {
                     webviewRef.current.injectJavaScript(`
                       (function(){
