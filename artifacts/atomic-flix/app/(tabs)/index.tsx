@@ -320,6 +320,37 @@ export default function HomeScreen() {
         )}
 
         <View style={styles.section}>
+          <SectionHeader title="✨ Pépites" accent />
+          {loadingPopular ? (
+            <FlatList
+              data={[1, 2, 3, 4]}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.list}
+              keyExtractor={(i) => `skel-pep-${i}`}
+              renderItem={() => <SkeletonCard width={140} height={198} />}
+            />
+          ) : (
+            <FlatList
+              data={pepitesList.length > 0 ? pepitesList : popularList}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.list}
+              keyExtractor={(item, i) => `pep-${i}-${getAnimeId(item)}`}
+              renderItem={({ item }) => (
+                <AnimeCard
+                  title={getAnimeTitle(item)}
+                  image={getAnimeImage(item)}
+                  type={item.type ?? item.category}
+                  onPress={() => handleAnimePress(item)}
+                  badge={item.type ?? item.category}
+                />
+              )}
+            />
+          )}
+        </View>
+
+        <View style={styles.section}>
           <SectionHeader title="Ajouts récents" accent />
           {loadingRecent ? (
             <FlatList
