@@ -111,10 +111,10 @@ export default function HomeScreen() {
     const combined: any[] = [];
     const max = Math.max(pepitesList.length, classiquesList.length);
     for (let i = 0; i < max; i++) {
-      if (pepitesList[i]) combined.push(pepitesList[i]);
       if (classiquesList[i]) combined.push(classiquesList[i]);
+      if (pepitesList[i]) combined.push(pepitesList[i]);
     }
-    return combined.slice(0, 10);
+    return combined;
   }, [pepitesList, classiquesList]);
 
   const [featuredIndex, setFeaturedIndex] = useState(0);
