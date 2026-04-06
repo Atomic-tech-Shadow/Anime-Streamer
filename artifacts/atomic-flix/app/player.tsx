@@ -348,23 +348,30 @@ export default function PlayerScreen() {
   const controlsTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
   const controlsOnRef  = useRef(false);
 
-  const [isLandscape, setIsLandscape] = useState(false);
+  const [isLandscape, setIsLandscape]   = useState(false);
+  const forceLandscapeRef               = useRef(false);
 
   useEffect(() => {
-    // Déverrouiller la rotation quand on entre dans le player
     ScreenOrientation.unlockAsync();
 
-    // Écouter les changements d'orientation
     const sub = ScreenOrientation.addOrientationChangeListener((e) => {
       const o = e.orientationInfo.orientation;
       const landscape =
         o === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
         o === ScreenOrientation.Orientation.LANDSCAPE_RIGHT;
+
+      // Si l'utilisateur a verrouillé le paysage et que le système tente
+      // de revenir en portrait (ex: sortie du player natif), on re-verrouille.
+      if (forceLandscapeRef.current && !landscape) {
+        ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+        return;
+      }
+
       setIsLandscape(landscape);
     });
 
     return () => {
-      // Reverrouiller en portrait quand on quitte le player
+      forceLandscapeRef.current = false;
       ScreenOrientation.removeOrientationChangeListener(sub);
       ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
     };
@@ -715,22 +722,14 @@ export default function PlayerScreen() {
               <TouchableOpacity
                 onPress={async () => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
-                  if (webviewRef.current) {
-                    webviewRef.current.injectJavaScript(`
-                      (function(){
-                        var v = document.querySelector('video');
-                        if (v) {
-                          if (v.requestFullscreen) v.requestFullscreen();
-                          else if (v.webkitRequestFullscreen) v.webkitRequestFullscreen();
-                          else if (v.webkitEnterFullscreen) v.webkitEnterFullscreen();
-                        } else {
-                          var el = document.documentElement;
-                          if (el.requestFullscreen) el.requestFullscreen();
-                          else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-                        }
-                      })();true;
-                    `);
+                  if (forceLandscapeRef.current) {
+                    forceLandscapeRef.current = false;
+                    await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+                    setIsLandscape(false);
+                  } else {
+                    forceLandscapeRef.current = true;
+                    await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+                    setIsLandscape(true);
                   }
                 }}
                 activeOpacity={0.8}
