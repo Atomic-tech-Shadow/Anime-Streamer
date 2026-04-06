@@ -13,6 +13,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import * as ScreenOrientation from "expo-screen-orientation";
+import { useKeepAwake } from "expo-keep-awake";
 import { Image } from "expo-image";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams } from "expo-router";
@@ -334,6 +335,7 @@ function PickerModal({
 }
 
 export default function PlayerScreen() {
+  useKeepAwake();
   const colors = useColors();
   const {
     title,
