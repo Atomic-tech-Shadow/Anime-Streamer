@@ -108,7 +108,13 @@ export default function HomeScreen() {
   const recoList = getRecoList(recommendations);
 
   const featuredList = useMemo(() => {
-    return classiquesList.length > 0 ? classiquesList : [];
+    if (classiquesList.length === 0) return [];
+    const shuffled = [...classiquesList];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
   }, [classiquesList]);
 
   const [featuredIndex, setFeaturedIndex] = useState(0);
