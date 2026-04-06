@@ -108,14 +108,8 @@ export default function HomeScreen() {
   const recoList = getRecoList(recommendations);
 
   const featuredList = useMemo(() => {
-    const combined: any[] = [];
-    const max = Math.max(pepitesList.length, classiquesList.length);
-    for (let i = 0; i < max; i++) {
-      if (classiquesList[i]) combined.push(classiquesList[i]);
-      if (pepitesList[i]) combined.push(pepitesList[i]);
-    }
-    return combined;
-  }, [pepitesList, classiquesList]);
+    return classiquesList.length > 0 ? classiquesList : [];
+  }, [classiquesList]);
 
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const fadeAnim      = useRef(new Animated.Value(1)).current;
@@ -324,40 +318,6 @@ export default function HomeScreen() {
             />
           </View>
         )}
-
-        <View style={styles.section}>
-          <SectionHeader
-            title="✨ Pépites"
-            accent
-          />
-          {loadingPopular ? (
-            <FlatList
-              data={[1, 2, 3, 4]}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.list}
-              keyExtractor={(i) => `skel-pep-${i}`}
-              renderItem={() => <SkeletonCard width={140} height={198} />}
-            />
-          ) : (
-            <FlatList
-              data={pepitesList.length > 0 ? pepitesList : popularList}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.list}
-              keyExtractor={(item, i) => `pep-${i}-${getAnimeId(item)}`}
-              renderItem={({ item }) => (
-                <AnimeCard
-                  title={getAnimeTitle(item)}
-                  image={getAnimeImage(item)}
-                  type={item.type ?? item.category}
-                  onPress={() => handleAnimePress(item)}
-                  badge={item.type ?? item.category}
-                />
-              )}
-            />
-          )}
-        </View>
 
         <View style={styles.section}>
           <SectionHeader title="Ajouts récents" accent />
