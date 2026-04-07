@@ -2,7 +2,6 @@
   "expo": {
     "name": "ATOMIC FLIX",
     "slug": "atomic-flix",
-    "owner": "cidmarco",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon_preview.png",
@@ -15,7 +14,7 @@
       "backgroundColor": "#08080F"
     },
     "updates": {
-      "url": "https://u.expo.dev/4a82031b-ff3f-479b-9e88-d0d38ff656d8",
+      "url": "https://u.expo.dev/a66c76df-7de1-48d3-ba6f-587b776ba633",
       "enabled": true,
       "checkAutomatically": "ON_LOAD",
       "fallbackToCacheTimeout": 0
@@ -80,8 +79,9 @@
     },
     "extra": {
       "eas": {
-        "projectId": "4a82031b-ff3f-479b-9e88-d0d38ff656d8"
+        "projectId": "a66c76df-7de1-48d3-ba6f-587b776ba633"
       }
-    }
+    },
+    "owner": "marcosoroko"
   }
 }
