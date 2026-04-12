@@ -2,7 +2,7 @@
   "expo": {
     "name": "ATOMIC FLIX",
     "slug": "atomic-flix",
-    "version": "1.0.0",
+    "version": "1.4.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon_preview.png",
     "scheme": "atomic-flix",
@@ -19,7 +19,7 @@
       "checkAutomatically": "ON_LOAD",
       "fallbackToCacheTimeout": 0
     },
-    "runtimeVersion": "1.0.0",
+    "runtimeVersion": "1.4.0",
     "ios": {
       "supportsTablet": false
     },
