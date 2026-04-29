@@ -16,6 +16,10 @@ function NativeTabLayout() {
         <Icon sf={{ default: "house", selected: "house.fill" }} />
         <Label>Accueil</Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="scans">
+        <Icon sf={{ default: "book", selected: "book.fill" }} />
+        <Label>Scans</Label>
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="history">
         <Icon sf={{ default: "clock", selected: "clock.fill" }} />
         <Label>Historique</Label>
@@ -32,6 +36,7 @@ function ClassicTabLayout() {
     >
       <Tabs.Screen name="planning" options={{ title: "Planning"   }} />
       <Tabs.Screen name="index"    options={{ title: "Accueil"    }} />
+      <Tabs.Screen name="scans"    options={{ title: "Scans"      }} />
       <Tabs.Screen name="history"  options={{ title: "Historique" }} />
     </Tabs>
   );

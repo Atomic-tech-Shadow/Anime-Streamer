@@ -22,9 +22,10 @@ interface TabItem {
 }
 
 const TABS: TabItem[] = [
-  { name: "planning", label: "Planning",   icon: "calendar" },
-  { name: "index",    label: "Accueil",    icon: "home"     },
-  { name: "history",  label: "Historique", icon: "clock"    },
+  { name: "planning", label: "Planning",   icon: "calendar"  },
+  { name: "index",    label: "Accueil",    icon: "home"      },
+  { name: "scans",    label: "Scans",      icon: "book-open" },
+  { name: "history",  label: "Historique", icon: "clock"     },
 ];
 
 interface CustomTabBarProps {
