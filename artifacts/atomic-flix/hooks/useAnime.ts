@@ -73,3 +73,33 @@ export function useEpisodes(animeId: string, season: string | number, language: 
 export function useSeasonEpisodes(animeId: string, season: string, language: string) {
   return useEpisodes(animeId, season, language);
 }
+
+// ── Scans (manga / webtoon) ──────────────────────────────────────────────────
+export function useScanChapters(
+  animeId: string,
+  language: string = "VF",
+  season: string = "scan",
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: ["scan-chapters", animeId, season, language],
+    queryFn: () => api.scanChapters(animeId, language, season),
+    enabled: enabled && !!animeId,
+    staleTime: 1000 * 60 * 10,
+  });
+}
+
+export function useScanChapter(
+  animeId: string,
+  chapter: number | string | null | undefined,
+  language: string = "VF",
+  season: string = "scan",
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: ["scan-chapter", animeId, season, language, String(chapter)],
+    queryFn: () => api.scanChapter(animeId, chapter as number | string, language, season),
+    enabled: enabled && !!animeId && chapter !== null && chapter !== undefined && chapter !== "",
+    staleTime: 1000 * 60 * 30,
+  });
+}

@@ -125,15 +125,42 @@ export default function AnimeDetailScreen() {
 
   const seasons = getSeasons(seasonsData);
 
+  const isScanSeason = (s: any): boolean => {
+    if (!s) return false;
+    if (s.contentType === "scan") return true;
+    if (typeof s.value === "string" && s.value.toLowerCase() === "scan") return true;
+    if (typeof s.type === "string" && s.type.toLowerCase().includes("scan")) return true;
+    return false;
+  };
+
   const handleSeasonPress = (idx: number) => {
     const seasonData = seasons[idx];
     if (!seasonData) return;
     const langs: string[] = seasonData?.languages ?? [];
-    const initialLang = langs[0] ?? "VOSTFR";
     const seasonValue = seasonData.value ?? seasonData.url?.split("/")[0] ?? String(seasonData.number ?? idx + 1);
     const seasonLabel = String(seasonData.number ?? idx + 1);
     const seasonType: string = seasonData.type ?? "saison";
     const seasonName: string = seasonData.name ?? "";
+
+    // ── Scan / manga ──────────────────────────────────────────────────────
+    if (isScanSeason(seasonData)) {
+      const scanLang = langs.includes("VF") ? "VF" : (langs[0] ?? "VF");
+      router.push({
+        pathname: "/scan/[id]",
+        params: {
+          id: id ?? "",
+          season: seasonValue,
+          language: scanLang,
+          availableLanguages: langs.join(","),
+          title,
+          image,
+        },
+      });
+      return;
+    }
+
+    // ── Vidéo (anime / film / oav) ────────────────────────────────────────
+    const initialLang = langs[0] ?? "VOSTFR";
     router.push({
       pathname: "/player",
       params: {

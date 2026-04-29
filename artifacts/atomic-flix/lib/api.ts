@@ -35,6 +35,9 @@ export interface Season {
   number?: number;
   languages?: string[];
   url?: string;
+  value?: string;
+  type?: string;
+  contentType?: string;
 }
 
 export interface PlanningEntry {
@@ -52,6 +55,34 @@ export interface EpisodeSource {
   server?: string;
   quality?: string;
   embed?: string;
+}
+
+export interface ScanChapterMeta {
+  number: number;
+  title?: string;
+  pageCount?: number;
+}
+
+export interface ScanChaptersResponse {
+  realName?: string;
+  count?: number;
+  chapters: ScanChapterMeta[];
+  language?: string;
+  season?: string;
+}
+
+export interface ScanChapterFull {
+  number: number;
+  title?: string;
+  pageCount: number;
+  images: string[];
+}
+
+export interface ScanChapterResponse {
+  chapter: ScanChapterFull;
+  realName?: string;
+  language?: string;
+  season?: string;
 }
 
 async function fetchAPI<T>(endpoint: string): Promise<T> {
@@ -84,4 +115,22 @@ export const api = {
 
   embed: (animeUrl: string) =>
     fetchAPI<any>(`/embed?url=${encodeURIComponent(animeUrl)}`),
+
+  // ── Scans (manga / webtoon) ────────────────────────────────────────────────
+  // Liste légère des chapitres (pas d'images chargées)
+  scanChapters: (animeId: string, language: string = "VF", season: string = "scan") =>
+    fetchAPI<ScanChaptersResponse>(
+      `/episodes/${encodeURIComponent(animeId)}?season=${encodeURIComponent(season)}&language=${encodeURIComponent(language)}`
+    ),
+
+  // Charge les images d'un chapitre précis
+  scanChapter: (
+    animeId: string,
+    chapter: number | string,
+    language: string = "VF",
+    season: string = "scan"
+  ) =>
+    fetchAPI<ScanChapterResponse>(
+      `/episodes/${encodeURIComponent(animeId)}?season=${encodeURIComponent(season)}&language=${encodeURIComponent(language)}&chapter=${encodeURIComponent(String(chapter))}`
+    ),
 };
