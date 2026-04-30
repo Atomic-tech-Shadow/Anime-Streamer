@@ -107,9 +107,11 @@ export default function AnimeDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const { id, title: paramTitle, image: paramImage } = useLocalSearchParams<{
-    id: string; title: string; image: string;
+  const { id, title: paramTitle, image: paramImage, scanOnly } = useLocalSearchParams<{
+    id: string; title: string; image: string; scanOnly?: string;
   }>();
+
+  const isScanMode = scanOnly === "1" || scanOnly === "true";
 
   const { data: seasonsData, isLoading } = useSeasons(id ?? "");
 
@@ -123,15 +125,16 @@ export default function AnimeDetailScreen() {
   const year     = seasMeta?.year ?? null;
   const studio   = seasMeta?.studio ?? null;
 
-  const seasons = getSeasons(seasonsData);
-
   const isScanSeason = (s: any): boolean => {
     if (!s) return false;
     if (s.contentType === "scan") return true;
-    if (typeof s.value === "string" && s.value.toLowerCase() === "scan") return true;
+    if (typeof s.value === "string" && s.value.toLowerCase().includes("scan")) return true;
     if (typeof s.type === "string" && s.type.toLowerCase().includes("scan")) return true;
     return false;
   };
+
+  const allSeasons = getSeasons(seasonsData);
+  const seasons = isScanMode ? allSeasons.filter(isScanSeason) : allSeasons;
 
   const handleSeasonPress = (idx: number) => {
     const seasonData = seasons[idx];
@@ -272,20 +275,29 @@ export default function AnimeDetailScreen() {
         ) : null}
 
 
-        {/* ── Saisons et Films ── */}
+        {/* ── Saisons / Scans ── */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <View style={[styles.sectionAccent, { backgroundColor: colors.neonPurple }]} />
-            <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Saisons & Films</Text>
+            <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
+              {isScanMode ? "Éditions disponibles" : "Saisons & Films"}
+            </Text>
           </View>
 
           {isLoading ? (
             <SpinnerLoader style={{ height: 140 }} />
+          ) : seasons.length === 0 ? (
+            <View style={[styles.emptyState, { borderColor: colors.border, backgroundColor: colors.card }]}>
+              <Feather name={isScanMode ? "book-open" : "tv"} size={22} color={colors.mutedForeground} />
+              <Text style={[styles.emptyStateText, { color: colors.mutedForeground }]}>
+                {isScanMode ? "Aucun scan disponible pour ce titre" : "Aucune saison disponible"}
+              </Text>
+            </View>
           ) : (
           <View style={styles.seasonGrid}>
             {seasons.map((s: any, i: number) => {
               const num = s.number ?? i + 1;
-              const name = s.name ?? `Saison ${num}`;
+              const name = s.name ?? (isScanMode ? `Édition ${num}` : `Saison ${num}`);
               const langs: string[] = s.languages ?? [];
               const seasonType: string = s.type ?? "";
               return (
@@ -336,6 +348,15 @@ const styles = StyleSheet.create({
   synopsisText: { fontSize: 14, lineHeight: 24 },
 
   seasonGrid: { flexDirection: "row", flexWrap: "wrap", gap: CARD_GAP },
+  emptyState: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    padding: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  emptyStateText: { fontSize: 13, flex: 1 },
   seasonCard: {
     width: SEASON_CARD_WIDTH, height: SEASON_CARD_HEIGHT,
     borderRadius: 14, overflow: "hidden", justifyContent: "flex-end",
