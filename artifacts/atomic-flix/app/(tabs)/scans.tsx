@@ -168,9 +168,12 @@ export default function ScansScreen() {
     const id = getId(item);
     if (!id) return;
     router.push({
-      pathname: "/anime/[id]",
+      pathname: "/scan/[id]",
       params: {
         id,
+        season: "scan",
+        language: "VF",
+        availableLanguages: "VF",
         title: getTitle(item),
         image: getImage(item) ?? "",
       },
