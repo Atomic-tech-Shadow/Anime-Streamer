@@ -228,7 +228,6 @@ export default function ScanReaderScreen() {
     setProgress(ratio);
   };
 
-  const canPrev = current > 1;
   const canNext = !totalChapters || current < totalChapters;
 
   return (
@@ -282,7 +281,7 @@ export default function ScanReaderScreen() {
             scrollEventThrottle={32}
             contentContainerStyle={{
               paddingTop: insets.top + 60,
-              paddingBottom: insets.bottom + 80,
+              paddingBottom: insets.bottom + 24,
             }}
             ListFooterComponent={
               <View style={[styles.endCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -360,60 +359,6 @@ export default function ScanReaderScreen() {
         </View>
       </Animated.View>
 
-      {/* ── Bottom overlay (prev / next) ──────────────────────────────── */}
-      <Animated.View
-        pointerEvents={showOverlay ? "auto" : "none"}
-        style={[
-          styles.bottomOverlay,
-          { paddingBottom: insets.bottom + 12, opacity: overlayAnim },
-        ]}
-      >
-        <LinearGradient
-          colors={["rgba(8,8,15,0)", "rgba(8,8,15,0.92)"]}
-          style={StyleSheet.absoluteFill}
-        />
-        <View style={styles.bottomRow}>
-          <TouchableOpacity
-            onPress={() => goToChapter(current - 1)}
-            disabled={!canPrev}
-            style={[
-              styles.navBtn,
-              {
-                backgroundColor: colors.card,
-                borderColor: colors.border,
-                opacity: canPrev ? 1 : 0.4,
-              },
-            ]}
-            activeOpacity={0.8}
-          >
-            <Feather name="chevron-left" size={18} color={colors.foreground} />
-            <Text style={[styles.navBtnText, { color: colors.foreground }]}>Précédent</Text>
-          </TouchableOpacity>
-
-          <View style={[styles.chapterPill, { backgroundColor: colors.neonPurple + "1F", borderColor: colors.neonPurple + "55" }]}>
-            <Feather name="book-open" size={12} color={colors.neonPurple} />
-            <Text style={[styles.chapterPillText, { color: colors.neonPurple }]}>{current}</Text>
-          </View>
-
-          <TouchableOpacity
-            onPress={() => goToChapter(current + 1)}
-            disabled={!canNext}
-            style={[
-              styles.navBtn,
-              {
-                backgroundColor: colors.neonPurple,
-                borderColor: colors.neonPurple,
-                opacity: canNext ? 1 : 0.4,
-              },
-            ]}
-            activeOpacity={0.85}
-          >
-            <Text style={[styles.navBtnText, { color: "#fff" }]}>Suivant</Text>
-            <Feather name="chevron-right" size={18} color="#fff" />
-          </TouchableOpacity>
-        </View>
-      </Animated.View>
-
       <ChapterPicker
         visible={showPicker}
         current={current}
@@ -447,28 +392,6 @@ const styles = StyleSheet.create({
     borderRadius: 2, marginTop: 10, overflow: "hidden",
   },
   progressFill: { height: "100%", borderRadius: 2 },
-
-  bottomOverlay: {
-    position: "absolute", left: 0, right: 0, bottom: 0,
-    paddingHorizontal: 14, paddingTop: 18,
-  },
-  bottomRow: {
-    flexDirection: "row", alignItems: "center", gap: 8,
-    justifyContent: "space-between",
-  },
-  navBtn: {
-    flexDirection: "row", alignItems: "center", gap: 6,
-    paddingHorizontal: 14, paddingVertical: 10,
-    borderRadius: 12, borderWidth: 1, flex: 1,
-    justifyContent: "center",
-  },
-  navBtnText: { fontSize: 13, fontWeight: "700" as const },
-  chapterPill: {
-    flexDirection: "row", alignItems: "center", gap: 5,
-    paddingHorizontal: 12, paddingVertical: 10,
-    borderRadius: 12, borderWidth: 1,
-  },
-  chapterPillText: { fontSize: 13, fontWeight: "800" as const, letterSpacing: 0.3 },
 
   endCard: {
     marginHorizontal: 16, marginTop: 16,
