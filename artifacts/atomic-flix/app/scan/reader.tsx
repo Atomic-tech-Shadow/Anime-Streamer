@@ -246,6 +246,31 @@ export default function ScanReaderScreen() {
       showOverlayWithTimeout();
     }
   };
+  const hideOverlay = () => {
+    if (!showOverlay) return;
+    if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
+    animateOverlay(false);
+    setShowOverlay(false);
+  };
+
+  // Tap vs scroll detection — won't steal the responder from FlatList.
+  const touchStartRef = useRef<{ x: number; y: number; t: number } | null>(null);
+  const handleTouchStart = (e: any) => {
+    const t = e.nativeEvent.touches?.[0];
+    if (!t) return;
+    touchStartRef.current = { x: t.pageX, y: t.pageY, t: Date.now() };
+  };
+  const handleTouchEnd = (e: any) => {
+    const start = touchStartRef.current;
+    touchStartRef.current = null;
+    if (!start) return;
+    const t = e.nativeEvent.changedTouches?.[0];
+    if (!t) return;
+    const dx = Math.abs(t.pageX - start.x);
+    const dy = Math.abs(t.pageY - start.y);
+    const dt = Date.now() - start.t;
+    if (dx < 8 && dy < 8 && dt < 250) toggleOverlay();
+  };
   useEffect(() => {
     showOverlayWithTimeout();
     return () => {
@@ -303,7 +328,11 @@ export default function ScanReaderScreen() {
           </View>
         </View>
       ) : (
-        <TouchableOpacity activeOpacity={1} onPress={toggleOverlay} style={{ flex: 1 }}>
+        <View
+          style={{ flex: 1 }}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
           <FlatList
             ref={listRef}
             data={images}
@@ -323,6 +352,7 @@ export default function ScanReaderScreen() {
             showsVerticalScrollIndicator={false}
             onScroll={handleScroll}
             scrollEventThrottle={32}
+            onScrollBeginDrag={hideOverlay}
             getItemLayout={
               allMeasured
                 ? (_, index) => ({
@@ -361,7 +391,7 @@ export default function ScanReaderScreen() {
               </View>
             }
           />
-        </TouchableOpacity>
+        </View>
       )}
 
       {/* ── Top overlay ───────────────────────────────────────────────── */}
