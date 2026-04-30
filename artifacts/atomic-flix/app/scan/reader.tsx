@@ -10,6 +10,7 @@ import {
   FlatList,
   useWindowDimensions,
   ActivityIndicator,
+  Image as RNImage,
 } from "react-native";
 import { Image } from "expo-image";
 import * as Haptics from "expo-haptics";
@@ -21,37 +22,27 @@ import { useColors } from "@/hooks/useColors";
 import { useScanChapter } from "@/hooks/useAnime";
 import SpinnerLoader from "@/components/SpinnerLoader";
 
-interface PageImage {
-  uri: string;
-  ratio: number; // height/width ratio, used while loading
-}
-
 function ScanPage({
   uri,
   width,
+  height,
   colors,
 }: {
   uri: string;
   width: number;
+  height: number;
   colors: any;
 }) {
-  // 0 = loading, ratio when known
-  const [ratio, setRatio] = useState<number>(1.4); // ~A4 default
-
   return (
-    <View style={[styles.pageWrap, { width, backgroundColor: colors.background }]}>
+    <View style={[styles.pageWrap, { width, height, backgroundColor: colors.background }]}>
       <Image
         source={{ uri }}
-        style={{ width, height: width * ratio, backgroundColor: colors.card }}
+        style={{ width, height, backgroundColor: colors.card }}
         contentFit="contain"
         cachePolicy="memory-disk"
-        transition={200}
-        onLoad={(e) => {
-          const src: any = (e as any)?.source;
-          const w = src?.width;
-          const h = src?.height;
-          if (w && h && w > 0) setRatio(h / w);
-        }}
+        transition={120}
+        recyclingKey={uri}
+        priority="high"
       />
     </View>
   );
@@ -171,6 +162,54 @@ export default function ScanReaderScreen() {
   const images: string[] = chapter?.images ?? [];
   const pageCount = chapter?.pageCount ?? images.length;
 
+  // ── Pre-measure all pages + prefetch into cache ────────────────────────
+  // Avoids layout shifts (each page has a fixed height before render) and
+  // makes scrolling feel instant since pages are already in memory/disk.
+  const [heights, setHeights] = useState<number[]>([]);
+  const fallbackHeight = SCREEN_WIDTH * 1.4;
+
+  useEffect(() => {
+    if (images.length === 0) {
+      setHeights([]);
+      return;
+    }
+    let cancelled = false;
+    setHeights([]);
+
+    // Warm the disk/memory cache for every page in parallel.
+    Image.prefetch(images, "memory-disk");
+
+    Promise.all(
+      images.map(
+        (uri) =>
+          new Promise<number>((resolve) => {
+            RNImage.getSize(
+              uri,
+              (w, h) => resolve(w > 0 ? (h / w) * SCREEN_WIDTH : fallbackHeight),
+              () => resolve(fallbackHeight),
+            );
+          }),
+      ),
+    ).then((hs) => {
+      if (!cancelled) setHeights(hs);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [images, SCREEN_WIDTH, fallbackHeight]);
+
+  // Cumulative offsets for getItemLayout (fast, O(1) per call once computed).
+  const offsets = useMemo(() => {
+    const out: number[] = [0];
+    for (let i = 0; i < heights.length; i++) {
+      out.push(out[i] + heights[i]);
+    }
+    return out;
+  }, [heights]);
+
+  const allMeasured = heights.length === images.length && images.length > 0;
+
   // ── Reset progress + scroll to top when chapter changes ────────────────
   useEffect(() => {
     setProgress(0);
@@ -269,16 +308,30 @@ export default function ScanReaderScreen() {
             ref={listRef}
             data={images}
             keyExtractor={(uri, i) => `${current}-${i}`}
-            renderItem={({ item }) => (
-              <ScanPage uri={item} width={SCREEN_WIDTH} colors={colors} />
+            renderItem={({ item, index }) => (
+              <ScanPage
+                uri={item}
+                width={SCREEN_WIDTH}
+                height={heights[index] ?? fallbackHeight}
+                colors={colors}
+              />
             )}
-            initialNumToRender={3}
-            maxToRenderPerBatch={4}
-            windowSize={5}
-            removeClippedSubviews
+            initialNumToRender={6}
+            maxToRenderPerBatch={6}
+            windowSize={11}
+            removeClippedSubviews={false}
             showsVerticalScrollIndicator={false}
             onScroll={handleScroll}
             scrollEventThrottle={32}
+            getItemLayout={
+              allMeasured
+                ? (_, index) => ({
+                    length: heights[index],
+                    offset: offsets[index],
+                    index,
+                  })
+                : undefined
+            }
             contentContainerStyle={{
               paddingTop: insets.top + 60,
               paddingBottom: insets.bottom + 24,
