@@ -18,32 +18,167 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Reanimated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  runOnJS,
+} from "react-native-reanimated";
 import { useColors } from "@/hooks/useColors";
 import { useScanChapter } from "@/hooks/useAnime";
 import SpinnerLoader from "@/components/SpinnerLoader";
+
+const AnimatedImage = Reanimated.createAnimatedComponent(Image);
+const MAX_SCALE = 4;
+const MIN_SCALE = 1;
+const DOUBLE_TAP_SCALE = 2.4;
 
 function ScanPage({
   uri,
   width,
   height,
   colors,
+  onSingleTap,
+  onZoomChange,
 }: {
   uri: string;
   width: number;
   height: number;
   colors: any;
+  onSingleTap: () => void;
+  onZoomChange: (zoomed: boolean) => void;
 }) {
+  const scale = useSharedValue(1);
+  const savedScale = useSharedValue(1);
+  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
+  const savedTranslateX = useSharedValue(0);
+  const savedTranslateY = useSharedValue(0);
+  const focalX = useSharedValue(0);
+  const focalY = useSharedValue(0);
+
+  // Clamp pan so the zoomed image stays within visible bounds.
+  const clampTranslation = (s: number, tx: number, ty: number) => {
+    "worklet";
+    const maxX = Math.max(0, (width * s - width) / 2);
+    const maxY = Math.max(0, (height * s - height) / 2);
+    return {
+      x: Math.min(maxX, Math.max(-maxX, tx)),
+      y: Math.min(maxY, Math.max(-maxY, ty)),
+    };
+  };
+
+  const reportZoom = (zoomed: boolean) => onZoomChange(zoomed);
+
+  const pinch = Gesture.Pinch()
+    .onStart((e) => {
+      focalX.value = e.focalX - width / 2;
+      focalY.value = e.focalY - height / 2;
+    })
+    .onUpdate((e) => {
+      const next = Math.min(MAX_SCALE, Math.max(0.8, savedScale.value * e.scale));
+      scale.value = next;
+    })
+    .onEnd(() => {
+      if (scale.value < MIN_SCALE) {
+        scale.value = withTiming(MIN_SCALE, { duration: 180 });
+        translateX.value = withTiming(0, { duration: 180 });
+        translateY.value = withTiming(0, { duration: 180 });
+        savedScale.value = MIN_SCALE;
+        savedTranslateX.value = 0;
+        savedTranslateY.value = 0;
+        runOnJS(reportZoom)(false);
+      } else {
+        savedScale.value = scale.value;
+        const c = clampTranslation(scale.value, translateX.value, translateY.value);
+        translateX.value = withTiming(c.x, { duration: 120 });
+        translateY.value = withTiming(c.y, { duration: 120 });
+        savedTranslateX.value = c.x;
+        savedTranslateY.value = c.y;
+        runOnJS(reportZoom)(scale.value > 1.02);
+      }
+    });
+
+  // Pan only activates when zoomed in (so vertical scroll still works at 1x).
+  const pan = Gesture.Pan()
+    .minPointers(1)
+    .maxPointers(1)
+    .averageTouches(true)
+    .onStart(() => {
+      savedTranslateX.value = translateX.value;
+      savedTranslateY.value = translateY.value;
+    })
+    .onUpdate((e) => {
+      if (scale.value <= 1.02) return;
+      const c = clampTranslation(
+        scale.value,
+        savedTranslateX.value + e.translationX,
+        savedTranslateY.value + e.translationY,
+      );
+      translateX.value = c.x;
+      translateY.value = c.y;
+    });
+
+  const doubleTap = Gesture.Tap()
+    .numberOfTaps(2)
+    .maxDelay(220)
+    .onEnd((e) => {
+      if (scale.value > 1.02) {
+        scale.value = withTiming(1, { duration: 200 });
+        translateX.value = withTiming(0, { duration: 200 });
+        translateY.value = withTiming(0, { duration: 200 });
+        savedScale.value = 1;
+        savedTranslateX.value = 0;
+        savedTranslateY.value = 0;
+        runOnJS(reportZoom)(false);
+      } else {
+        const cx = e.x - width / 2;
+        const cy = e.y - height / 2;
+        const tx = -cx * (DOUBLE_TAP_SCALE - 1);
+        const ty = -cy * (DOUBLE_TAP_SCALE - 1);
+        const c = clampTranslation(DOUBLE_TAP_SCALE, tx, ty);
+        scale.value = withTiming(DOUBLE_TAP_SCALE, { duration: 200 });
+        translateX.value = withTiming(c.x, { duration: 200 });
+        translateY.value = withTiming(c.y, { duration: 200 });
+        savedScale.value = DOUBLE_TAP_SCALE;
+        savedTranslateX.value = c.x;
+        savedTranslateY.value = c.y;
+        runOnJS(reportZoom)(true);
+      }
+    });
+
+  const singleTap = Gesture.Tap()
+    .numberOfTaps(1)
+    .maxDelay(220)
+    .onEnd(() => {
+      runOnJS(onSingleTap)();
+    });
+
+  const tap = Gesture.Exclusive(doubleTap, singleTap);
+  const composed = Gesture.Simultaneous(pinch, pan, tap);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: translateX.value },
+      { translateY: translateY.value },
+      { scale: scale.value },
+    ],
+  }));
+
   return (
-    <View style={[styles.pageWrap, { width, height, backgroundColor: colors.background }]}>
-      <Image
-        source={{ uri }}
-        style={{ width, height, backgroundColor: colors.card }}
-        contentFit="contain"
-        cachePolicy="memory-disk"
-        transition={120}
-        recyclingKey={uri}
-        priority="high"
-      />
+    <View style={[styles.pageWrap, { width, height, backgroundColor: colors.background, overflow: "hidden" }]}>
+      <GestureDetector gesture={composed}>
+        <AnimatedImage
+          source={{ uri }}
+          style={[{ width, height, backgroundColor: colors.card }, animatedStyle]}
+          contentFit="contain"
+          cachePolicy="memory-disk"
+          transition={120}
+          recyclingKey={uri}
+          priority="high"
+        />
+      </GestureDetector>
     </View>
   );
 }
@@ -253,23 +388,14 @@ export default function ScanReaderScreen() {
     setShowOverlay(false);
   };
 
-  // Tap vs scroll detection — won't steal the responder from FlatList.
-  const touchStartRef = useRef<{ x: number; y: number; t: number } | null>(null);
-  const handleTouchStart = (e: any) => {
-    const t = e.nativeEvent.touches?.[0];
-    if (!t) return;
-    touchStartRef.current = { x: t.pageX, y: t.pageY, t: Date.now() };
-  };
-  const handleTouchEnd = (e: any) => {
-    const start = touchStartRef.current;
-    touchStartRef.current = null;
-    if (!start) return;
-    const t = e.nativeEvent.changedTouches?.[0];
-    if (!t) return;
-    const dx = Math.abs(t.pageX - start.x);
-    const dy = Math.abs(t.pageY - start.y);
-    const dt = Date.now() - start.t;
-    if (dx < 8 && dy < 8 && dt < 250) toggleOverlay();
+  // True when any page is currently zoomed in — disables list scroll so
+  // single-finger pan moves the zoomed image instead of scrolling chapters.
+  const [anyPageZoomed, setAnyPageZoomed] = useState(false);
+  const zoomedPagesRef = useRef<Set<string>>(new Set());
+  const handlePageZoom = (uri: string, zoomed: boolean) => {
+    if (zoomed) zoomedPagesRef.current.add(uri);
+    else zoomedPagesRef.current.delete(uri);
+    setAnyPageZoomed(zoomedPagesRef.current.size > 0);
   };
   useEffect(() => {
     showOverlayWithTimeout();
@@ -328,11 +454,7 @@ export default function ScanReaderScreen() {
           </View>
         </View>
       ) : (
-        <View
-          style={{ flex: 1 }}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-        >
+        <View style={{ flex: 1 }}>
           <FlatList
             ref={listRef}
             data={images}
@@ -343,8 +465,11 @@ export default function ScanReaderScreen() {
                 width={SCREEN_WIDTH}
                 height={heights[index] ?? fallbackHeight}
                 colors={colors}
+                onSingleTap={toggleOverlay}
+                onZoomChange={(z) => handlePageZoom(item, z)}
               />
             )}
+            scrollEnabled={!anyPageZoomed}
             initialNumToRender={6}
             maxToRenderPerBatch={6}
             windowSize={11}
