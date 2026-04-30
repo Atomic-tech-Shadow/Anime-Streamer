@@ -2,7 +2,7 @@
   "expo": {
     "name": "ATOMIC FLIX",
     "slug": "atomic-flix",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon_preview.png",
     "scheme": "atomic-flix",
@@ -19,7 +19,7 @@
       "checkAutomatically": "ON_LOAD",
       "fallbackToCacheTimeout": 0
     },
-    "runtimeVersion": "1.4.0",
+    "runtimeVersion": "1.5.0",
     "ios": {
       "supportsTablet": false
     },
@@ -27,7 +27,7 @@
       "backgroundColor": "#08080F",
       "package": "com.atomicflix.app",
       "usesCleartextTraffic": true,
-      "versionCode": 2,
+      "versionCode": 3,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon_preview.png",
         "backgroundColor": "#08080F"
