@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Animated,
   Platform,
   Modal,
   FlatList,
@@ -39,14 +38,12 @@ function ScanPage({
   width,
   height,
   colors,
-  onSingleTap,
   onZoomChange,
 }: {
   uri: string;
   width: number;
   height: number;
   colors: any;
-  onSingleTap: () => void;
   onZoomChange: (zoomed: boolean) => void;
 }) {
   const scale = useSharedValue(1);
@@ -148,15 +145,7 @@ function ScanPage({
       }
     });
 
-  const singleTap = Gesture.Tap()
-    .numberOfTaps(1)
-    .maxDelay(220)
-    .onEnd(() => {
-      runOnJS(onSingleTap)();
-    });
-
-  const tap = Gesture.Exclusive(doubleTap, singleTap);
-  const composed = Gesture.Simultaneous(pinch, pan, tap);
+  const composed = Gesture.Simultaneous(pinch, pan, doubleTap);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
@@ -276,10 +265,7 @@ export default function ScanReaderScreen() {
   const totalChapters  = parseInt(totalParam ?? "0", 10) || 0;
   const [current, setCurrent]     = useState(initialChapter);
   const [progress, setProgress]   = useState(0);
-  const [showOverlay, setShowOverlay] = useState(true);
-  const [showPicker, setShowPicker]   = useState(false);
-
-  const overlayAnim = useRef(new Animated.Value(1)).current;
+  const [showPicker, setShowPicker] = useState(false);
   const listRef = useRef<FlatList<any>>(null);
 
   const seasonValue = season ?? "scan";
@@ -353,41 +339,6 @@ export default function ScanReaderScreen() {
     });
   }, [current]);
 
-  // ── Toggle overlay (auto hide after 2.5s) ──────────────────────────────
-  const overlayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const animateOverlay = (visible: boolean) => {
-    Animated.timing(overlayAnim, {
-      toValue: visible ? 1 : 0,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
-  };
-  const showOverlayWithTimeout = () => {
-    setShowOverlay(true);
-    animateOverlay(true);
-    if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
-    overlayTimerRef.current = setTimeout(() => {
-      animateOverlay(false);
-      setShowOverlay(false);
-    }, 2800);
-  };
-  const toggleOverlay = () => {
-    Haptics.selectionAsync();
-    if (showOverlay) {
-      if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
-      animateOverlay(false);
-      setShowOverlay(false);
-    } else {
-      showOverlayWithTimeout();
-    }
-  };
-  const hideOverlay = () => {
-    if (!showOverlay) return;
-    if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
-    animateOverlay(false);
-    setShowOverlay(false);
-  };
-
   // True when any page is currently zoomed in — disables list scroll so
   // single-finger pan moves the zoomed image instead of scrolling chapters.
   const [anyPageZoomed, setAnyPageZoomed] = useState(false);
@@ -397,12 +348,6 @@ export default function ScanReaderScreen() {
     else zoomedPagesRef.current.delete(uri);
     setAnyPageZoomed(zoomedPagesRef.current.size > 0);
   };
-  useEffect(() => {
-    showOverlayWithTimeout();
-    return () => {
-      if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
-    };
-  }, [current]);
 
   const goToChapter = (n: number) => {
     if (totalChapters && (n < 1 || n > totalChapters)) return;
@@ -465,7 +410,6 @@ export default function ScanReaderScreen() {
                 width={SCREEN_WIDTH}
                 height={heights[index] ?? fallbackHeight}
                 colors={colors}
-                onSingleTap={toggleOverlay}
                 onZoomChange={(z) => handlePageZoom(item, z)}
               />
             )}
@@ -477,7 +421,6 @@ export default function ScanReaderScreen() {
             showsVerticalScrollIndicator={false}
             onScroll={handleScroll}
             scrollEventThrottle={32}
-            onScrollBeginDrag={hideOverlay}
             getItemLayout={
               allMeasured
                 ? (_, index) => ({
@@ -519,14 +462,8 @@ export default function ScanReaderScreen() {
         </View>
       )}
 
-      {/* ── Top overlay ───────────────────────────────────────────────── */}
-      <Animated.View
-        pointerEvents={showOverlay ? "auto" : "none"}
-        style={[
-          styles.topOverlay,
-          { paddingTop: insets.top + 6, opacity: overlayAnim },
-        ]}
-      >
+      {/* ── Top bar (permanent) ────────────────────────────────────────── */}
+      <View style={[styles.topOverlay, { paddingTop: insets.top + 6 }]}>
         <LinearGradient
           colors={["rgba(8,8,15,0.92)", "rgba(8,8,15,0)"]}
           style={StyleSheet.absoluteFill}
@@ -565,7 +502,7 @@ export default function ScanReaderScreen() {
             ]}
           />
         </View>
-      </Animated.View>
+      </View>
 
       <ChapterPicker
         visible={showPicker}
