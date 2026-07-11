@@ -211,22 +211,6 @@ export default function AnimeDetailScreen() {
           />
 
           <View style={styles.heroContent}>
-            {/* Genre pills */}
-            {genres.length > 0 && (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.genreList}
-                style={{ marginBottom: 12 }}
-              >
-                {genres.map((g, i) => (
-                  <View key={i} style={[styles.genreBadge, { backgroundColor: "rgba(255,255,255,0.10)", borderColor: "rgba(255,255,255,0.18)" }]}>
-                    <Text style={styles.genreText}>{g}</Text>
-                  </View>
-                ))}
-              </ScrollView>
-            )}
-
             <Text style={styles.heroTitle} numberOfLines={2}>{title}</Text>
 
             {/* Meta badges */}
@@ -274,6 +258,27 @@ export default function AnimeDetailScreen() {
           </View>
         ) : null}
 
+
+        {/* ── Genres ── */}
+        {genres.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <View style={[styles.sectionAccent, { backgroundColor: colors.neonPink }]} />
+              <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Genres</Text>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.genreList}
+            >
+              {genres.map((g, i) => (
+                <View key={i} style={[styles.genreBadge, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                  <Text style={[styles.genreText, { color: colors.mutedForeground }]}>{g}</Text>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        )}
 
         {/* ── Saisons / Scans ── */}
         <View style={styles.section}>
