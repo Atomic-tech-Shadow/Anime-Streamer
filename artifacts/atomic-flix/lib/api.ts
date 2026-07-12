@@ -85,10 +85,32 @@ export interface ScanChapterResponse {
   season?: string;
 }
 
+/** Fusionne les genres fragmentés par l'API (ex: ["Science","fiction"] → ["Science-fiction"]) */
+function fixGenres(genres: string[]): string[] {
+  const result: string[] = [];
+  for (let i = 0; i < genres.length; i++) {
+    const cur = genres[i];
+    const next = genres[i + 1];
+    // Si le fragment suivant commence par une minuscule, c'est la suite du précédent
+    if (next && /^[a-zàâçéèêëîïôùûü]/.test(next)) {
+      result.push(cur + "-" + next);
+      i++; // saute le fragment suivant
+    } else {
+      result.push(cur);
+    }
+  }
+  return result;
+}
+
 async function fetchAPI<T>(endpoint: string): Promise<T> {
   const res = await fetch(`${BASE_URL}${endpoint}`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
-  return res.json();
+  const data = await res.json();
+  // Corrige les genres fragmentés si présents
+  if (data && Array.isArray(data.genres)) {
+    data.genres = fixGenres(data.genres);
+  }
+  return data;
 }
 
 export const api = {
