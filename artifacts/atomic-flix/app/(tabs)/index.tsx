@@ -293,8 +293,9 @@ export default function HomeScreen() {
                     style={[
                       styles.dot,
                       {
-                        backgroundColor: i === featuredIndex ? colors.neonPurple : colors.border,
-                        width: i === featuredIndex ? 18 : 6,
+                        backgroundColor: i === featuredIndex ? colors.neonPurple : "rgba(255,255,255,0.35)",
+                        width: i === featuredIndex ? 20 : 6,
+                        opacity: i === featuredIndex ? 1 : 0.9,
                       },
                     ]}
                   />

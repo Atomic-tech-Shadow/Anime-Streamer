@@ -31,19 +31,17 @@ export default function HeroBanner({ title, image, type, onPress, onPlay }: Hero
   const handlePressIn  = () => Animated.spring(pressScale, { toValue: 0.975, useNativeDriver: true, tension: 120, friction: 8 }).start();
   const handlePressOut = () => Animated.spring(pressScale, { toValue: 1,     useNativeDriver: true, tension: 120, friction: 8 }).start();
 
-  // ── Ken Burns: image zooms 1 → 1.08 → 1 in loop ──
+  // ── Ken Burns: image zooms 1 → 1.08 → 1 en boucle native (pas de callback JS) ──
   const kenBurns = useRef(new Animated.Value(1)).current;
   useEffect(() => {
-    let stopped = false;
-    const loop = () => {
-      if (stopped) return;
+    const anim = Animated.loop(
       Animated.sequence([
         Animated.timing(kenBurns, { toValue: 1.08, duration: 9000, useNativeDriver: true }),
         Animated.timing(kenBurns, { toValue: 1,    duration: 9000, useNativeDriver: true }),
-      ]).start(({ finished }) => { if (finished) loop(); });
-    };
-    loop();
-    return () => { stopped = true; };
+      ])
+    );
+    anim.start();
+    return () => anim.stop();
   }, []);
 
   // ── Staggered entrance: reset & replay on each new title ──
