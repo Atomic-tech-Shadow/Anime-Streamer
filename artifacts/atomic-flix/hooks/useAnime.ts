@@ -120,5 +120,10 @@ export function useScanChapter(
     queryFn: () => api.scanChapter(animeId, chapter as number | string, language, season),
     enabled: enabled && !!animeId && chapter !== null && chapter !== undefined && chapter !== "",
     staleTime: 1000 * 60 * 30,
+    // L'API de scraping upstream renvoie des 500 intermittents sur cette route
+    // (le scraping d'anime-sama.to échoue parfois sans raison liée à l'app).
+    // On retente plusieurs fois avec un backoff avant d'afficher une erreur.
+    retry: 4,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
   });
 }

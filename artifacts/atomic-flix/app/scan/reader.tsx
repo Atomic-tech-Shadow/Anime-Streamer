@@ -54,6 +54,12 @@ function ScanPage({
   const savedTranslateY = useSharedValue(0);
   const focalX = useSharedValue(0);
   const focalY = useSharedValue(0);
+  // Plain JS state (not a shared value) so it can gate .enabled() on the pan
+  // gesture below. Without this, the single-finger Pan gesture claims every
+  // touch — even at 1x zoom where it's a no-op — which steals the touch from
+  // the parent FlatList and makes normal one-finger scrolling stop working
+  // (only two-finger drags reach the list).
+  const [isZoomed, setIsZoomed] = useState(false);
 
   // Clamp pan so the zoomed image stays within visible bounds.
   const clampTranslation = (s: number, tx: number, ty: number) => {
@@ -66,7 +72,10 @@ function ScanPage({
     };
   };
 
-  const reportZoom = (zoomed: boolean) => onZoomChange(zoomed);
+  const reportZoom = (zoomed: boolean) => {
+    setIsZoomed(zoomed);
+    onZoomChange(zoomed);
+  };
 
   const pinch = Gesture.Pinch()
     .onStart((e) => {
@@ -98,7 +107,11 @@ function ScanPage({
     });
 
   // Pan only activates when zoomed in (so vertical scroll still works at 1x).
+  // `.enabled()` fully disables gesture recognition at 1x zoom, so the
+  // touch is never claimed here and falls through to the parent FlatList's
+  // native scroll responder — that's what makes one-finger scroll work again.
   const pan = Gesture.Pan()
+    .enabled(isZoomed)
     .minPointers(1)
     .maxPointers(1)
     .averageTouches(true)
