@@ -229,6 +229,17 @@ export default function HistoryScreen() {
           />
         )}
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+        ListFooterComponent={
+          <View style={styles.creditFooter}>
+            <View style={[styles.creditDivider, { backgroundColor: colors.border }]} />
+            <Text style={[styles.creditFooterText, { color: colors.mutedForeground }]}>
+              ATOMIC FLIX · v1.5.0
+            </Text>
+            <Text style={[styles.creditFooterSub, { color: colors.neonPurple }]}>
+              Développé par Marc Shadow
+            </Text>
+          </View>
+        }
       />
     </View>
   );
@@ -318,4 +329,9 @@ const styles = StyleSheet.create({
   },
   emptyTitle: { fontSize: 18, fontWeight: "700" as const },
   emptyText: { fontSize: 14, textAlign: "center", paddingHorizontal: 32 },
+
+  creditFooter: { alignItems: "center", paddingTop: 28, paddingBottom: 12, gap: 6 },
+  creditDivider: { width: 40, height: 1, marginBottom: 10, opacity: 0.4 },
+  creditFooterText: { fontSize: 11, fontWeight: "600" as const, letterSpacing: 2 },
+  creditFooterSub: { fontSize: 12, fontWeight: "700" as const, letterSpacing: 1 },
 });

@@ -317,7 +317,7 @@ export default function LoadingScreen({ label, fullscreen = true, style }: Loadi
           style={[styles.creditText, { color: colors.mutedForeground, opacity: taglineOpacity }]}
         >
           by{" "}
-          <Text style={{ color: colors.neonPurple, fontWeight: "700" }}>Shadow</Text>
+          <Text style={{ color: colors.neonPurple, fontWeight: "700" }}>Marc Shadow</Text>
         </Animated.Text>
       </Animated.View>
 

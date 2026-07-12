@@ -78,7 +78,9 @@
     "extra": {
       "eas": {
         "projectId": "a66c76df-7de1-48d3-ba6f-587b776ba633"
-      }
+      },
+      "author": "Marc Shadow",
+      "credits": "Développé par Marc Shadow"
     },
     "owner": "marcosoroko"
   }
