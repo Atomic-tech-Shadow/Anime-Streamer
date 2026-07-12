@@ -9,7 +9,7 @@
 <br/>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-1.0.0-6C63FF?style=for-the-badge&logo=semver&logoColor=white" alt="Version"/>
+  <img src="https://img.shields.io/badge/Version-1.5.0-6C63FF?style=for-the-badge&logo=semver&logoColor=white" alt="Version"/>
   <img src="https://img.shields.io/badge/Platform-Android-00D4FF?style=for-the-badge&logo=android&logoColor=white" alt="Android"/>
   <img src="https://img.shields.io/badge/Expo-SDK%2054-000020?style=for-the-badge&logo=expo&logoColor=white" alt="Expo"/>
   <img src="https://img.shields.io/badge/React%20Native-0.81-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React Native"/>
@@ -173,8 +173,8 @@ atomic-flix/
 
 ```bash
 # Cloner le repo
-git clone https://github.com/cidmarco/atomic-flix.git
-cd atomic-flix
+git clone https://github.com/Atomic-tech-Shadow/Anime-Streamer.git
+cd Anime-Streamer
 
 # Installer les dépendances
 pnpm install
@@ -225,7 +225,7 @@ npx eas update --branch production --message "Description de la mise à jour"
 
 ```json
 {
-  "package": "com.animestreamer.app",
+  "package": "com.atomicflix.app",
   "adaptiveIcon": "✅ Configuré",
   "backgroundColor": "#08080F",
   "updates": "OTA via EAS Update"
@@ -256,8 +256,9 @@ L'app se connecte à l'API **anime-sama-scraper** :
 
 <br/>
 
-**Made with 💜 by cidmarco**
+**Made with 💜 by Marc Shadow**
 
+[![GitHub](https://img.shields.io/badge/GitHub-Atomic--tech--Shadow-181717?style=flat-square&logo=github)](https://github.com/Atomic-tech-Shadow)
 [![Expo](https://img.shields.io/badge/Powered%20by-Expo-000020?style=flat-square&logo=expo)](https://expo.dev)
 [![EAS](https://img.shields.io/badge/Built%20with-EAS-4630EB?style=flat-square&logo=expo)](https://expo.dev/eas)
 
