@@ -81,6 +81,7 @@ export default function HeroBanner({ title, image, type, onPress, onPlay }: Hero
               contentFit="cover"
               transition={500}
               cachePolicy="memory-disk"
+              priority="high"
             />
           ) : (
             <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.card }]} />

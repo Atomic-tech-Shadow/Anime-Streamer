@@ -1,11 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
+const GC_TIME = 1000 * 60 * 30; // garde le cache 30 min en mémoire
+
 export function useRecent() {
   return useQuery({
     queryKey: ["recent"],
     queryFn: () => api.recent(),
     staleTime: 1000 * 60 * 5,
+    gcTime: GC_TIME,
+    retry: 1,
   });
 }
 
@@ -14,6 +18,8 @@ export function usePopular() {
     queryKey: ["popular"],
     queryFn: () => api.popular(),
     staleTime: 1000 * 60 * 10,
+    gcTime: GC_TIME,
+    retry: 1,
   });
 }
 
@@ -22,6 +28,8 @@ export function useRecommendations() {
     queryKey: ["recommendations"],
     queryFn: () => api.recommendations(),
     staleTime: 1000 * 60 * 10,
+    gcTime: GC_TIME,
+    retry: 1,
   });
 }
 
@@ -30,6 +38,8 @@ export function usePlanning(day: string = "today") {
     queryKey: ["planning", day],
     queryFn: () => api.planning(day),
     staleTime: 1000 * 60 * 5,
+    gcTime: GC_TIME,
+    retry: 1,
   });
 }
 
@@ -39,6 +49,9 @@ export function useSearch(query: string) {
     queryFn: () => api.search(query),
     enabled: query.trim().length > 1,
     staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
+    retry: 1,
+    placeholderData: (prev: any) => prev, // évite le flash vide entre deux recherches
   });
 }
 
@@ -48,6 +61,8 @@ export function useAnimeDetails(animeId: string) {
     queryFn: () => api.animeDetails(animeId),
     enabled: !!animeId,
     staleTime: 1000 * 60 * 10,
+    gcTime: GC_TIME,
+    retry: 1,
   });
 }
 
@@ -57,6 +72,8 @@ export function useSeasons(animeId: string) {
     queryFn: () => api.seasons(animeId),
     enabled: !!animeId,
     staleTime: 1000 * 60 * 10,
+    gcTime: GC_TIME,
+    retry: 1,
   });
 }
 
@@ -66,6 +83,8 @@ export function useEpisodes(animeId: string, season: string | number, language: 
     queryFn: () => api.episodes(animeId, season, language),
     enabled: enabled && !!animeId && !!season,
     staleTime: 1000 * 60 * 5,
+    gcTime: GC_TIME,
+    retry: 1,
   });
 }
 

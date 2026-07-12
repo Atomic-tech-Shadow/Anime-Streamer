@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -106,7 +106,11 @@ export default function SearchScreen() {
             styles.grid,
             { paddingBottom: Platform.OS === "web" ? 34 : insets.bottom + 16 },
           ]}
-          renderItem={({ item }) => (
+          removeClippedSubviews
+          initialNumToRender={12}
+          maxToRenderPerBatch={9}
+          windowSize={5}
+          renderItem={useCallback(({ item }: { item: any }) => (
             <View style={styles.gridItem}>
               <AnimeCard
                 title={item.title}
@@ -128,7 +132,7 @@ export default function SearchScreen() {
                 }}
               />
             </View>
-          )}
+          ), [router])}
         />
       )}
     </View>

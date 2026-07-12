@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useMemo } from "react";
+import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import {
   View,
   Text,
@@ -181,7 +181,7 @@ export default function HomeScreen() {
 
   const refreshing = loadingPopular && loadingRecent;
 
-  const handleAnimePress = (item: any) => {
+  const handleAnimePress = useCallback((item: any) => {
     const id = getAnimeId(item);
     if (id) {
       router.push({
@@ -189,10 +189,10 @@ export default function HomeScreen() {
         params: { id, title: getAnimeTitle(item), image: getAnimeImage(item) ?? "" },
       });
     }
-  };
+  }, [router]);
 
   // For recent episodes: go directly to the player at the right episode + language
-  const handleRecentPress = (item: any) => {
+  const handleRecentPress = useCallback((item: any) => {
     const id = item.animeId ?? getAnimeId(item);
     if (!id) return;
     router.push({
@@ -208,7 +208,7 @@ export default function HomeScreen() {
         availableLanguages: item.language ?? "VOSTFR",
       },
     });
-  };
+  }, [router]);
 
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
 
@@ -313,6 +313,10 @@ export default function HomeScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.list}
               keyExtractor={(item, i) => `cls-${i}-${getAnimeId(item)}`}
+              removeClippedSubviews
+              initialNumToRender={5}
+              maxToRenderPerBatch={5}
+              windowSize={3}
               renderItem={({ item }) => (
                 <AnimeCard
                   title={getAnimeTitle(item)}
@@ -343,6 +347,10 @@ export default function HomeScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.list}
               keyExtractor={(item, i) => `pep-${i}-${getAnimeId(item)}`}
+              removeClippedSubviews
+              initialNumToRender={5}
+              maxToRenderPerBatch={5}
+              windowSize={3}
               renderItem={({ item }) => (
                 <AnimeCard
                   title={getAnimeTitle(item)}
@@ -374,6 +382,10 @@ export default function HomeScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.list}
               keyExtractor={(item, i) => `rec-${i}-${getAnimeId(item)}`}
+              removeClippedSubviews
+              initialNumToRender={5}
+              maxToRenderPerBatch={5}
+              windowSize={3}
               renderItem={({ item }) => (
                 <AnimeCard
                   title={getAnimeTitle(item)}
@@ -397,6 +409,10 @@ export default function HomeScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.list}
               keyExtractor={(item, i) => `reco-${i}-${getAnimeId(item)}`}
+              removeClippedSubviews
+              initialNumToRender={5}
+              maxToRenderPerBatch={5}
+              windowSize={3}
               renderItem={({ item }) => (
                 <AnimeCard
                   title={getAnimeTitle(item)}

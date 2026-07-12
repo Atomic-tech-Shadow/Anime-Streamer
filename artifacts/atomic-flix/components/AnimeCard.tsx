@@ -44,7 +44,7 @@ const DIMENSIONS = {
   large:  { width: 182, height: 257 },
 };
 
-export default function AnimeCard({
+function AnimeCard({
   title, image, type, episode, language, season, onPress, size = "medium", badge,
 }: AnimeCardProps) {
   const colors = useColors();
@@ -139,6 +139,8 @@ export default function AnimeCard({
     </TouchableOpacity>
   );
 }
+
+export default React.memo(AnimeCard);
 
 const styles = StyleSheet.create({
   container: { marginRight: 12 },
