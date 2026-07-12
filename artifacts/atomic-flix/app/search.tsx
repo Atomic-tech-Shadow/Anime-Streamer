@@ -46,6 +46,30 @@ export default function SearchScreen() {
 
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
 
+  const renderItem = useCallback(({ item }: { item: any }) => (
+    <View style={styles.gridItem}>
+      <AnimeCard
+        title={item.title}
+        image={getAnimeImage(item)}
+        type={item.type}
+        size="small"
+        onPress={() => {
+          const id = getAnimeId(item);
+          if (id) {
+            router.push({
+              pathname: "/anime/[id]",
+              params: {
+                id,
+                title: item.title ?? "",
+                image: getAnimeImage(item) ?? "",
+              },
+            });
+          }
+        }}
+      />
+    </View>
+  ), [router]);
+
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       <View
@@ -110,29 +134,7 @@ export default function SearchScreen() {
           initialNumToRender={12}
           maxToRenderPerBatch={9}
           windowSize={5}
-          renderItem={useCallback(({ item }: { item: any }) => (
-            <View style={styles.gridItem}>
-              <AnimeCard
-                title={item.title}
-                image={getAnimeImage(item)}
-                type={item.type}
-                size="small"
-                onPress={() => {
-                  const id = getAnimeId(item);
-                  if (id) {
-                    router.push({
-                      pathname: "/anime/[id]",
-                      params: {
-                        id,
-                        title: item.title ?? "",
-                        image: getAnimeImage(item) ?? "",
-                      },
-                    });
-                  }
-                }}
-              />
-            </View>
-          ), [router])}
+          renderItem={renderItem}
         />
       )}
     </View>
